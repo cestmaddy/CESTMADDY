@@ -16,6 +16,7 @@ const app = express()
 
 app.use((req, res, next) => {
     if(!req.path.startsWith("/front/")) {
+        // look for the file with .html
         var file = contentDir + req.path + '.html'
         fs.access(file, fs.constants.R_OK, (err) => {
             if (!err) {
@@ -23,9 +24,11 @@ app.use((req, res, next) => {
                 next()
             }
             else {
+                // look for the file without .html
                 var file = contentDir + req.path
                 fs.access(file, fs.constants.R_OK, (err) => {
                     if(!err) {
+                        // redirect if endsWith .html
                         if(req.path.endsWith('.html')) {
                             let new_path = req.path.substr(0, req.path.length - 5)
                             res.redirect(new_path)
@@ -41,6 +44,7 @@ app.use((req, res, next) => {
                 })
             }
         })
+
     }
     else {
         next()
