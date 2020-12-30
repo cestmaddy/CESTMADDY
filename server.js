@@ -16,35 +16,49 @@ const app = express()
 
 app.use((req, res, next) => {
     if(!req.path.startsWith("/front/")) {
-        // look for the file with .html
-        var file = contentDir + req.path + '.html'
-        fs.access(file, fs.constants.R_OK, (err) => {
-            if (!err) {
-                req.url += '.html'
-                next()
-            }
-            else {
-                // look for the file without .html
-                var file = contentDir + req.path
-                fs.access(file, fs.constants.R_OK, (err) => {
-                    if(!err) {
-                        // redirect if endsWith .html
-                        if(req.path.endsWith('.html')) {
-                            let new_path = req.path.substr(0, req.path.length - 5)
-                            res.redirect(new_path)
+        if(config.server.hide_html_extension) {
+            // look for the file with .html
+            var file = contentDir + req.path + '.html'
+            fs.access(file, fs.constants.R_OK, (err) => {
+                if (!err) {
+                    req.url += '.html'
+                    next()
+                }
+                else {
+                    // look for the file without .html
+                    var file = contentDir + req.path
+                    fs.access(file, fs.constants.R_OK, (err) => {
+                        if(!err) {
+                            // redirect if endsWith .html
+                            if(req.path.endsWith('.html')) {
+                                let new_path = req.path.substr(0, req.path.length - 5)
+                                res.redirect(new_path)
+                            }
+                            else {
+                                next()  
+                            }
                         }
                         else {
-                            next()  
+                            res.status(404)
+                            res.end()
                         }
-                    }
-                    else {
-                        res.status(404)
-                        res.end()
-                    }
-                })
-            }
-        })
-
+                    })
+                }
+            })
+        }
+        else {
+            // check if file exist
+            var file = contentDir + req.path
+            fs.access(file, fs.constants.R_OK, (err) => {
+                if(!err) {
+                    next()
+                }
+                else {
+                    res.status(404)
+                    res.end()
+                }
+            })
+        }
     }
     else {
         next()

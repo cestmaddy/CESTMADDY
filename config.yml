@@ -1,2 +1,3 @@
 server:
   port: 8625
+  hide_html_extension: true
