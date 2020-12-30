@@ -4,6 +4,7 @@ const fs = require("fs")
 const colors = require('colors')
 var mkdirp = require('mkdirp')
 const configYaml = require('config-yaml')
+var ejs = require('ejs')
 
 const config = configYaml("./config.yml")
 
@@ -49,42 +50,52 @@ compileFile = (path) => {
     else {
         fs.readFile(path, "utf8", (err, data) => {
             if(!err) {
-                let html = marked(data)
+                // make html
+                ejs.renderFile("./res/render_template.ejs", {
+                    html_content: marked(data)
+                }, (err, str) => {
+                    if(err) {
+                        console.log(`\n${path.bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                    else {
+                        // remove both source/ and .md
+                        let new_file_path = `${contentDir}${path.substr(6, path.length - 9)}.html`
 
-                // remove both source/ and .md
-                let new_file_path = `${contentDir}${path.substr(6, path.length - 9)}.html`
+                        // without filename
+                        let folder = new_file_path.match(/^(.*)\//)[1]
+                        
+                        mkdirp(folder).then((made) => {
+                            fs.writeFile(new_file_path, str, (err, data) => {
+                                if(!err) {
+                                    // look for conflict
+                                    if(new_file_path.endsWith("index.html")) {
+                                        file = `${folder}.html`
+                                        fs.access(`${file}`, fs.F_OK, (err) => {
+                                            console.log(`\n${path.bold}`)
+                                            console.log(`    Successfully compiled!`.green)
 
-                // without filename
-                let folder = new_file_path.match(/^(.*)\//)[1]
-                
-                mkdirp(folder).then((made) => {
-                    fs.writeFile(new_file_path, html, (err,data) => {
-                        if(!err) {
-                            // look for conflict
-                            if(new_file_path.endsWith("index.html")) {
-                                file = `${folder}.html`
-                                fs.access(`${file}`, fs.F_OK, (err) => {
-                                    console.log(`\n${path.bold}`)
-                                    console.log(`    Successfully compiled!`.green)
-
-                                    if(!err && config.server.hide_html_extension) {
-                                        console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${path.gray.bold}${` and `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
+                                            if(!err && config.server.hide_html_extension) {
+                                                console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${path.gray.bold}${` and `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
+                                            }
+                                        })
                                     }
-                                })
-                            }
-                            else {
-                                console.log(`\n${path.bold}`)
-                                console.log(`    Successfully compiled!`.green)
-                            }
-                        }
-                        else {
+                                    else {
+                                        console.log(`\n${path.bold}`)
+                                        console.log(`    Successfully compiled!`.green)
+                                    }
+                                }
+                                else {
+                                    console.log(`\n${path.bold}`)
+                                    console.log(`    ${err}`.red)
+                                }
+                            }) 
+                        }).catch((err) => {
                             console.log(`\n${path.bold}`)
                             console.log(`    ${err}`.red)
-                        }
-                    }) 
-                }).catch((err) => {
-                    console.log(`\n${path.bold}`)
-                    console.log(`    ${err}`.red)
+                        })
+                    }
+                    
                 })
             }
             else {
