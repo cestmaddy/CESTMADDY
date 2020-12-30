@@ -1,6 +1,7 @@
 const chokidar = require('chokidar')
 const marked = require('marked')
 const fs = require("fs")
+const path = require("path")
 const colors = require('colors')
 var mkdirp = require('mkdirp')
 const configYaml = require('config-yaml')
@@ -28,7 +29,32 @@ marked.setOptions({
 
 const watcher = chokidar.watch('source', { persistent: true })
 
+reloadEveryHtml = (startDir = contentDir) => {
+    console.log("startdir "+ startDir)
+    mkdirp(startDir).then((made) => {
+        var files=fs.readdirSync(startDir)
+        for(var i=0;i<files.length;i++){
+            var filename=path.join(startDir,files[i])
+            var stat = fs.lstatSync(filename)
+            if (stat.isDirectory()){
+                reloadEveryHtml(filename)
+            }
+            else if (filename.indexOf(".html")>=0) {
+                let source_filename = filename.replace(/^res\/content\/generated\//g, "source/")
+                source_filename = source_filename.substr(0, source_filename.length - 5)
+                source_filename += ".md"
+                fileChange(source_filename)
+            }
+        }
+    }) 
+}
+
 compileFile = (path) => {
+    // if file is header
+    if(config.content.header_file.includes(path)) {
+        reloadEveryHtml()
+        return
+    }
     // check extension
     let extension = path.match(/(.md)$/)
     if(!extension) {
@@ -51,8 +77,21 @@ compileFile = (path) => {
         fs.readFile(path, "utf8", (err, data) => {
             if(!err) {
                 // make html
+                let header_html = ""
+                if(config.content.header_file) {
+                    try {
+                        let header_file = fs.readFileSync(config.content.header_file, "utf-8")
+                        header_html = marked(header_file)
+                    }
+                    catch(err) {
+                        console.log(`\n${path.bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                }
+
                 ejs.renderFile("./res/render_template.ejs", {
-                    html_content: marked(data)
+                    html_content: marked(data),
+                    html_header: header_html
                 }, (err, str) => {
                     if(err) {
                         console.log(`\n${path.bold}`)
@@ -104,7 +143,6 @@ compileFile = (path) => {
             }
         })
     }
-    
 }
 
 fileChange = (path) => {
