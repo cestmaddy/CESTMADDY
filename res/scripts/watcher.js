@@ -3,6 +3,9 @@ const marked = require('marked')
 const fs = require("fs")
 const colors = require('colors')
 var mkdirp = require('mkdirp')
+const configYaml = require('config-yaml')
+
+const config = configYaml("./config.yml")
 
 const contentDir = "./res/content/generated"
 
@@ -46,7 +49,6 @@ compileFile = (path) => {
     else {
         fs.readFile(path, "utf8", (err, data) => {
             if(!err) {
-                //console.log()
                 let html = marked(data)
 
                 // remove both source/ and .md
@@ -58,8 +60,22 @@ compileFile = (path) => {
                 mkdirp(folder).then((made) => {
                     fs.writeFile(new_file_path, html, (err,data) => {
                         if(!err) {
-                            console.log(`\n${path.bold}`)
-                            console.log(`    Successfully compiled!`.green)
+                            // look for conflict
+                            if(new_file_path.endsWith("index.html")) {
+                                file = `${folder}.html`
+                                fs.access(`${file}`, fs.F_OK, (err) => {
+                                    console.log(`\n${path.bold}`)
+                                    console.log(`    Successfully compiled!`.green)
+
+                                    if(!err && config.server.hide_html_extension) {
+                                        console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${path.gray.bold}${` and `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
+                                    }
+                                })
+                            }
+                            else {
+                                console.log(`\n${path.bold}`)
+                                console.log(`    Successfully compiled!`.green)
+                            }
                         }
                         else {
                             console.log(`\n${path.bold}`)
