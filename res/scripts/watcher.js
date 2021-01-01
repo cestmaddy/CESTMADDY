@@ -30,7 +30,6 @@ marked.setOptions({
 const watcher = chokidar.watch('source', { persistent: true })
 
 reloadEveryHtml = (startDir = contentDir) => {
-    console.log("startdir "+ startDir)
     mkdirp(startDir).then((made) => {
         var files=fs.readdirSync(startDir)
         for(var i=0;i<files.length;i++){
@@ -51,7 +50,12 @@ reloadEveryHtml = (startDir = contentDir) => {
 
 compileFile = (path) => {
     // if file is header
-    if(config.content.header_file.includes(path)) {
+    if(config.content.header_file && config.content.header_file.includes(path)) {
+        reloadEveryHtml()
+        return
+    }
+    // if file is footer
+    if(config.content.footer_file && config.content.footer_file.includes(path)) {
         reloadEveryHtml()
         return
     }
@@ -88,10 +92,22 @@ compileFile = (path) => {
                         console.log(`    ${err}`.red)
                     }
                 }
+                let footer_html = ""
+                if(config.content.footer_file) {
+                    try {
+                        let footer_file = fs.readFileSync(config.content.footer_file, "utf-8")
+                        footer_html = marked(footer_file)
+                    }
+                    catch(err) {
+                        console.log(`\n${path.bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                }
 
                 ejs.renderFile("./res/render_template.ejs", {
                     html_content: marked(data),
-                    html_header: header_html
+                    html_header: header_html,
+                    html_footer: footer_html
                 }, (err, str) => {
                     if(err) {
                         console.log(`\n${path.bold}`)
