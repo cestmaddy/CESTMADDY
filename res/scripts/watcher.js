@@ -107,7 +107,8 @@ compileFile = (path) => {
                 ejs.renderFile("./res/render_template.ejs", {
                     html_content: marked(data),
                     html_header: header_html,
-                    html_footer: footer_html
+                    html_footer: footer_html,
+                    theme: config.content.theme
                 }, (err, str) => {
                     if(err) {
                         console.log(`\n${path.bold}`)

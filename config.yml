@@ -5,3 +5,4 @@ server:
 content:
   header_file: "./source/header.md"
   footer_file: "./source/footer.md"
+  theme: "clean"
