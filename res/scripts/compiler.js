@@ -6,9 +6,9 @@ const fs = require("fs")
 const colors = require('colors')
 var mkdirp = require('mkdirp')
 var ejs = require('ejs')
-const { resolveCname } = require("dns")
 
 const config = configYaml("./config.yml")
+const shortcodes = require("./shortcodes")
 const contentDir = "./res/content/generated"
 
 marked.setOptions({
@@ -116,6 +116,16 @@ exports.make_html = (source_path) => {
         }
 
         let source_html = marked(source_file)
+
+        /* [LIST_DIR] */
+        let list_dir_reg = /\[LIST_DIR\]/g
+        let found
+        do {
+            found = list_dir_reg.exec(source_html)
+            if(found) {
+                console.log(shortcodes.list_dir_html(source_path))
+            }
+        } while (found)
 
         resolve(source_html)
     })
