@@ -9,6 +9,7 @@ var ejs = require('ejs')
 
 const config = configYaml("./config.yml")
 const shortcodes = require("./shortcodes")
+const podcasts = require("./podcasts")
 const contentDir = "./res/content/generated"
 
 marked.setOptions({
@@ -30,7 +31,10 @@ marked.setOptions({
 exports.should_it_be_compiled = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
-    if(config.content.header_file && path_resolve(config.content.header_file) == absolute_source_path) {
+    if(this.special_content_type(source_path) != "normal") {
+        return false
+    }
+    else if(config.content.header_file && path_resolve(config.content.header_file) == absolute_source_path) {
         return false
     }
     else if(config.content.footer_file && path_resolve(config.content.footer_file) == absolute_source_path) {
@@ -38,6 +42,26 @@ exports.should_it_be_compiled = (source_path) => {
     }
 
     return true
+}
+
+exports.special_content_type = (source_path) => {
+    let absolute_source_path = path_resolve(source_path)
+
+    /* PODCAST */
+    if(Array.isArray(config.content.podcasts) && 
+        config.content.podcasts.length != 0) {
+        for(confpod_ctr = 0; confpod_ctr < config.content.podcasts.length; confpod_ctr++) {
+            if(absolute_source_path.startsWith(
+                path_resolve(
+                    config.content.podcasts[confpod_ctr]["dir"]
+                )
+            )) {
+                return "podcast"
+            }
+        }
+    }
+
+    return "normal"
 }
 
 exports.should_reload_every_files = (source_path) => {
@@ -84,6 +108,14 @@ exports.is_markdown_file = (source_path) => {
 
 exports.folder_of_file = (source_path) => {    
     return source_path.match(/^(.*)\//)[1]
+}
+
+exports.get_last_folder_name = (source_path) => {
+    return this.folder_of_file(source_path).match(/([^\/]*)\/*$/)[1]
+}
+
+exports.get_last_portion_of_path = (source_path) => {
+    return source_path.match(/([^\/]*)\/*$/)[1]
 }
 
 exports.copy_file = (source_path) => {
@@ -217,9 +249,20 @@ exports.compile = (source_path) => {
             console.log(`\nRecompile everything because of the modification of a file included in all the others\n`.yellow.bold)
             this.recompile_every_markdown()
         }
-        return
+        if(this.special_content_type(source_path) != "normal") {
+            let content_type = this.special_content_type(source_path)
+    
+            switch (content_type) {
+                case "podcast":
+                    podcasts.compile_podcast_dir(source_path)
+                    break
+                default:
+                    console.log(`\n${source_path.bold}`)
+                    console.log(`    Unknown special content type`.red)
+            }
+        }
     }
-    if(!this.is_markdown_file(source_path)) {
+    else if(!this.is_markdown_file(source_path)) {
         this.copy_file(source_path)   
     }
     else {
