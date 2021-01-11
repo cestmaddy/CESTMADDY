@@ -131,9 +131,27 @@ exports.copy_file = (source_path, dest) => {
                     console.log(`    Successfully copied! (only .md are compiled)`.green)
                 }
             })  
-        })
-              
+        })  
     }) 
+}
+
+exports.look_for_conflict = (source_path, new_file_source_path) => {
+    if(new_file_source_path.endsWith("index.html")) {
+        let folder = this.folder_of_file(new_file_source_path)
+        let file = `${folder}.html`
+        fs.access(`${file}`, fs.F_OK, (err) => {
+            console.log(`\n${source_path.bold}`)
+            console.log(`    Successfully compiled!`.green)
+
+            if(!err && config.server.hide_html_extension) {
+                console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${source_path.gray.bold}${` and `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${source_path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
+            }
+        })
+    }
+    else {
+        console.log(`\n${source_path.bold}`)
+        console.log(`    Successfully compiled!`.green)
+    }
 }
 
 exports.get_header_content = () => {

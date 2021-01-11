@@ -2,9 +2,12 @@ const path = require("path")
 const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
 const configYaml = require('config-yaml')
+const fs = require("fs")
 
 const config = configYaml("./config.yml")
 const compiler = require("./compiler")
+const markdown_compiler = require("./markdown_compiler")
+const ejs = require("ejs")
 
 const contentDir = "./res/content/generated"
 
@@ -12,18 +15,12 @@ exports.compile_blog_dir = (source_path) => {
     let blog_config = this.get_blog_config(source_path)
     let generated_blog_path = `${contentDir}/blog/${compiler.get_last_portion_of_path(blog_config["dir"])}`
 
-    mkdirp(generated_blog_path).then(() => {
-        
-    })
-
     if(!compiler.is_markdown_file(source_path)) {
         let copy_dest = `${generated_blog_path}${source_path.substr(blog_config["dir"].length-2, source_path.length)}`
-        console.log(copy_dest)
         compiler.copy_file(source_path, `${copy_dest}`)
     }
     else {
-        console.log(`\n${source_path.bold}`)
-        console.log(`    blog à compiler !`.red)
+        this.compile_html(source_path, generated_blog_path, blog_config["dir"])
     }
 }
 
@@ -48,4 +45,50 @@ exports.get_blog_config = (source_path) => {
             }
         }
     }
+}
+
+exports.compile_html = (source_path, generated_blog_path, blog_dir) => {
+    let source_file = ""
+    try {
+        source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
+    }
+    catch(err) {
+        console.log(`\n${source_path.bold}`)
+        console.log(`    ${err}`.red)
+        return
+    }
+
+    let source_html = markdown_compiler.compile(source_file)
+
+    ejs.renderFile("./res/templates/render_template.ejs", {
+        html_content: source_html,
+        html_header: compiler.get_header_content(),
+        html_footer: compiler.get_footer_content(),
+        theme: config.content.theme
+    }, (err, str) => {
+        if(err) {
+            console.log(`\n${source_path.bold}`)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            // remove both source/ and .md
+            let new_file_source_path = `${generated_blog_path}${source_path.substr(blog_dir.length-2, source_path.length - blog_dir.length - 1)}.html`
+            let folder = compiler.folder_of_file(new_file_source_path)
+            
+            mkdirp(folder).then((made) => {
+                fs.writeFile(new_file_source_path, str, (err, data) => {
+                    if(!err) {
+                        compiler.look_for_conflict(source_path, new_file_source_path)
+                    }
+                    else {
+                        console.log(`\n${source_path.bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                }) 
+            }).catch((err) => {
+                console.log(`\n${source_path.bold}`)
+                console.log(`    ${err}`.red)
+            })
+        }
+    })
 }

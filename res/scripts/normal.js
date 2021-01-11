@@ -57,7 +57,6 @@ exports.make_html = (source_path) => {
 }
 
 exports.compile_html = (source_path) => {
-    // RENDER FILE
     this.make_html(source_path).then((html_content) => {
         ejs.renderFile("./res/templates/render_template.ejs", {
             html_content: html_content,
@@ -77,22 +76,7 @@ exports.compile_html = (source_path) => {
                 mkdirp(folder).then((made) => {
                     fs.writeFile(new_file_source_path, str, (err, data) => {
                         if(!err) {
-                            // look for conflict
-                            if(new_file_source_path.endsWith("index.html")) {
-                                file = `${folder}.html`
-                                fs.access(`${file}`, fs.F_OK, (err) => {
-                                    console.log(`\n${source_path.bold}`)
-                                    console.log(`    Successfully compiled!`.green)
-    
-                                    if(!err && config.server.hide_html_extension) {
-                                        console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${source_path.gray.bold}${` and `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${source_path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
-                                    }
-                                })
-                            }
-                            else {
-                                console.log(`\n${source_path.bold}`)
-                                console.log(`    Successfully compiled!`.green)
-                            }
+                            compiler.look_for_conflict(source_path, new_file_source_path)
                         }
                         else {
                             console.log(`\n${source_path.bold}`)
