@@ -122,7 +122,7 @@ exports.copy_file = (source_path, dest) => {
     
     mkdirp(folder).then((made) => {
         fs.unlink(dest, (err) => {
-            fs.copyFile(`./${source_path}`, dest, (err) => {
+            fs.link(`./${source_path}`, dest, (err) => {
                 console.log(`\n${source_path.bold}`)
                 if(err) {
                     console.log(`    ${err}`.red)
