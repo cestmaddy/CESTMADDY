@@ -77,7 +77,12 @@ exports.should_reload_every_files = (source_path) => {
 }
 
 exports.recompile_every_markdown = (startDir = contentDir) => {
-    mkdirp(startDir).then((made) => {
+    this.get_every_files_with_extension_of_dir('./source', "md").forEach((file) => {
+        if(!this.should_reload_every_files(file)) {
+            this.compile(file)
+        }
+    })
+    /* mkdirp(startDir).then((made) => {
         var files=fs.readdirSync(startDir)
         for(var i=0;i<files.length;i++){
             var filename=path.join(startDir,files[i])
@@ -92,7 +97,29 @@ exports.recompile_every_markdown = (startDir = contentDir) => {
                 this.compile(source_filename)
             }
         }
-    }) 
+    })  */
+}
+
+exports.get_every_files_with_extension_of_dir = (startDir = "./source", extension = "md") => {
+    let files = []
+    
+    files_of_dir=fs.readdirSync(startDir)
+    files_of_dir = files_of_dir || []
+
+    files_of_dir.forEach((file) => {
+        if (fs.statSync(startDir + "/" + file).isDirectory()) {
+            this.get_every_files_with_extension_of_dir(startDir + "/" + file, extension).forEach((rec_file) => {
+                files.push(rec_file)
+            })
+        }
+        else {
+            if(file.endsWith(`.${extension}`)) {
+                files.push(startDir + "/" + file)
+            }
+        }
+    })
+
+    return files
 }
 
 exports.is_markdown_file = (source_path) => {
@@ -122,8 +149,8 @@ exports.copy_file = (source_path, dest) => {
     
     mkdirp(folder).then((made) => {
         fs.unlink(dest, (err) => {
-            fs.link(`./${source_path}`, dest, (err) => {
-                console.log(`\n${source_path.bold}`)
+            fs.link(`${source_path}`, dest, (err) => {
+                console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
                 if(err) {
                     console.log(`    ${err}`.red)
                 }
@@ -140,7 +167,7 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
         let folder = this.folder_of_file(new_file_source_path)
         let file = `${folder}.html`
         fs.access(`${file}`, fs.F_OK, (err) => {
-            console.log(`\n${source_path.bold}`)
+            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
             console.log(`    Successfully compiled!`.green)
 
             if(!err && config.server.hide_html_extension) {
@@ -149,9 +176,27 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
         })
     }
     else {
-        console.log(`\n${source_path.bold}`)
+        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
         console.log(`    Successfully compiled!`.green)
     }
+}
+
+exports.remove_before_source_from_path = (u_path) => {
+    let reg = /^(.+?)source/g
+    let match = reg.exec(u_path)[1]
+
+    u_path = u_path.replace(match, "")
+
+    return u_path
+}
+
+exports.remove_source_and_md_extension_from_path = (u_path) => {
+    let without_before_source = this.remove_before_source_from_path(u_path)
+    return without_before_source.substr(6, without_before_source.length - 9)
+}
+
+exports.remove_source_from_path = (u_path) => {
+    return this.remove_before_source_from_path(u_path).substr(6)
 }
 
 exports.get_header_content = () => {
@@ -183,6 +228,7 @@ exports.get_footer_content = () => {
 }
 
 exports.compile = (source_path) => {
+    source_path = path_resolve(source_path)
     let content_type = this.special_content_type(source_path)
     
     switch (content_type) {
@@ -196,7 +242,7 @@ exports.compile = (source_path) => {
             blogs.compile_blog_dir(source_path)
             break
         default:
-            console.log(`\n${source_path.bold}`)
+            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
             console.log(`    Unknown special content type`.red)
     }
 }

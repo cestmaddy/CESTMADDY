@@ -20,7 +20,8 @@ exports.compile_normal_dir = (source_path) => {
         }
     }
     else if(!compiler.is_markdown_file(source_path)) {
-        let copy_dest = `${contentDir}/${source_path.substr(6, source_path.length)}`
+        let without_source = compiler.remove_source_from_path(source_path)
+        let copy_dest = `${contentDir}${without_source}`
         compiler.copy_file(source_path, `${copy_dest}`)
     }
     else {
@@ -34,7 +35,7 @@ exports.compile_html = (source_path) => {
         source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
     }
     catch(err) {
-        console.log(`\n${source_path.bold}`)
+        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
         console.log(`    ${err}`.red)
         return
     }
@@ -49,12 +50,13 @@ exports.compile_html = (source_path) => {
         theme: config.content.theme
     }, (err, str) => {
         if(err) {
-            console.log(`\n${source_path.bold}`)
+            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
             console.log(`    ${err}`.red)
         }
         else {
             // remove both source/ and .md
-            let new_file_source_path = `${contentDir}${source_path.substr(6, source_path.length - 9)}.html`
+            let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
+            let new_file_source_path = `${contentDir}${without_source_and_ext}.html`
             let folder = compiler.folder_of_file(new_file_source_path)
             
             mkdirp(folder).then((made) => {
@@ -63,15 +65,14 @@ exports.compile_html = (source_path) => {
                         compiler.look_for_conflict(source_path, new_file_source_path)
                     }
                     else {
-                        console.log(`\n${source_path.bold}`)
+                        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
                         console.log(`    ${err}`.red)
                     }
                 }) 
             }).catch((err) => {
-                console.log(`\n${source_path.bold}`)
+                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
                 console.log(`    ${err}`.red)
             })
         }
-        
     })
 }

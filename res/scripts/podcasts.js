@@ -16,7 +16,7 @@ exports.compile_podcast_dir = (source_path) => {
 
     })
 
-    console.log(`\n${source_path.bold}`)
+    console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
     console.log(`    podcast à compiler !`.red)
 }
 
