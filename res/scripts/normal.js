@@ -28,70 +28,50 @@ exports.compile_normal_dir = (source_path) => {
     }
 }
 
-exports.make_html = (source_path) => {
-    return new Promise((resolve, reject) => {
-        let source_file = ""
-        try {
-            source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
-        }
-        catch(err) {
-            console.log(`\n${source_path.bold}`)
-            console.log(`    ${err}`.red)
-            return
-        }
-
-        let source_html = markdown_compiler.compile(source_file)
-
-        /* [LIST_DIR] */
-        let list_dir_reg = /\[LIST_DIR\]/g
-        let found
-        do {
-            found = list_dir_reg.exec(source_html)
-            if(found) {
-                console.log(shortcodes.list_dir_html(source_path))
-            }
-        } while (found)
-
-        resolve(source_html)
-    })
-}
-
 exports.compile_html = (source_path) => {
-    this.make_html(source_path).then((html_content) => {
-        ejs.renderFile("./res/templates/render_template.ejs", {
-            html_content: html_content,
-            html_header: compiler.get_header_content(),
-            html_footer: compiler.get_footer_content(),
-            theme: config.content.theme
-        }, (err, str) => {
-            if(err) {
-                console.log(`\n${source_path.bold}`)
-                console.log(`    ${err}`.red)
-            }
-            else {
-                // remove both source/ and .md
-                let new_file_source_path = `${contentDir}${source_path.substr(6, source_path.length - 9)}.html`
-                let folder = compiler.folder_of_file(new_file_source_path)
-                
-                mkdirp(folder).then((made) => {
-                    fs.writeFile(new_file_source_path, str, (err, data) => {
-                        if(!err) {
-                            compiler.look_for_conflict(source_path, new_file_source_path)
-                        }
-                        else {
-                            console.log(`\n${source_path.bold}`)
-                            console.log(`    ${err}`.red)
-                        }
-                    }) 
-                }).catch((err) => {
-                    console.log(`\n${source_path.bold}`)
-                    console.log(`    ${err}`.red)
-                })
-            }
-            
-        })
-    }).catch((err) => {
+    let source_file = ""
+    try {
+        source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
+    }
+    catch(err) {
         console.log(`\n${source_path.bold}`)
         console.log(`    ${err}`.red)
+        return
+    }
+
+    source_file = shortcodes.replace_shortcode(source_file)
+    let source_html = markdown_compiler.compile(source_file)
+
+    ejs.renderFile("./res/templates/render_template.ejs", {
+        html_content: source_html,
+        html_header: compiler.get_header_content(),
+        html_footer: compiler.get_footer_content(),
+        theme: config.content.theme
+    }, (err, str) => {
+        if(err) {
+            console.log(`\n${source_path.bold}`)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            // remove both source/ and .md
+            let new_file_source_path = `${contentDir}${source_path.substr(6, source_path.length - 9)}.html`
+            let folder = compiler.folder_of_file(new_file_source_path)
+            
+            mkdirp(folder).then((made) => {
+                fs.writeFile(new_file_source_path, str, (err, data) => {
+                    if(!err) {
+                        compiler.look_for_conflict(source_path, new_file_source_path)
+                    }
+                    else {
+                        console.log(`\n${source_path.bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                }) 
+            }).catch((err) => {
+                console.log(`\n${source_path.bold}`)
+                console.log(`    ${err}`.red)
+            })
+        }
+        
     })
 }

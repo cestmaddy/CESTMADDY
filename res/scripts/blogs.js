@@ -3,11 +3,12 @@ const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
 const configYaml = require('config-yaml')
 const fs = require("fs")
+const ejs = require("ejs")
 
 const config = configYaml("./config.yml")
 const compiler = require("./compiler")
+const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
-const ejs = require("ejs")
 
 const contentDir = "./res/content/generated"
 
@@ -58,6 +59,7 @@ exports.compile_html = (source_path, generated_blog_path, blog_dir) => {
         return
     }
 
+    source_file = shortcodes.replace_shortcode(source_file)
     let source_html = markdown_compiler.compile(source_file)
 
     ejs.renderFile("./res/templates/render_template.ejs", {
