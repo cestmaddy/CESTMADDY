@@ -17,7 +17,7 @@ exports.compile_podcast_dir = (source_path) => {
     })
 
     console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-    console.log(`    podcast à compiler !`.red)
+    console.log(`    podcast à compiler !`.bgMagenta)
 }
 
 exports.make_rss_feed = (podcast_config) => {

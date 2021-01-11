@@ -1,8 +1,10 @@
 server:
   port: 8625
   hide_html_extension: true
+  domain: "http://localhost:8625"
 
 content:
+  language: fr
   header_file: "./source/header.md"
   footer_file: "./source/footer.md"
   theme: "clean"
@@ -10,7 +12,14 @@ content:
   blogs: [
     {
       dir: "./source/blogs/cestoliv",
-      title: "CESTOLIV"
+      title: "CESTOLIV",
+      description : "Un blog tech",
+      category: "Technology",
+      language: "fr",
+      main_author: "cestoliv",
+      authors: {
+        "cestoliv": "me@cestoliv.com"
+      }
     }
   ]
 

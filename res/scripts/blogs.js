@@ -30,10 +30,162 @@ exports.compile_blog_dir = (source_path) => {
 }
 
 exports.make_rss_feed = (generated_blog_path, blog_config) => {
-    //console.log(compiler.get_every_files_with_extension_of_dir(blog_config['dir'], "md"))
-    return `
-        <name>${blog_config["title"]}</name>
-    `
+    let posts = compiler.get_every_files_with_extension_of_dir(blog_config['dir'], "md")
+
+    itemsFeed = ""
+    posts.forEach((post) => {
+        let source_file = ""
+        try {
+            source_file = fs.readFileSync(post, "utf-8")
+        }
+        catch(err) {
+            console.log(`\n${compiler.remove_before_source_from_path(post).bold}`)
+            console.log(`    ${err}`.red)
+            return
+        }
+
+        if(source_file != "") {
+            //let source_html = markdown_compiler.compile(shortcodes.replace_shortcode(source_file))
+            let post_data = this.get_post_data(source_file, blog_config, post)
+
+            itemsFeed += `
+                <item>
+                    <title>${post_data.title}</title>
+                    <link>${post_data.link}</link>
+                    <description>${post_data.description}</description>
+                    <author>${post_data.author.email}</author>
+                    <enclosure url="${post_data.enclosure}"/>
+                    <pubDate>${post_data.date}</pubDate>
+                </item>
+            `
+        }
+    })
+
+    let feed = `<rss version="2.0">
+        <channel>
+            <title>${blog_config["title"]}</title>
+            <description>${blog_config["description"]}</description>
+            <link>${config.server.domain}/blog/${compiler.get_last_portion_of_path(blog_config["dir"])}</link>
+            <category>${blog_config["category"]}</category>
+            <language>${blog_config["language"]}</language>
+
+        ${itemsFeed}
+        </channel>
+    </rss>`
+
+    fs.writeFile(`${generated_blog_path}/feed.xml`, feed, (err, data) => {
+        if(!err) {
+
+        }
+        else {
+            console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
+            console.log(`    ${err}`.red)
+        }
+    })
+
+    return 
+}
+
+exports.get_post_data = (post_md, blog_config, md_post_path) => {
+    let post_shortcodes = shortcodes.get_shortcodes(post_md)
+    //let post_html = markdown_compiler.compile(shortcodes.replace_shortcode(post_md))
+    let post_data = {
+        title: "",
+        description: "",
+        date: "",
+        author: {
+            name: "",
+            email: ""
+        },
+        enclosure: "",
+        link: ""
+    }
+
+    // TITLE
+    if(post_shortcodes.values.hasOwnProperty("[TITLE]")) {
+        post_data.title = post_shortcodes.values["[TITLE]"]
+    }
+
+    // DESCRIPTION
+    if(post_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
+        post_data.description = markdown_compiler.compile(shortcodes.replace_shortcode(post_shortcodes.values["[DESCRIPTION]"]))
+    }
+    else {
+        let md_start = post_md.substr(0, 500)
+        let md_start_html = markdown_compiler.compile(shortcodes.replace_shortcode(md_start))
+
+        post_data.description = md_start_html
+    }
+
+    // LINK
+    let generated_blog_path = `/blog/${compiler.get_last_portion_of_path(blog_config["dir"])}`
+    let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
+    let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(md_post_path)
+    without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
+    let post_link = `${config.server.domain}${generated_blog_path}${without_source_and_ext}`
+
+    if(config.server.hasOwnProperty("hide_html_extension") && !config.server.hide_html_extension) {
+        post_link += ".html"
+    }
+
+    post_data.link = post_link
+    
+
+    // ENCLOSURE
+    if(post_shortcodes.values.hasOwnProperty("[ENCLOSURE]")) {
+        post_data.enclosure = post_shortcodes.values["[ENCLOSURE]"]
+    }
+    else {
+        let fisrt_image = /!\[.+?\]\((.+?)\)/g.exec(post_md)
+        if(fisrt_image)
+            fisrt_image = fisrt_image[1]
+        if(fisrt_image)
+            post_data.enclosure = fisrt_image
+    }
+
+    // DATE
+    if(post_shortcodes.values.hasOwnProperty("[DATE]")) {
+        post_data.date = this.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
+    }
+
+    // AUTHOR
+    if(blog_config.hasOwnProperty("main_author") && 
+    blog_config.hasOwnProperty('authors')) {
+        if(post_shortcodes.values.hasOwnProperty("[AUTHOR]")) {
+            if(blog_config.authors.hasOwnProperty(post_shortcodes.values["[AUTHOR]"])) {
+                post_data.author = {
+                    name: post_shortcodes.values["[AUTHOR]"],
+                    email: blog_config.authors[post_shortcodes.values["[AUTHOR]"]]
+                }
+            }
+            else {
+                console.log(`The ${post_shortcodes.values["[AUTHOR]"]} author is not referenced in your configuration`.red.bold)
+            }
+        }
+        else {
+            if(blog_config.authors.hasOwnProperty(blog_config.main_author)) {
+                post_data.author = {
+                    name: blog_config.main_author,
+                    email: blog_config.authors[blog_config.main_author]
+                }
+            }
+            else {
+                console.log(`The ${blog_config.main_author} author is not referenced in your configuration`.red.bold)
+            }
+        }
+    }
+    else {
+        console.log(`Please provide a main_author and a list of authors for your blog ${blog_config.title}`.red.bold)
+    }
+
+    return post_data
+}
+
+exports.user_date_to_pub_date = (u_date) => {
+    // YYYY-MM-DDTHH:MM:SS
+    let date = new Date(u_date)
+
+    return date.toGMTString()
 }
 
 exports.get_blog_config = (source_path) => {

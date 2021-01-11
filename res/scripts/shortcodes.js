@@ -1,6 +1,8 @@
 const fs = require("fs")
 const path_resolve = require("path").resolve
+const configYaml = require('config-yaml')
 
+const config = configYaml("./config.yml")
 const compiler = require("./compiler")
 
 exports.get_shortcodes = (str) => {
@@ -21,59 +23,45 @@ exports.get_shortcodes = (str) => {
         }
     }
 
-    /* [TITLE] */
-    let reg = /\[TITLE(.+?)?\]/g
-    let found
-    do {
-        found = reg.exec(str)
-        if(found) {
-            if(found[1] == undefined) { // is get
-                results.replace.push({
-                    is_get: true,
-                    shortcode: found[0],
-                    index: found.index
-                })
-            }
-            else {
-                if(found[1].startsWith("=")) {
-                    results.values["[TITLE]"] = found[1].substr(1)
+    // Shortcodes of value to define
+    let shortcodes_to_define = [
+        // GENERAL
+        'TITLE', 
+        'DESCRIPTION',
+
+        // BLOG
+        'AUTHOR',
+        'ENCLOSURE',
+        'DATE'
+    ]
+
+    for(short in shortcodes_to_define) {
+        let reg = new RegExp(`\\[${shortcodes_to_define[short]}(.+?)?\\]`, 'g')
+        let found
+        do {
+            found = reg.exec(str)
+            if(found) {
+                if(found[1] == undefined) { // is get
+                    results.replace.push({
+                        is_get: true,
+                        shortcode: found[0],
+                        index: found.index
+                    })
                 }
+                else {
+                    if(found[1].startsWith("=")) {
+                        results.values[`[${shortcodes_to_define[short]}]`] = found[1].substr(1)
+                    }
 
-                results.replace.push({
-                    is_get: false,
-                    shortcode: found[0],
-                    index: found.index
-                })
-            }
-        }
-    } while (found)
-
-    /* [DESCRIPTION] */
-    reg = /\[DESCRIPTION(.+?)?\]/g
-    found
-    do {
-        found = reg.exec(str)
-        if(found) {
-            if(found[1] == undefined) { // is get
-                results.replace.push({
-                    is_get: true,
-                    shortcode: found[0],
-                    index: found.index
-                })
-            }
-            else {
-                if(found[1].startsWith("=")) {
-                    results.values["[DESCRIPTION]"] = found[1].substr(1)
+                    results.replace.push({
+                        is_get: false,
+                        shortcode: found[0],
+                        index: found.index
+                    })
                 }
-
-                results.replace.push({
-                    is_get: false,
-                    shortcode: found[0],
-                    index: found.index
-                })
             }
-        }
-    } while (found)
+        } while (found)
+    }
 
     return results
 
@@ -100,11 +88,49 @@ exports.replace_shortcode = (str) => {
             str = str.replace(new RegExp(key, "g"), "")
         }
         else {
-            str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[srtcd].shortcode])
+            if(shortcode_data.replace[srtcd].shortcode == '[DATE]') {
+                str = str.replace(new RegExp(key, "g"), this.date_to_relative_date(
+                    shortcode_data.values[shortcode_data.replace[srtcd].shortcode]
+                ))
+            }
+            else {
+                str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[srtcd].shortcode])
+            }
         }
     }
 
     return str
+}
+
+exports.date_to_relative_date = (u_date) => {
+    u_date = new Date(u_date)
+    let formatter = new Intl.RelativeTimeFormat(config.content.language, {
+        localeMatcher: "best fit",
+        numeric: "always",
+        style: "long",
+    })
+
+    let divisions = [
+        { amount: 60, name: 'seconds' },
+        { amount: 60, name: 'minutes' },
+        { amount: 24, name: 'hours' },
+        { amount: 7, name: 'days' },
+        { amount: 4.34524, name: 'weeks' },
+        { amount: 12, name: 'months' },
+        { amount: Number.POSITIVE_INFINITY, name: 'years' }
+    ]
+      
+    let duration = (u_date - new Date()) / 1000
+        
+    for (i = 0; i <= divisions.length-1; i++) {
+        let division = divisions[i]
+        if (Math.abs(duration) < division.amount) {
+            return `${formatter.format(Math.round(duration), division.name)}, ${u_date.toLocaleString(config.content.language)}`
+        }
+        duration /= division.amount
+    }
+
+    return "Invalid Date"
 }
 
 exports.list_dir_html = (source_path) => {
