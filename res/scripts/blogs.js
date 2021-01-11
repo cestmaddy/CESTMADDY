@@ -73,7 +73,7 @@ exports.make_rss_feed = (generated_blog_path, blog_config) => {
         </channel>
     </rss>`
 
-    fs.writeFile(`${generated_blog_path}/feed.xml`, feed, (err, data) => {
+    fs.writeFile(`${generated_blog_path}/feed`, feed, (err, data) => {
         if(!err) {
 
         }
