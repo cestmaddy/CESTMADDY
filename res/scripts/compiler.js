@@ -36,10 +36,10 @@ exports.special_content_type = (source_path) => {
     /* PODCAST */
     if(Array.isArray(config.content.podcasts) && 
         config.content.podcasts.length != 0) {
-        for(confpod_ctr = 0; confpod_ctr < config.content.podcasts.length; confpod_ctr++) {
+        for(conf_ctr = 0; conf_ctr < config.content.podcasts.length; conf_ctr++) {
             if(absolute_source_path.startsWith(
                 path_resolve(
-                    config.content.podcasts[confpod_ctr]["dir"]
+                    config.content.podcasts[conf_ctr]["dir"]
                 )
             )) {
                 return "podcast"
@@ -49,10 +49,10 @@ exports.special_content_type = (source_path) => {
     /* BLOG */
     if(Array.isArray(config.content.blogs) && 
         config.content.blogs.length != 0) {
-        for(confblg_ctr = 0; confblg_ctr < config.content.blogs.length; confblg_ctr++) {
+        for(conf_ctr = 0; conf_ctr < config.content.blogs.length; conf_ctr++) {
             if(absolute_source_path.startsWith(
                 path_resolve(
-                    config.content.blogs[confblg_ctr]["dir"]
+                    config.content.blogs[conf_ctr]["dir"]
                 )
             )) {
                 return "blog"
@@ -182,6 +182,7 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
 }
 
 exports.remove_before_source_from_path = (u_path) => {
+    u_path = path_resolve(u_path)
     let reg = /^(.+?)source/g
     let match = reg.exec(u_path)[1]
 

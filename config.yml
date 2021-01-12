@@ -26,6 +26,19 @@ content:
   podcasts: [
     {
       dir: "./source/podcasts/cestoliv",
-      title: "CESTOLIV"
+      title: "CESTOLIV",
+      description: 'Un podcast tech',
+      image: "source/podcasts/cestoliv/motivation1.jpg",
+      category: "Technology",
+      language: "fr",
+      country: "fr",
+      explicit: "no",
+      complete: "no",
+      type: "episodic",
+      limit: 25,
+      main_author: "cestoliv",
+      authors: {
+        "cestoliv": "me@cestoliv.com"
+      }
     }
   ]

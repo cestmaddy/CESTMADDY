@@ -32,11 +32,15 @@ exports.get_shortcodes = (str) => {
         // BLOG
         'AUTHOR',
         'ENCLOSURE',
-        'DATE'
+        'DATE',
+
+        // PODCAST
+        'PODCAST_AUDIO',
+        'PODCAST_IMAGE'
     ]
 
     for(short in shortcodes_to_define) {
-        let reg = new RegExp(`\\[${shortcodes_to_define[short]}(.+?)?\\]`, 'g')
+        let reg = new RegExp(`\\[${shortcodes_to_define[short]}([\\s\\S]*?)\\]`, 'g')
         let found
         do {
             found = reg.exec(str)
@@ -81,20 +85,20 @@ exports.get_shortcodes = (str) => {
 exports.replace_shortcode = (str) => {
     shortcode_data = this.get_shortcodes(str)
 
-    for(srtcd in shortcode_data.replace) {
-        let key = shortcode_data.replace[srtcd].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
+    for(short_ctr in shortcode_data.replace) {
+        let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
 
-        if(!shortcode_data.replace[srtcd].is_get) {
+        if(!shortcode_data.replace[short_ctr].is_get) {
             str = str.replace(new RegExp(key, "g"), "")
         }
         else {
-            if(shortcode_data.replace[srtcd].shortcode == '[DATE]') {
+            if(shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
                 str = str.replace(new RegExp(key, "g"), this.date_to_relative_date(
-                    shortcode_data.values[shortcode_data.replace[srtcd].shortcode]
+                    shortcode_data.values[shortcode_data.replace[short_ctr].shortcode]
                 ))
             }
             else {
-                str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[srtcd].shortcode])
+                str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
             }
         }
     }

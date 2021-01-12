@@ -52,7 +52,7 @@ exports.make_rss_feed = (generated_blog_path, blog_config) => {
                 <item>
                     <title>${post_data.title}</title>
                     <link>${post_data.link}</link>
-                    <description>${post_data.description}</description>
+                    <description><![CDATA[${post_data.description}]]></description>
                     <author>${post_data.author.email}</author>
                     <enclosure url="${post_data.enclosure}"/>
                     <pubDate>${post_data.date}</pubDate>
@@ -61,7 +61,8 @@ exports.make_rss_feed = (generated_blog_path, blog_config) => {
         }
     })
 
-    let feed = `<rss version="2.0">
+    let feed = `<?xml version="1.0" encoding="utf-8"?>
+    <rss version="2.0">
         <channel>
             <title>${blog_config["title"]}</title>
             <description>${blog_config["description"]}</description>
@@ -82,8 +83,6 @@ exports.make_rss_feed = (generated_blog_path, blog_config) => {
             console.log(`    ${err}`.red)
         }
     })
-
-    return 
 }
 
 exports.get_post_data = (post_md, blog_config, md_post_path) => {
@@ -136,11 +135,11 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
         post_data.enclosure = post_shortcodes.values["[ENCLOSURE]"]
     }
     else {
-        let fisrt_image = /!\[.+?\]\((.+?)\)/g.exec(post_md)
-        if(fisrt_image)
-            fisrt_image = fisrt_image[1]
-        if(fisrt_image)
-            post_data.enclosure = fisrt_image
+        let first_image = /!\[.+?\]\((.+?)\)/g.exec(post_md)
+        if(first_image)
+            first_image = first_image[1]
+        if(first_image)
+            post_data.enclosure = first_image
     }
 
     // DATE
@@ -193,13 +192,13 @@ exports.get_blog_config = (source_path) => {
 
     if(Array.isArray(config.content.blogs) && 
         config.content.blogs.length != 0) {
-        for(confblg_ctr = 0; confblg_ctr < config.content.blogs.length; confblg_ctr++) {
+        for(conf_ctr = 0; conf_ctr < config.content.blogs.length; conf_ctr++) {
             if(absolute_source_path.startsWith(
                 path_resolve(
-                    config.content.blogs[confblg_ctr]["dir"]
+                    config.content.blogs[conf_ctr]["dir"]
                 )
             )) {
-                return config.content.blogs[confblg_ctr]
+                return config.content.blogs[conf_ctr]
             }
         }
     }
