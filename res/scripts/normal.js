@@ -13,13 +13,15 @@ const markdown_compiler = require("./markdown_compiler")
 const contentDir = "./res/content/generated"
 
 exports.compile_normal_dir = (source_path) => {
+    /*
     if(!compiler.should_it_be_compiled(source_path)) {
         if(compiler.should_reload_every_files(source_path)) {
             console.log(`\nRecompile everything because of the modification of a file included in all the others\n`.yellow.bold)
             compiler.recompile_every_markdown()
         }
     }
-    else if(!compiler.is_markdown_file(source_path)) {
+    */
+    if(!compiler.is_markdown_file(source_path)) {
         let without_source = compiler.remove_source_from_path(source_path)
         let copy_dest = `${contentDir}${without_source}`
         compiler.copy_file(source_path, `${copy_dest}`)

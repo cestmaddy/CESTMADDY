@@ -28,7 +28,7 @@ content:
       dir: "./source/podcasts/cestoliv",
       title: "CESTOLIV",
       description: 'Un podcast tech',
-      image: "source/podcasts/cestoliv/motivation1.jpg",
+      image: "source/blogs/cestoliv/bague.webp",
       category: "Technology",
       language: "fr",
       country: "fr",

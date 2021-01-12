@@ -31,14 +31,13 @@ exports.compile_podcast_dir = (source_path) => {
     }
     else {
         mkdirp(podcast_config["local_path"]).then(() => {
-            this.make_rss_feed(podcast_config)
+            //this.make_rss_feed(podcast_config)
         })
     }
 }
 
 exports.make_rss_feed = (podcast_config) => {
     let podcasts = compiler.get_every_files_with_extension_of_dir(podcast_config['dir'], "md")
-    console.log(podcasts)
 
     itemsFeed = ""
     podcasts.forEach((podcast) => {
@@ -118,7 +117,8 @@ exports.make_rss_feed = (podcast_config) => {
 
     fs.writeFile(`${podcast_config["local_path"]}/feed.xml`, feed, (err, data) => {
         if(!err) {
-
+            console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold.magenta)
+            console.log(`    generated !`.green)
         }
         else {
             console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
@@ -302,7 +302,8 @@ exports.get_podcast_config = (source_path) => {
                     fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
                     let new_image_path = `${podcast_config["local_path"]}/${compiler.get_last_portion_of_path(podcast_config["image_url"])}`
 
-                    compiler.copy_file(podcast_config["image_url"], new_image_path)
+                    // problem : called for every podcast file
+                    compiler.copy_file(podcast_config["image_url"], new_image_path, true)
 
                     podcast_config["image_url"] = `${config.server.domain}${podcast_config["path"]}/${compiler.get_last_portion_of_path(podcast_config["image_url"])}`
                 }

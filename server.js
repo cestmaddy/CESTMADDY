@@ -2,15 +2,16 @@ const express = require('express')
 const fs = require("fs")
 const rimraf = require("rimraf")
 const configYaml = require('config-yaml')
+const colors = require('colors')
 
 const config = configYaml("./config.yml")
 
 const contentDir = "res/content/generated"
 
 // Remove Generated folder and start watcher
-rimraf(contentDir, () => { 
+/* rimraf(contentDir, () => { 
     const watcher = require("./res/scripts/watcher")
-})
+}) */
 
 const app = express()
 
@@ -73,5 +74,5 @@ app.use("/", express.static(contentDir))
 app.use("/front", express.static("res/content/front"))
 
 app.listen(config.server.port, () => {
-    console.log(`cestmaddy started on ::${config.server.port}`)
+    console.log(`\ncestmaddy started on ::${config.server.port}`.magenta.bold)
 })

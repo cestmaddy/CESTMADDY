@@ -122,6 +122,26 @@ exports.get_every_files_with_extension_of_dir = (startDir = "./source", extensio
     return files
 }
 
+exports.get_every_files_of_dir = (startDir = "./source") => {
+    let files = []
+    
+    files_of_dir=fs.readdirSync(startDir)
+    files_of_dir = files_of_dir || []
+
+    files_of_dir.forEach((file) => {
+        if (fs.statSync(startDir + "/" + file).isDirectory()) {
+            this.get_every_files_of_dir(startDir + "/" + file).forEach((rec_file) => {
+                files.push(rec_file)
+            })
+        }
+        else {
+            files.push(startDir + "/" + file)
+        }
+    })
+
+    return files
+}
+
 exports.is_markdown_file = (source_path) => {
     // check extension
     let extension = source_path.match(/(.md)$/)
@@ -144,18 +164,21 @@ exports.get_last_portion_of_path = (source_path) => {
     return source_path.match(/([^\/]*)\/*$/)[1]
 }
 
-exports.copy_file = (source_path, dest) => {
+exports.copy_file = (source_path, dest, silent = false) => {
     let folder = this.folder_of_file(dest)
     
     mkdirp(folder).then((made) => {
         fs.unlink(dest, (err) => {
             fs.link(`${source_path}`, dest, (err) => {
-                console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                if(err) {
+                if(err && err.code != "EEXIST") {
+                    console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
                     console.log(`    ${err}`.red)
                 }
                 else {
-                    console.log(`    Successfully copied! (only .md are compiled)`.green)
+                    if(!silent) {
+                        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                        console.log(`    Successfully copied! (only .md are compiled)`.green)
+                    }
                 }
             })  
         })  
@@ -184,9 +207,12 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
 exports.remove_before_source_from_path = (u_path) => {
     u_path = path_resolve(u_path)
     let reg = /^(.+?)source/g
-    let match = reg.exec(u_path)[1]
+    let match = reg.exec(u_path)
 
-    u_path = u_path.replace(match, "")
+    if(match) {
+        match = match[1]
+        u_path = u_path.replace(match, "")
+    }
 
     return u_path
 }
