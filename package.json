@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "build": "node res/scripts/build.js",
-    "start": "npm run build && node server.js",
-    "dev": "nodemon -e js,css,ejs server.js & grunt watch",
-    "minify": "grunt minify"
+    "minify": "grunt minify",
+    "start": "npm run build && npm run minify && node server.js",
+    "dev": "nodemon -e js,css,ejs server.js & grunt watch"
   },
   "author": "cestoliv",
   "license": "ISC",

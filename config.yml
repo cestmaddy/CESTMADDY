@@ -8,37 +8,3 @@ content:
   header_file: "./source/header.md"
   footer_file: "./source/footer.md"
   theme: "clean"
-
-  blogs: [
-    {
-      dir: "./source/blogs/cestoliv",
-      title: "CESTOLIV",
-      description : "Un blog tech",
-      category: "Technology",
-      language: "fr",
-      main_author: "cestoliv",
-      authors: {
-        "cestoliv": "me@cestoliv.com"
-      }
-    }
-  ]
-
-  podcasts: [
-    {
-      dir: "./source/podcasts/cestoliv",
-      title: "CESTOLIV",
-      description: 'Un podcast tech',
-      image: "source/blogs/cestoliv/bague.webp",
-      category: "Technology",
-      language: "fr",
-      country: "fr",
-      explicit: "no",
-      complete: "no",
-      type: "episodic",
-      limit: 25,
-      main_author: "cestoliv",
-      authors: {
-        "cestoliv": "me@cestoliv.com"
-      }
-    }
-  ]

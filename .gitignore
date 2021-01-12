@@ -1,4 +1,2 @@
-res/content/generated/*
-
 package-lock.json
 node_modules
