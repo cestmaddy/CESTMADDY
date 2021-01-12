@@ -1,0 +1,1 @@
+*cestmaddy is an OpenSource project, available under the MIT license (basically, you can do whatever you want with it).*
