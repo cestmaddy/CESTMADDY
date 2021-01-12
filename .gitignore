@@ -1,5 +1,4 @@
 res/content/generated/*
-source/*
 
 package-lock.json
 node_modules
