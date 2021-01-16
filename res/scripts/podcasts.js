@@ -69,6 +69,11 @@ exports.make_rss_feed = (podcast_config) => {
             `
         }
     })
+
+    let author_email = undefined
+    if(podcast_config.hasOwnProperty("authors") && podcast_config["authors"].hasOwnProperty(podcast_config["main_author"])) {
+        author_email = podcast_config["authors"][podcast_config["main_author"]]
+    }
    
     let feed = `<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0"
@@ -99,7 +104,7 @@ exports.make_rss_feed = (podcast_config) => {
 
     <itunes:owner>
         <itunes:name>${podcast_config["main_author"]}</itunes:name>
-        <itunes:email>${podcast_config["authors"][podcast_config["main_author"]]}</itunes:email>
+        <itunes:email>${author_email}</itunes:email>
     </itunes:owner>
     <itunes:author>${podcast_config["main_author"]}</itunes:author> 
     <itunes:image href="${podcast_config["image_url"]}"/>
@@ -114,17 +119,19 @@ exports.make_rss_feed = (podcast_config) => {
     </channel>
 </rss>`
     
-
-    fs.writeFile(`${podcast_config["local_path"]}/feed.xml`, feed, (err, data) => {
-        if(!err) {
-            console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold.magenta)
-            console.log(`    generated !`.green)
-        }
-        else {
-            console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
-            console.log(`    ${err}`.red)
-        }
+    mkdirp(podcast_config["local_path"]).then(() => {
+        fs.writeFile(`${podcast_config["local_path"]}/feed.xml`, feed, (err, data) => {
+            if(!err) {
+                console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold.magenta)
+                console.log(`    generated !`.green)
+            }
+            else {
+                console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
+                console.log(`    ${err}`.red)
+            }
+        })
     })
+    
 }
 
 exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
@@ -178,7 +185,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
 
         try {
             fs.accessSync(audio_path, fs.constants.R_OK)
-            let new_audio_path = `${podcast_config["path"]}${without_source_and_ext}/${compiler.get_last_portion_of_path(audio_path)}`
+            let new_audio_path = `${podcast_config["path"]}${without_source_and_ext}/${path.basename(audio_path)}`
 
             let copy_dest = `${contentDir}${new_audio_path}`
             
@@ -207,7 +214,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
 
         try {
             fs.accessSync(image_path, fs.constants.R_OK)
-            let new_image_path = `${podcast_config["path"]}${without_source_and_ext}/${compiler.get_last_portion_of_path(image_path)}`
+            let new_image_path = `${podcast_config["path"]}${without_source_and_ext}/${path.basename(image_path)}`
 
             let copy_dest = `${contentDir}${new_image_path}`
             
@@ -290,27 +297,30 @@ exports.get_podcast_config = (source_path) => {
                 let podcast_config = config.content.podcasts[conf_ctr]
 
                 // LOCAL PODCAST PATH
-                podcast_config["path"] = `/podcast/${compiler.get_last_portion_of_path(podcast_config["dir"])}`
+                podcast_config["path"] = `/podcast/${path.basename(podcast_config["dir"])}`
                 podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
 
                 // PODCAST LINK
                 podcast_config["link"] = `${config.server.domain}${podcast_config["path"]}`
             
                 // PODCAST IMAGE
-                podcast_config["image_url"] = path_resolve(podcast_config["image"])
-                try {
-                    fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
-                    let new_image_path = `${podcast_config["local_path"]}/${compiler.get_last_portion_of_path(podcast_config["image_url"])}`
+                if(podcast_config.hasOwnProperty("image") && podcast_config["image"] != undefined) {
+                    podcast_config["image_url"] = path_resolve(podcast_config["image"])
+                    try {
+                        fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
+                        let new_image_path = `${podcast_config["local_path"]}/${path.basename(podcast_config["image_url"])}`
 
-                    // problem : called for every podcast file
-                    compiler.copy_file(podcast_config["image_url"], new_image_path, true)
+                        // problem : called for every podcast file
+                        compiler.copy_file(podcast_config["image_url"], new_image_path, true)
 
-                    podcast_config["image_url"] = `${config.server.domain}${podcast_config["path"]}/${compiler.get_last_portion_of_path(podcast_config["image_url"])}`
+                        podcast_config["image_url"] = `${config.server.domain}${podcast_config["path"]}/${path.basename(podcast_config["image_url"])}`
+                    }
+                    catch (err) {
+                        console.log(`\n${compiler.remove_before_source_from_path(podcast_config["image_url"]).bold}`)
+                        console.log(`    ${err}`.red)
+                    }
                 }
-                catch (err) {
-                    console.log(`\n${compiler.remove_before_source_from_path(podcast_config["image_url"]).bold}`)
-                    console.log(`    ${err}`.red)
-                }
+                
 
                 return podcast_config
             }
