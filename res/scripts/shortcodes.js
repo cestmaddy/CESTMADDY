@@ -139,10 +139,10 @@ exports.date_to_relative_date = (u_date) => {
 
 exports.list_dir_html = (source_path) => {
     try {
-        files = fs.readdirSync(compiler.folder_of_file(source_path), {withFileTypes: true})
+        files = fs.readdirSync(path.dirname(source_path), {withFileTypes: true})
   
         files.forEach(file => {
-            let filepath = `${compiler.folder_of_file(source_path)}/${file.name}`
+            let filepath = `${path.dirname(source_path)}/${file.name}`
             
             if(compiler.should_it_be_compiled(filepath) && 
                 file.isFile() && 

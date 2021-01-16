@@ -240,7 +240,7 @@ exports.compile_html = (source_path, blog_config) => {
             let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
             without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
             let new_file_source_path = `${blog_config["local_path"]}${without_source_and_ext}.html`
-            let folder = compiler.folder_of_file(new_file_source_path)
+            let folder = path.dirname(new_file_source_path)
             
             mkdirp(folder).then((made) => {
                 fs.writeFile(new_file_source_path, str, (err, data) => {
