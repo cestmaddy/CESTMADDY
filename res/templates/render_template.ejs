@@ -5,19 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CESTMADDY</title>
 
-    <% switch (theme) {
-        case "wave": %>
-            <link rel="stylesheet" href="/front/themes/wave/page.min.css">
-            <link rel="stylesheet" href="/front/github-markdown.min.css">
-            <% break;
-        case "clean": %>
-            <link rel="stylesheet" href="/front/themes/clean/page.min.css">
-            <link rel="stylesheet" href="/front/github-markdown.min.css">
-            <% break;
-    
-        default:
-            break;
-    } %>
+    <link rel="stylesheet" href="/front/markdown.min.css">
+    <% if(theme && theme != "") { %>
+        <link rel="stylesheet" href="/front/themes/<%- theme %>/page.min.css">
+    <% } %>
 </head>
 <body>
     <header class="markdown">
