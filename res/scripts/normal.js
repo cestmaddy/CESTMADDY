@@ -59,9 +59,8 @@ exports.compile_html = (source_path) => {
             // remove both source/ and .md
             let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
             let new_file_source_path = `${contentDir}${without_source_and_ext}.html`
-            let folder = compiler.folder_of_file(new_file_source_path)
             
-            mkdirp(folder).then((made) => {
+            mkdirp(path.dirname(new_file_source_path)).then(() => {
                 fs.writeFile(new_file_source_path, str, (err, data) => {
                     if(!err) {
                         compiler.look_for_conflict(source_path, new_file_source_path)

@@ -82,22 +82,6 @@ exports.recompile_every_markdown = (startDir = contentDir) => {
             this.compile(file)
         }
     })
-    /* mkdirp(startDir).then((made) => {
-        var files=fs.readdirSync(startDir)
-        for(var i=0;i<files.length;i++){
-            var filename=path.join(startDir,files[i])
-            var stat = fs.lstatSync(filename)
-            if (stat.isDirectory()){
-                this.recompile_every_markdown(filename)
-            }
-            else if (filename.indexOf(".html")>=0) {
-                let source_filename = filename.replace(/^res\/content\/generated\//g, "source/")
-                source_filename = source_filename.substr(0, source_filename.length - 5)
-                source_filename += ".md"
-                this.compile(source_filename)
-            }
-        }
-    })  */
 }
 
 exports.get_every_files_with_extension_of_dir = (startDir = "./source", extension = "md") => {
@@ -152,22 +136,8 @@ exports.is_markdown_file = (source_path) => {
     return true
 }
 
-exports.folder_of_file = (source_path) => {    
-    return source_path.match(/^(.*)\//)[1]
-}
-
-exports.get_last_folder_name = (source_path) => {
-    return this.folder_of_file(source_path).match(/([^\/]*)\/*$/)[1]
-}
-
-exports.get_last_portion_of_path = (source_path) => {
-    return source_path.match(/([^\/]*)\/*$/)[1]
-}
-
-exports.copy_file = (source_path, dest, silent = false) => {
-    let folder = this.folder_of_file(dest)
-    
-    mkdirp(folder).then((made) => {
+exports.copy_file = (source_path, dest, silent = false) => {    
+    mkdirp(path.dirname(dest)).then((made) => {
         fs.unlink(dest, (err) => {
             fs.link(`${source_path}`, dest, (err) => {
                 if(err && err.code != "EEXIST") {
@@ -187,8 +157,7 @@ exports.copy_file = (source_path, dest, silent = false) => {
 
 exports.look_for_conflict = (source_path, new_file_source_path) => {
     if(new_file_source_path.endsWith("index.html")) {
-        let folder = this.folder_of_file(new_file_source_path)
-        let file = `${folder}.html`
+        let file = `${path.dirname(new_file_source_path)}.html`
         fs.access(`${file}`, fs.F_OK, (err) => {
             console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
             console.log(`    Successfully compiled!`.green)

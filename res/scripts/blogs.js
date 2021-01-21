@@ -73,15 +73,17 @@ exports.make_rss_feed = (blog_config) => {
     </channel>
 </rss>`
 
-    fs.writeFile(`${blog_config["local_path"]}/feed.xml`, feed, (err, data) => {
-        if(!err) {
-            console.log(`\nfeed for blog ${blog_config["title"]}`.bold.magenta)
-            console.log(`    generated !`.green)
-        }
-        else {
-            console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
-            console.log(`    ${err}`.red)
-        }
+    mkdirp(blog_config["local_path"]).then(() => {
+        fs.writeFile(`${blog_config["local_path"]}/feed.xml`, feed, (err, data) => {
+            if(!err) {
+                console.log(`\nfeed for blog ${blog_config["title"]}`.bold.magenta)
+                console.log(`    generated !`.green)
+            }
+            else {
+                console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
+                console.log(`    ${err}`.red)
+            }
+        })  
     })
 }
 
@@ -201,7 +203,7 @@ exports.get_blog_config = (source_path) => {
                 let blog_config = config.content.blogs[conf_ctr]
 
                 // LOCAL BLOG PATH
-                blog_config["path"] = `/blog/${compiler.get_last_portion_of_path(blog_config["dir"])}`
+                blog_config["path"] = `/blog/${path.basename(blog_config["dir"])}`
                 blog_config["local_path"] = `${contentDir}${blog_config["path"]}`
 
                 return blog_config
@@ -240,7 +242,7 @@ exports.compile_html = (source_path, blog_config) => {
             let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
             without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
             let new_file_source_path = `${blog_config["local_path"]}${without_source_and_ext}.html`
-            let folder = compiler.folder_of_file(new_file_source_path)
+            let folder = path.dirname(new_file_source_path)
             
             mkdirp(folder).then((made) => {
                 fs.writeFile(new_file_source_path, str, (err, data) => {
