@@ -8,15 +8,3 @@ content:
   header_file: "./source/header.md"
   footer_file: "./source/footer.md"
   theme: "clean"
-
-  blogs: [
-    {
-      dir: source/blogs/cestoliv
-    }
-  ]
-
-  podcasts: [
-    {
-      dir: source/podcasts/cestoliv
-    }
-  ]
