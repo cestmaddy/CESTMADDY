@@ -7,7 +7,12 @@
 
     <link rel="stylesheet" href="/front/markdown.min.css">
     <% if(theme && theme != "") { %>
-        <link rel="stylesheet" href="/front/themes/<%- theme %>/page.min.css">
+    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/page.min.css">
+    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/markdown.min.css">
+    <% } else { %>
+        <%- theme %>
+    <link rel="stylesheet" href="/front/themes/clean/css/page.min.css">
+    <link rel="stylesheet" href="/front/themes/clean/css/markdown.min.css">
     <% } %>
 </head>
 <body>
