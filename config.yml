@@ -10,7 +10,7 @@ content:
   footer_file: "./source/footer.md"
   theme: "clean"
   favicon: {
-    path: "./source/imgs/logotype_color.svg",
+    path: "./source/imgs/monogram_color.svg",
     background: "#fff",
     theme_color: "#fff"
   }
