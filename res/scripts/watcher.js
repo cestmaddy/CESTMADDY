@@ -1,9 +1,8 @@
 const chokidar = require('chokidar')
 const fs = require("fs")
-const configYaml = require('config-yaml')
-let compiler = require("./compiler")
 
-const config = configYaml("./config.yml")
+const compiler = require("./compiler")
+const config = require("./config")
 
 const contentDir = "./res/content/generated"
 

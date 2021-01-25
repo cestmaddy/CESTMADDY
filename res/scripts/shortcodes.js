@@ -1,8 +1,7 @@
 const fs = require("fs")
 const path_resolve = require("path").resolve
-const configYaml = require('config-yaml')
 
-const config = configYaml("./config.yml")
+const config = require("./config")
 const compiler = require("./compiler")
 
 exports.get_shortcodes = (str) => {
@@ -108,7 +107,7 @@ exports.replace_shortcode = (str) => {
 
 exports.date_to_relative_date = (u_date) => {
     u_date = new Date(u_date)
-    let formatter = new Intl.RelativeTimeFormat(config.content.language, {
+    let formatter = new Intl.RelativeTimeFormat(config.get("string", ["content", "language"]), {
         localeMatcher: "best fit",
         numeric: "always",
         style: "long",
@@ -129,7 +128,7 @@ exports.date_to_relative_date = (u_date) => {
     for (i = 0; i <= divisions.length-1; i++) {
         let division = divisions[i]
         if (Math.abs(duration) < division.amount) {
-            return `${formatter.format(Math.round(duration), division.name)}, ${u_date.toLocaleString(config.content.language)}`
+            return `${formatter.format(Math.round(duration), division.name)}, ${u_date.toLocaleString(config.get("string", ["content", "language"]))}`
         }
         duration /= division.amount
     }

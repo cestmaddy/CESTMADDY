@@ -1,6 +1,5 @@
 const path = require("path")
 const path_resolve = require("path").resolve
-const configYaml = require('config-yaml')
 const fs = require("fs")
 const colors = require('colors')
 const mkdirp = require('mkdirp')
@@ -8,7 +7,7 @@ const ejs = require('ejs')
 const favicons = require('favicons')
 const sp = require('synchronized-promise')
 
-const config = configYaml("./config.yml")
+const config = require("./config")
 const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
 const podcasts = require("./podcasts")
@@ -23,10 +22,10 @@ exports.should_it_be_compiled = (source_path) => {
     if(this.special_content_type(source_path) != "normal") {
         return false
     }
-    else if(config.content.header_file && path_resolve(config.content.header_file) == absolute_source_path) {
+    else if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
         return false
     }
-    else if(config.content.footer_file && path_resolve(config.content.footer_file) == absolute_source_path) {
+    else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
         return false
     }
 
@@ -37,29 +36,25 @@ exports.special_content_type = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
     /* PODCAST */
-    if(Array.isArray(config.content.podcasts) && 
-        config.content.podcasts.length != 0) {
-        for(conf_ctr = 0; conf_ctr < config.content.podcasts.length; conf_ctr++) {
-            if(absolute_source_path.startsWith(
-                path_resolve(
-                    config.content.podcasts[conf_ctr]["dir"]
-                )
-            )) {
-                return "podcast"
-            }
+    let config_podcasts = config.get("array", ["content", "podcasts"])
+    for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
+        if(absolute_source_path.startsWith(
+            path_resolve(
+                config.get("string", ["content", "podcasts", conf_ctr, "dir"])
+            )
+        )) {
+            return "podcast"
         }
     }
     /* BLOG */
-    if(Array.isArray(config.content.blogs) && 
-        config.content.blogs.length != 0) {
-        for(conf_ctr = 0; conf_ctr < config.content.blogs.length; conf_ctr++) {
-            if(absolute_source_path.startsWith(
-                path_resolve(
-                    config.content.blogs[conf_ctr]["dir"]
-                )
-            )) {
-                return "blog"
-            }
+    let config_blogs = config.get("array", ["content", "blogs"])
+    for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
+        if(absolute_source_path.startsWith(
+            path_resolve(
+                config.get("string", ["content", "blogs", conf_ctr, "dir"])
+            )
+        )) {
+            return "blog"
         }
     }
 
@@ -69,10 +64,10 @@ exports.special_content_type = (source_path) => {
 exports.should_reload_every_files = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
-    if(config.content.header_file && path_resolve(config.content.header_file) == absolute_source_path) {
+    if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
         return true
     }
-    else if(config.content.footer_file && path_resolve(config.content.footer_file) == absolute_source_path) {
+    else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
         return true
     }
 
@@ -165,7 +160,7 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
             console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
             console.log(`    Successfully compiled!`.green)
 
-            if(!err && config.server.hide_html_extension) {
+            if(!err && config.get("boolean", ["server", "hide_html_extension"])) {
                 console.log(`    ${`You have enabled the `.yellow}${`hide_html_extension`.yellow.bold}${` option, `.yellow}${source_path.gray.bold}${` and `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` could enter a conflict, you can rename the `.yellow}${`${source_path.match(/^(.*)\//)[1]}.md`.gray.bold}${` file or rename the `.yellow}${source_path.match(/^(.*)\//)[1].gray.bold}${` folder.`.yellow}`)
             }
         })
@@ -199,30 +194,26 @@ exports.remove_source_from_path = (u_path) => {
 }
 
 exports.get_header_content = () => {
-    if(config.content.header_file) {
-        try {
-            let header_file = fs.readFileSync(config.content.header_file, "utf-8")
-            return markdown_compiler.compile(header_file)
-        }
-        catch(err) {
-            console.log(`\n${config.content.header_file.bold}`)
-            console.log(`    ${err}`.red)
-            return ""
-        }
+    try {
+        let header_file = fs.readFileSync(config.get("string", ["content", "header_file"]), "utf-8")
+        return markdown_compiler.compile(header_file)
+    }
+    catch(err) {
+        console.log(`\nheader_file : ${config.get("string", ["content", "header_file"]).bold}`)
+        console.log(`    ${err}`.red)
+        return ""
     }
 }
 
 exports.get_footer_content = () => {
-    if(config.content.footer_file) {
-        try {
-            let footer_file = fs.readFileSync(config.content.footer_file, "utf-8")
-            return markdown_compiler.compile(footer_file)
-        }
-        catch(err) {
-            console.log(`\n${config.content.footer_file.bold}`)
-            console.log(`    ${err}`.red)
-            return ""
-        }
+    try {
+        let footer_file = fs.readFileSync(config.get("string", ["content", "footer_file"]), "utf-8")
+        return markdown_compiler.compile(footer_file)
+    }
+    catch(err) {
+        console.log(`\nfooter_file : ${config.get("string", ["content", "footer_file"]).bold}`)
+        console.log(`    ${err}`.red)
+        return ""
     }
 }
 
@@ -241,21 +232,21 @@ exports.generate_favicons = () => {
             console.log(`    ${err}`.red)
         }
 
-        if(config.content.hasOwnProperty('favicon')) {
+        if(config.get("object", ["content", "favicon"])) {
                 
             console.log(`\ngenerating favicons`.bold.magenta)
 
             configuration = {
                 path: "/__favicons",                      // Path for overriding default icons path. `string`
-                appName: config.content.title,            // Your application's name. `string`
+                appName: config.get("string", ["content", "title"]),            // Your application's name. `string`
                 appShortName: null,                       // Your application's short_name. `string`. Optional. If not set, appName will be used
                 appDescription: null,                     // Your application's description. `string`
                 developerName: null,                      // Your (or your developer's) name. `string`
                 developerURL: null,                       // Your (or your developer's) URL. `string`
                 dir: "auto",                              // Primary text direction for name, short_name, and description
-                lang: config.content.language,            // Primary language for name and short_name
-                background: config.content.favicon.background, // Background colour for flattened icons. `string`
-                theme_color: config.content.favicon.theme_color, // Theme color user for example in Android's task switcher. `string`
+                lang: config.get("string", ["content", "language"]),            // Primary language for name and short_name
+                background: config.get("string", ["content", "favicon", "background"]), // Background colour for flattened icons. `string`
+                theme_color: config.get("string", ["content", "favicon", "theme_color"]), // Theme color user for example in Android's task switcher. `string`
                 appleStatusBarStyle: "black-translucent", // Style for Apple status bar: "black-translucent", "default", "black". `string`
                 display: "standalone",                    // Preferred display mode: "fullscreen", "standalone", "minimal-ui" or "browser". `string`
                 orientation: "any",                       // Default orientation: "any", "natural", "portrait" or "landscape". `string`
@@ -277,7 +268,7 @@ exports.generate_favicons = () => {
                 }
             }
             
-            favicons(config.content.favicon.path, configuration, (error, response) => {
+            favicons(config.get("string", ["content", "favicon", "path"]), configuration, (error, response) => {
                 if (error) {
                     console.log(`    ${err}`.red)
                     resolve()

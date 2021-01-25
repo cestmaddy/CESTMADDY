@@ -1,10 +1,9 @@
 const express = require('express')
 const fs = require("fs")
 const rimraf = require("rimraf")
-const configYaml = require('config-yaml')
 const colors = require('colors')
 
-const config = configYaml("./config.yml")
+const config = require("./res/scripts/config")
 
 const contentDir = "res/content/generated"
 
@@ -21,7 +20,7 @@ app.use((req, res, next) => {
         let req_path = req.path.replace(/\/$/, "")
         let req_url = req.url.replace(/\/$/, "")
 
-        if(config.server.hide_html_extension) {
+        if(config.get("boolean", ["server", "hide_html_extension"])) {
             // look for the file with .html
             var file = contentDir + req_path + '.html'
             fs.access(file, fs.constants.R_OK, (err) => {
@@ -73,6 +72,6 @@ app.use((req, res, next) => {
 app.use("/", express.static(contentDir))
 app.use("/front", express.static("res/content/front"))
 
-app.listen(config.server.port, () => {
-    console.log(`\ncestmaddy started on ::${config.server.port}`.magenta.bold)
+app.listen(config.get("number", ["server", "port"]), () => {
+    console.log(`\ncestmaddy started on ::${config.get("number", ["server", "port"])}`.magenta.bold)
 })

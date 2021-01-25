@@ -1,11 +1,10 @@
 const path = require("path")
 const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
-const configYaml = require('config-yaml')
 const fs = require("fs")
 const ejs = require("ejs")
 
-const config = configYaml("./config.yml")
+const config = require("./config")
 const compiler = require("./compiler")
 const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
@@ -65,7 +64,7 @@ exports.make_rss_feed = (blog_config) => {
     <channel>
         <title>${blog_config["title"]}</title>
         <description>${blog_config["description"]}</description>
-        <link>${config.server.domain}${blog_config["path"]}</link>
+        <link>${config.get("string", ["server", "domain"])}${blog_config["path"]}</link>
         <category>${blog_config["category"]}</category>
         <language>${blog_config["language"]}</language>
 
@@ -122,9 +121,9 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
     let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(md_post_path)
     without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
-    let post_link = `${config.server.domain}${blog_config["path"]}${without_source_and_ext}`
+    let post_link = `${config.get("string", ["server", "domain"])}${blog_config["path"]}${without_source_and_ext}`
 
-    if(config.server.hasOwnProperty("hide_html_extension") && !config.server.hide_html_extension) {
+    if(!config.get("boolean", ["server", "hide_html_extension"])) {
         post_link += ".html"
     }
 
@@ -191,23 +190,29 @@ exports.user_date_to_pub_date = (u_date) => {
 exports.get_blog_config = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
-    if(Array.isArray(config.content.blogs) && 
-        config.content.blogs.length != 0) {
-        for(conf_ctr = 0; conf_ctr < config.content.blogs.length; conf_ctr++) {
-            if(absolute_source_path.startsWith(
-                path_resolve(
-                    config.content.blogs[conf_ctr]["dir"]
-                )
-            )) {
+    let config_blogs = config.get("array", ["content", "blogs"])
+    for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
+        if(absolute_source_path.startsWith(
+            path_resolve(
+                config.get("string", ["content", "blogs", conf_ctr, "dir"])
+            )
+        )) {
 
-                let blog_config = config.content.blogs[conf_ctr]
+            let blog_config = []
 
-                // LOCAL BLOG PATH
-                blog_config["path"] = `/blog/${path.basename(blog_config["dir"])}`
-                blog_config["local_path"] = `${contentDir}${blog_config["path"]}`
+            blog_config["dir"] = config.get("string", ["content", "blogs", conf_ctr, "dir"])
+            blog_config["title"] = config.get("string", ["content", "blogs", conf_ctr, "title"])
+            blog_config["description"] = config.get("string", ["content", "blogs", conf_ctr, "description"])
+            blog_config["category"] = config.get("string", ["content", "blogs", conf_ctr, "category"])
+            blog_config["language"] = config.get("string", ["content", "blogs", conf_ctr, "language"])
+            blog_config["main_author"] = config.get("string", ["content", "blogs", conf_ctr, "main_author"])
+            blog_config["authors"] = config.get("object", ["content", "blogs", conf_ctr, "authors"])
 
-                return blog_config
-            }
+            // LOCAL BLOG PATH
+            blog_config["path"] = `/blog/${path.basename(blog_config["dir"])}`
+            blog_config["local_path"] = `${contentDir}${blog_config["path"]}`
+
+            return blog_config
         }
     }
 }
@@ -230,7 +235,7 @@ exports.compile_html = (source_path, blog_config) => {
         html_content: source_html,
         html_header: compiler.get_header_content(),
         html_footer: compiler.get_footer_content(),
-        theme: config.content.theme
+        theme: config.get("string", ["content", "theme"])
     }, (err, str) => {
         if(err) {
             console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)

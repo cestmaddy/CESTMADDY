@@ -1,10 +1,8 @@
 const rimraf = require("rimraf")
 const path_resolve = require("path").resolve
 const colors = require('colors')
-const configYaml = require('config-yaml')
 
-const config = configYaml("./config.yml")
-
+const config = require("./config")
 const compiler = require("./compiler")
 const blogs = require("./blogs")
 const podcasts = require("./podcasts")

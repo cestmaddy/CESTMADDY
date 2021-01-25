@@ -1,14 +1,13 @@
 const path = require("path")
 const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
-const configYaml = require('config-yaml')
 const fs = require("fs")
 const mime = require('mime')
 const { getAudioDurationInSeconds } = require('get-audio-duration')
 const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
 
-const config = configYaml("./config.yml")
+const config = require("./config")
 const compiler = require("./compiler")
 const blogs = require("./blogs")
 const markdown_compiler = require("./markdown_compiler")
@@ -170,9 +169,9 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     }
 
     // LINK
-    let podcast_link = `${config.server.domain}${podcast_config["path"]}${without_source_and_ext}`
+    let podcast_link = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}${without_source_and_ext}`
 
-    if(config.server.hasOwnProperty("hide_html_extension") && !config.server.hide_html_extension) {
+    if(!config.get("boolean", ["server", "hide_html_extension"])) {
         podcast_link += ".html"
     }
 
@@ -196,7 +195,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
             let get_audio_duration = sp(mp3Duration)
             let audio_duration = get_audio_duration(audio_path)
 
-            podcast_data.enclosure.url = `${config.server.domain}${new_audio_path}`
+            podcast_data.enclosure.url = `${config.get("string", ["server", "domain"])}${new_audio_path}`
             podcast_data.enclosure.length = audio_stats.size
             podcast_data.enclosure.type = mime.getType(path.extname(audio_path))
 
@@ -220,7 +219,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
             
             compiler.copy_file(image_path, copy_dest)
 
-            podcast_data.image= `${config.server.domain}${new_image_path}`
+            podcast_data.image= `${config.get("string", ["server", "domain"])}${new_image_path}`
         }
         catch (err) {
             console.log(`\n${compiler.remove_before_source_from_path(image_path).bold}`)
@@ -286,44 +285,57 @@ exports.seconds_to_hours_minutes_seconds = (duration) => {
 exports.get_podcast_config = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
-    if(Array.isArray(config.content.podcasts) && 
-        config.content.podcasts.length != 0) {
-        for(conf_ctr = 0; conf_ctr < config.content.podcasts.length; conf_ctr++) {
-            if(absolute_source_path.startsWith(
-                path_resolve(
-                    config.content.podcasts[conf_ctr]["dir"]
-                )
-            )) {
-                let podcast_config = config.content.podcasts[conf_ctr]
+    let config_podcasts = config.get("array", ["content", "podcasts"])
+    for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
+        if(absolute_source_path.startsWith(
+            path_resolve(
+                config.get("string", ["content", "podcasts", conf_ctr, "dir"])
+            )
+        )) {
+            let podcast_config = []
 
-                // LOCAL PODCAST PATH
-                podcast_config["path"] = `/podcast/${path.basename(podcast_config["dir"])}`
-                podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
+            podcast_config["dir"] = config.get("string", ["content", "podcasts", conf_ctr, "dir"])
+            podcast_config["title"] = config.get("string", ["content", "podcasts", conf_ctr, "title"])
+            podcast_config["description"] = config.get("string", ["content", "podcasts", conf_ctr, "description"])
+            podcast_config["image"] = config.get("string", ["content", "podcasts", conf_ctr, "image"])
+            podcast_config["category"] = config.get("string", ["content", "podcasts", conf_ctr, "category"])
+            podcast_config["language"] = config.get("string", ["content", "podcasts", conf_ctr, "language"])
+            podcast_config["country"] = config.get("string", ["content", "podcasts", conf_ctr, "country"])
+            podcast_config["explicit"] = config.get("string", ["content", "podcasts", conf_ctr, "explicit"])
+            podcast_config["complete"] = config.get("string", ["content", "podcasts", conf_ctr, "complete"])
+            podcast_config["type"] = config.get("string", ["content", "podcasts", conf_ctr, "type"])
+            podcast_config["limit"] = config.get("number", ["content", "podcasts", conf_ctr, "limit"])
+            podcast_config["main_author"] = config.get("string", ["content", "podcasts", conf_ctr, "main_author"])
+            podcast_config["author"] = config.get("object", ["content", "podcasts", conf_ctr, "authors"])
 
-                // PODCAST LINK
-                podcast_config["link"] = `${config.server.domain}${podcast_config["path"]}`
-            
-                // PODCAST IMAGE
-                if(podcast_config.hasOwnProperty("image") && podcast_config["image"] != undefined) {
-                    podcast_config["image_url"] = path_resolve(podcast_config["image"])
-                    try {
-                        fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
-                        let new_image_path = `${podcast_config["local_path"]}/${path.basename(podcast_config["image_url"])}`
 
-                        // problem : called for every podcast file
-                        compiler.copy_file(podcast_config["image_url"], new_image_path, true)
+            // LOCAL PODCAST PATH
+            podcast_config["path"] = `/podcast/${path.basename(podcast_config["dir"])}`
+            podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
 
-                        podcast_config["image_url"] = `${config.server.domain}${podcast_config["path"]}/${path.basename(podcast_config["image_url"])}`
-                    }
-                    catch (err) {
-                        console.log(`\n${compiler.remove_before_source_from_path(podcast_config["image_url"]).bold}`)
-                        console.log(`    ${err}`.red)
-                    }
+            // PODCAST LINK
+            podcast_config["link"] = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}`
+        
+            // PODCAST IMAGE
+            if(podcast_config["image"] != "") {
+                podcast_config["image_url"] = path_resolve(podcast_config["image"])
+                try {
+                    fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
+                    let new_image_path = `${podcast_config["local_path"]}/${path.basename(podcast_config["image_url"])}`
+
+                    // problem : called for every podcast file
+                    compiler.copy_file(podcast_config["image_url"], new_image_path, true)
+
+                    podcast_config["image_url"] = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}/${path.basename(podcast_config["image_url"])}`
                 }
-                
-
-                return podcast_config
+                catch (err) {
+                    console.log(`\n${compiler.remove_before_source_from_path(podcast_config["image_url"]).bold}`)
+                    console.log(`    ${err}`.red)
+                }
             }
+            
+
+            return podcast_config
         }
     }
 }

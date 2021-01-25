@@ -1,11 +1,10 @@
 const path = require("path")
 const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
-const configYaml = require('config-yaml')
 const fs = require("fs")
 const ejs = require("ejs")
 
-const config = configYaml("./config.yml")
+const config = require("./config")
 const compiler = require("./compiler")
 const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
@@ -49,7 +48,7 @@ exports.compile_html = (source_path) => {
         html_content: source_html,
         html_header: compiler.get_header_content(),
         html_footer: compiler.get_footer_content(),
-        theme: config.content.theme
+        theme: config.get("string", ["content", "theme"])
     }, (err, str) => {
         if(err) {
             console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
