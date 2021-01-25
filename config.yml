@@ -4,7 +4,13 @@ server:
   domain: "http://localhost:8625"
 
 content:
+  title: "CESTMADDY"
   language: fr
   header_file: "./source/header.md"
   footer_file: "./source/footer.md"
   theme: "clean"
+  favicon: {
+    path: "./source/imgs/logotype_color.svg",
+    background: "#fff",
+    theme_color: "#fff"
+  }

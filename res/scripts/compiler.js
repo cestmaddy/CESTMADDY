@@ -3,8 +3,10 @@ const path_resolve = require("path").resolve
 const configYaml = require('config-yaml')
 const fs = require("fs")
 const colors = require('colors')
-var mkdirp = require('mkdirp')
-var ejs = require('ejs')
+const mkdirp = require('mkdirp')
+const ejs = require('ejs')
+const favicons = require('favicons')
+const sp = require('synchronized-promise')
 
 const config = configYaml("./config.yml")
 const shortcodes = require("./shortcodes")
@@ -12,7 +14,8 @@ const markdown_compiler = require("./markdown_compiler")
 const podcasts = require("./podcasts")
 const blogs = require("./blogs")
 const normal = require("./normal")
-const contentDir = "./res/content/generated"
+
+const contentDir = path.join("res", "content", "generated")
 
 exports.should_it_be_compiled = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
@@ -221,6 +224,104 @@ exports.get_footer_content = () => {
             return ""
         }
     }
+}
+
+exports.generate_favicons = () => {
+    return new Promise((resolve, reject) => {
+        var favicon_ejs = path.join("res", "templates", "favicons.ejs")
+
+        try {
+            fs.writeFileSync(
+                favicon_ejs,
+                ""
+            )
+        }
+        catch (err) {
+            console.log(`\n${compiler.remove_before_source_from_path(favicon_ejs).bold}`)
+            console.log(`    ${err}`.red)
+        }
+
+        if(config.content.hasOwnProperty('favicon')) {
+                
+            console.log(`\ngenerating favicons`.bold.magenta)
+
+            configuration = {
+                path: "/__favicons",                      // Path for overriding default icons path. `string`
+                appName: config.content.title,            // Your application's name. `string`
+                appShortName: null,                       // Your application's short_name. `string`. Optional. If not set, appName will be used
+                appDescription: null,                     // Your application's description. `string`
+                developerName: null,                      // Your (or your developer's) name. `string`
+                developerURL: null,                       // Your (or your developer's) URL. `string`
+                dir: "auto",                              // Primary text direction for name, short_name, and description
+                lang: config.content.language,            // Primary language for name and short_name
+                background: config.content.favicon.background, // Background colour for flattened icons. `string`
+                theme_color: config.content.favicon.theme_color, // Theme color user for example in Android's task switcher. `string`
+                appleStatusBarStyle: "black-translucent", // Style for Apple status bar: "black-translucent", "default", "black". `string`
+                display: "standalone",                    // Preferred display mode: "fullscreen", "standalone", "minimal-ui" or "browser". `string`
+                orientation: "any",                       // Default orientation: "any", "natural", "portrait" or "landscape". `string`
+                scope: "/",                               // set of URLs that the browser considers within your app
+                start_url: "/",                           // Start URL when launching the application from a device. `string`
+                version: "1.0",                           // Your application's version string. `string`
+                logging: false,                           // Print logs to console? `boolean`
+                pixel_art: false,                         // Keeps pixels "sharp" when scaling up, for pixel art.  Only supported in offline mode.
+                loadManifestWithCredentials: false,       // Browsers don't send cookies when fetching a manifest, enable this to fix that. `boolean`
+                icons: {
+                    android: true,
+                    appleIcon: true,
+                    appleStartup: true,
+                    coast: true,
+                    favicons: true,
+                    firefox: true,
+                    windows: true,
+                    yandex: true
+                }
+            }
+            
+            favicons(config.content.favicon.path, configuration, (error, response) => {
+                if (error) {
+                    console.log(`    ${err}`.red)
+                    resolve()
+                }
+
+                var favicons_path = path.join(contentDir, "__favicons")
+
+                mkdirp(favicons_path).then(() => {
+                    var images_files = response.images.concat(response.files)
+                    // Write Images
+                    for(i_img = 0; i_img < images_files.length; i_img++) {
+                        var file_name = path.join(favicons_path, images_files[i_img].name)
+                        try {
+                            fs.writeFileSync(
+                                file_name,
+                                images_files[i_img].contents
+                            )
+                        }
+                        catch (err) {
+                            console.log(`\n${this.remove_before_source_from_path(file_name).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+                    }
+
+                    try {
+                        fs.writeFileSync(
+                            favicon_ejs,
+                            response.html.join('\n')
+                        )
+                    }
+                    catch (err) {
+                        console.log(`\n${compiler.remove_before_source_from_path(favicon_ejs).bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+
+                    console.log(`    generated !`.green)
+                    resolve()
+                })
+            })
+        }
+        else {
+            resolve()
+        }        
+    })
 }
 
 exports.compile = (source_path) => {
