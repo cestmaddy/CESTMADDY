@@ -43,7 +43,6 @@ exports.make_rss_feed = (blog_config) => {
         }
 
         if(source_file != "") {
-            //let source_html = markdown_compiler.compile(shortcodes.replace_shortcode(source_file))
             let post_data = this.get_post_data(source_file, blog_config, post)
 
             itemsFeed += `
@@ -88,7 +87,6 @@ exports.make_rss_feed = (blog_config) => {
 
 exports.get_post_data = (post_md, blog_config, md_post_path) => {
     let post_shortcodes = shortcodes.get_shortcodes(post_md)
-    //let post_html = markdown_compiler.compile(shortcodes.replace_shortcode(post_md))
     let post_data = {
         title: "",
         description: "",
@@ -108,11 +106,26 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
 
     // DESCRIPTION
     if(post_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
-        post_data.description = markdown_compiler.compile(shortcodes.replace_shortcode(post_shortcodes.values["[DESCRIPTION]"]))
+        post_data.description = markdown_compiler.compile(
+            shortcodes.replace_shortcode(
+                post_shortcodes.values["[DESCRIPTION]"],
+                md_post_path,
+                "blog"
+            )
+        )
     }
     else {
         let md_start = post_md.substr(0, 500)
-        let md_start_html = markdown_compiler.compile(shortcodes.replace_shortcode(md_start))
+        console.log(md_start,
+            md_post_path,
+            "blog")
+        let md_start_html = ""/*markdown_compiler.compile(
+            shortcodes.replace_shortcode(
+                md_start,
+                md_post_path,
+                "blog"
+            )
+        )*/
 
         post_data.description = md_start_html
     }
@@ -228,7 +241,11 @@ exports.compile_html = (source_path, blog_config) => {
         return
     }
 
-    source_file = shortcodes.replace_shortcode(source_file)
+    source_file = shortcodes.replace_shortcode(
+        source_file,
+        source_path,
+        "blog"
+    )
     let source_html = markdown_compiler.compile(source_file)
 
     ejs.renderFile("./res/templates/render_template.ejs", {

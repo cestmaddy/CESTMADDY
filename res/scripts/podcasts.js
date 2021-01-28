@@ -3,7 +3,6 @@ const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
 const fs = require("fs")
 const mime = require('mime')
-const { getAudioDurationInSeconds } = require('get-audio-duration')
 const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
 
@@ -135,7 +134,6 @@ exports.make_rss_feed = (podcast_config) => {
 
 exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     let podcast_shortcodes = shortcodes.get_shortcodes(podcast_md)
-    //let post_html = markdown_compiler.compile(shortcodes.replace_shortcode(post_md))
     let podcast_data = {
         title: "",
         description: "",
@@ -165,7 +163,13 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
 
     // DESCRIPTION
     if(podcast_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
-        podcast_data.description = markdown_compiler.compile(shortcodes.replace_shortcode(podcast_shortcodes.values["[DESCRIPTION]"]))
+        podcast_data.description = markdown_compiler.compile(
+            shortcodes.replace_shortcode(
+                podcast_shortcodes.values["[DESCRIPTION]"],
+                md_podcast_path,
+                "podcast"
+            )
+        )
     }
 
     // LINK

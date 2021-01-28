@@ -11,7 +11,8 @@
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
-                "start"
+                "run",
+                "quick-start"
             ]
         }
     ]

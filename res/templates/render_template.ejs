@@ -7,14 +7,7 @@
 
     <%- include("favicons.ejs") %>
 
-    <% if(theme && theme != "") { %>
-    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/page.min.css">
-    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/markdown.min.css">
-    <% } else { %>
-        <%- theme %>
-    <link rel="stylesheet" href="/front/themes/clean/css/page.min.css">
-    <link rel="stylesheet" href="/front/themes/clean/css/markdown.min.css">
-    <% } %>
+    <%- include("theme.ejs") %>
 </head>
 <body>
     <header class="markdown">

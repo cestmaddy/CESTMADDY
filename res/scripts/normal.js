@@ -41,7 +41,11 @@ exports.compile_html = (source_path) => {
         return
     }
 
-    source_file = shortcodes.replace_shortcode(source_file)
+    source_file = shortcodes.replace_shortcode(
+        source_file,
+        source_path,
+        "normal"
+    )
     let source_html = markdown_compiler.compile(source_file)
 
     ejs.renderFile("./res/templates/render_template.ejs", {

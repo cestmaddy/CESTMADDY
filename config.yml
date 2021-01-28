@@ -14,3 +14,16 @@ content:
     background: "#fff",
     theme_color: "#fff"
   }
+  blogs: [
+    {
+      dir: "./source/blogs/cestoliv",
+      title: "CESTOLIV",
+      description : "Un blog tech",
+      category: "Technology",
+      language: "fr",
+      main_author: "cestoliv",
+      authors: {
+        "cestoliv": "me@cestoliv.com"
+      }
+    }
+  ]

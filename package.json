@@ -6,11 +6,16 @@
   "scripts": {
     "build": "node res/scripts/build.js",
     "minify": "grunt minify",
-    "start": "npm run build && npm run minify && node server.js",
-    "dev": "nodemon -e js,css,ejs server.js & grunt watch"
+    "favicons": "node res/scripts/favicons.js",
+    "clear": "node res/scripts/clear.js",
+
+    "generate": "npm run clear && npm run favicons && npm run build && npm run minify",
+    "start": "npm run generate && node server.js",
+
+    "quick-start": "npm run clear && npm run build && npm run minify && node server.js"
   },
   "author": "cestoliv",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "nodemon": "^2.0.6"
   },
