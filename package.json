@@ -8,10 +8,8 @@
     "minify": "grunt minify",
     "favicons": "node res/scripts/favicons.js",
     "clear": "node res/scripts/clear.js",
-
     "generate": "npm run clear && npm run favicons && npm run build && npm run minify",
     "start": "npm run generate && node server.js",
-
     "quick-start": "npm run clear && npm run build && npm run minify && node server.js"
   },
   "author": "cestoliv",
@@ -30,6 +28,7 @@
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-watch": "^1.1.0",
+    "html-to-text": "^6.0.0",
     "marked": "^1.2.7",
     "mime": "^2.4.7",
     "mkdirp": "^1.0.4",

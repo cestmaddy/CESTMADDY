@@ -116,16 +116,13 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     }
     else {
         let md_start = post_md.substr(0, 500)
-        console.log(md_start,
-            md_post_path,
-            "blog")
-        let md_start_html = ""/*markdown_compiler.compile(
+        let md_start_html = markdown_compiler.compile(
             shortcodes.replace_shortcode(
                 md_start,
                 md_post_path,
-                "blog"
+                "normal"
             )
-        )*/
+        )
 
         post_data.description = md_start_html
     }

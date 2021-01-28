@@ -1,6 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 const path_resolve = require("path").resolve
+const { htmlToText } = require('html-to-text')
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -104,7 +105,12 @@ exports.replace_shortcode = (str, source_path, type) => {
             }
 
             if(!replaced) {
-                str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
+                if(shortcode_data.values.hasOwnProperty(shortcode_data.replace[short_ctr].shortcode)) {
+                    str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
+                }
+                else {
+                    str = str.replace(new RegExp(key, "g"), "")
+                }
             }
         }
     }
@@ -184,10 +190,15 @@ exports.list_blog_recursively = (source_path, file_content) => {
 
         let post_data = blogs.get_post_data(post_content, blog_config, posts[i_post])
 
+        let title = post_data["title"]
+        if(title == "") {
+            title = "Untitled"
+        }
+
         list_content += `<li>
             <a href="${post_data["link"]}">
-                <p>${post_data["title"]}</p>
-                <p>${post_data["description"]}</p>
+                <p>${title}</p>
+                <p>${htmlToText(post_data["description"])}</p>
             </a>
         </li>`
     }
