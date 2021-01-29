@@ -69,6 +69,20 @@ app.use((req, res, next) => {
     }
 })
 
+// redirect */index.html to */
+app.use((req, res, next) => {
+    //remove trailing slash
+    let req_path = req.path.replace(/\/$/, "")
+
+    if(req_path.endsWith('index.html')) {
+        let new_path = req_path.substr(0, req_path.length - 10)
+        res.redirect(new_path)
+    }
+    else {
+        next()  
+    }
+})
+
 app.use("/", express.static(contentDir))
 app.use("/front", express.static("res/content/front"))
 
