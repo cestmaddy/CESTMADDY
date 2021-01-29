@@ -141,7 +141,7 @@ exports.date_to_relative_date = (u_date) => {
     for (i = 0; i <= divisions.length-1; i++) {
         let division = divisions[i]
         if (Math.abs(duration) < division.amount) {
-            return `${formatter.format(Math.round(duration), division.name)}, ${u_date.toLocaleString(config.get("string", ["content", "language"]))}`
+            return `${formatter.format(Math.round(duration), division.name)}`
         }
         duration /= division.amount
     }
@@ -215,8 +215,9 @@ exports.list_blog_recursively = (source_path, file_content) => {
 
         list_content += `<li>
             <a href="${posts_data[i_data]["link"]}">
-                <p>${title}</p>
-                <p>${htmlToText(posts_data[i_data]["description"])}</p>
+                <p class="post_date">${posts_data[i_data]["author"]["name"]}, <strong>${this.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
+                <p class="post_title">${title}</p>
+                <p class="post_description">${htmlToText(posts_data[i_data]["description"])}</p>
             </a>
         </li>`
     }
