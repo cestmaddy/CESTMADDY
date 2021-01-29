@@ -32,20 +32,22 @@ exports.make_rss_feed = (blog_config) => {
 
     itemsFeed = ""
     posts.forEach((post) => {
-        let source_file = ""
-        try {
-            source_file = fs.readFileSync(post, "utf-8")
-        }
-        catch(err) {
-            console.log(`\n${compiler.remove_before_source_from_path(post).bold}`)
-            console.log(`    ${err}`.red)
-            return
-        }
+        // exclude index.md from feed (because it's not an article)
+        if(!post.endsWith("index.md")) {
+          let source_file = ""
+            try {
+                source_file = fs.readFileSync(post, "utf-8")
+            }
+            catch(err) {
+                console.log(`\n${compiler.remove_before_source_from_path(post).bold}`)
+                console.log(`    ${err}`.red)
+                return
+            }
 
-        if(source_file != "") {
-            let post_data = this.get_post_data(source_file, blog_config, post)
+            if(source_file != "") {
+                let post_data = this.get_post_data(source_file, blog_config, post)
 
-            itemsFeed += `
+                itemsFeed += `
         <item>
             <title>${post_data.title}</title>
             <link>${post_data.link}</link>
@@ -54,7 +56,8 @@ exports.make_rss_feed = (blog_config) => {
             <enclosure url="${post_data.enclosure}"/>
             <pubDate>${post_data.date}</pubDate>
         </item>
-            `
+            `  
+            }
         }
     })
 
