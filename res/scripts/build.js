@@ -24,27 +24,25 @@ for(f in files) {
     
     // FEEDS
     let content_type = compiler.special_content_type(source_path)
-        if(content_type == "podcast") {
-            podcasts_list[
-                podcasts.get_podcast_config(source_path)["local_path"]
-            ] = podcasts.get_podcast_config(source_path)
-        }
-        if(content_type == "blog") {
-            blogs_list[
-                blogs.get_blog_config(source_path)["local_path"]
-            ] = blogs.get_blog_config(source_path)
-        }
+    if(content_type == "podcast") {
+        podcasts_list[
+            podcasts.get_podcast_config(source_path)["local_path"]
+        ] = podcasts.get_podcast_config(source_path)
     }
+    if(content_type == "blog") {
+        blogs_list[
+            blogs.get_blog_config(source_path)["local_path"]
+        ] = blogs.get_blog_config(source_path)
+    }
+}
 
 for(key in podcasts_list) {
     if(podcasts_list.hasOwnProperty(key)) {
-        //console.log(podcasts_list[key])
         podcasts.make_rss_feed(podcasts_list[key])
     }
 }
 for(key in blogs_list) {
     if(blogs_list.hasOwnProperty(key)) {
-        //console.log(key)
         blogs.make_rss_feed(blogs_list[key])
     }
 }

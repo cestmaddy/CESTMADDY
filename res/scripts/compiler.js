@@ -36,7 +36,7 @@ exports.special_content_type = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
     /* PODCAST */
-    let config_podcasts = config.get("array", ["content", "podcasts"])
+    let config_podcasts = config.get("array", ["content", "podcasts"], false)
     for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
         if(absolute_source_path.startsWith(
             path_resolve(
@@ -47,7 +47,7 @@ exports.special_content_type = (source_path) => {
         }
     }
     /* BLOG */
-    let config_blogs = config.get("array", ["content", "blogs"])
+    let config_blogs = config.get("array", ["content", "blogs"], false)
     for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
         if(absolute_source_path.startsWith(
             path_resolve(

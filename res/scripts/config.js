@@ -1,7 +1,7 @@
 const configYaml = require('config-yaml')
 const config = configYaml("./config.yml")
 
-exports.get = (type, conf_path_arr) => {
+exports.get = (type, conf_path_arr, required=true) => {
     if(conf_path_arr.length != 0) {
         let current_config = config
         let found = false
@@ -11,7 +11,8 @@ exports.get = (type, conf_path_arr) => {
                 current_config = current_config[conf_path_arr[i_conf]]
             }
             else {
-                console.log(`Config : ${conf_path_arr.slice(0, i_conf+1).join(".")} is not defined`.yellow)
+                if(required)
+                    console.log(`Config : ${conf_path_arr.slice(0, i_conf+1).join(".")} is not defined`.yellow)
                 break
             }
 
