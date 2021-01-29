@@ -178,29 +178,32 @@ exports.list_blog_recursively = (source_path, file_content) => {
     let posts = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
 
     for(i_post = 0; i_post < posts.length; i_post++) {
-        let post_content = ""
-        try {
-            post_content = fs.readFileSync(posts[i_post], "utf-8")
-        }
-        catch(err) {
-            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-            console.log(`    ${err}`.red)
-            return
-        }
+        // exclude the current page from the list
+        if(path_resolve(source_path) != posts[i_post]) {
+            let post_content = ""
+            try {
+                post_content = fs.readFileSync(posts[i_post], "utf-8")
+            }
+            catch(err) {
+                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                console.log(`    ${err}`.red)
+                return
+            }
 
-        let post_data = blogs.get_post_data(post_content, blog_config, posts[i_post])
+            let post_data = blogs.get_post_data(post_content, blog_config, posts[i_post])
 
-        let title = post_data["title"]
-        if(title == "") {
-            title = "Untitled"
+            let title = post_data["title"]
+            if(title == "") {
+                title = "Untitled"
+            }
+
+            list_content += `<li>
+                <a href="${post_data["link"]}">
+                    <p>${title}</p>
+                    <p>${htmlToText(post_data["description"])}</p>
+                </a>
+            </li>`
         }
-
-        list_content += `<li>
-            <a href="${post_data["link"]}">
-                <p>${title}</p>
-                <p>${htmlToText(post_data["description"])}</p>
-            </a>
-        </li>`
     }
 
     list_content += "</ul>"
