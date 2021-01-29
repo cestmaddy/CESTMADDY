@@ -177,6 +177,8 @@ exports.list_blog_recursively = (source_path, file_content) => {
     let blog_config = blogs.get_blog_config(source_path)
     let posts = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
 
+    // get posts_datas
+    let posts_data = []
     for(i_post = 0; i_post < posts.length; i_post++) {
         // exclude the current page from the list
         if(path_resolve(source_path) != posts[i_post]) {
@@ -190,20 +192,33 @@ exports.list_blog_recursively = (source_path, file_content) => {
                 return
             }
 
-            let post_data = blogs.get_post_data(post_content, blog_config, posts[i_post])
-
-            let title = post_data["title"]
-            if(title == "") {
-                title = "Untitled"
-            }
-
-            list_content += `<li>
-                <a href="${post_data["link"]}">
-                    <p>${title}</p>
-                    <p>${htmlToText(post_data["description"])}</p>
-                </a>
-            </li>`
+            posts_data.push(
+                blogs.get_post_data(
+                    post_content, 
+                    blog_config, 
+                    posts[i_post]
+                )
+            )
         }
+    }
+
+    // sort by date
+    posts_data = posts_data.sort((a, b) => {
+        return a.date_object < b.date_object ? 1 : -1
+    })
+
+    for(i_data in posts_data) {
+        let title = posts_data[i_data]["title"]
+        if(title == "") {
+            title = "Untitled"
+        }
+
+        list_content += `<li>
+            <a href="${posts_data[i_data]["link"]}">
+                <p>${title}</p>
+                <p>${htmlToText(posts_data[i_data]["description"])}</p>
+            </a>
+        </li>`
     }
 
     list_content += "</ul>"

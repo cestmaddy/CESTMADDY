@@ -31,6 +31,9 @@ exports.make_rss_feed = (blog_config) => {
     let posts = compiler.get_every_files_with_extension_of_dir(blog_config['dir'], "md")
 
     itemsFeed = ""
+
+    // get posts data
+    let posts_data = []
     posts.forEach((post) => {
         // exclude index.md from feed (because it's not an article)
         if(!post.endsWith("index.md")) {
@@ -45,21 +48,29 @@ exports.make_rss_feed = (blog_config) => {
             }
 
             if(source_file != "") {
-                let post_data = this.get_post_data(source_file, blog_config, post)
-
-                itemsFeed += `
-        <item>
-            <title>${post_data.title}</title>
-            <link>${post_data.link}</link>
-            <description><![CDATA[${post_data.description}]]></description>
-            <author>${post_data.author.email}</author>
-            <enclosure url="${post_data.enclosure}"/>
-            <pubDate>${post_data.date}</pubDate>
-        </item>
-            `  
+                posts_data.push(this.get_post_data(source_file, blog_config, post))
             }
         }
     })
+
+    // sort by date
+    posts_data = posts_data.sort((a, b) => {
+        return a.date_object < b.date_object ? 1 : -1
+    })
+
+    for(i_data in posts_data) {
+        itemsFeed += `
+        <item>
+            <title>${posts_data[i_data].title}</title>
+            <link>${posts_data[i_data].link}</link>
+            <description><![CDATA[${posts_data[i_data].description}]]></description>
+            <author>${posts_data[i_data].author.email}</author>
+            <enclosure url="${posts_data[i_data].enclosure}"/>
+            <pubDate>${posts_data[i_data].date}</pubDate>
+        </item>
+            `  
+    }
+
 
     let feed = `<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
@@ -94,6 +105,7 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
         title: "",
         description: "",
         date: "",
+        date_object: "",
         author: {
             name: "",
             email: ""
@@ -157,7 +169,12 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
 
     // DATE
     if(post_shortcodes.values.hasOwnProperty("[DATE]")) {
-        post_data.date = this.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
+        post_data.date_object = this.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
+        post_data.date = post_data.date_object.toGMTString()
+    }
+    else {
+        post_data.date_object = this.user_date_to_pub_date()
+        post_data.date = post_data.date_object.toGMTString()
     }
 
     // AUTHOR
@@ -193,11 +210,16 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     return post_data
 }
 
-exports.user_date_to_pub_date = (u_date) => {
+exports.user_date_to_pub_date = (u_date = "") => {
     // YYYY-MM-DDTHH:MM:SS
-    let date = new Date(u_date)
+    let date_parsed = Date.parse(u_date)
+    if(u_date == "") {
+        date_parsed = Date.now()
+    }
+    let date = new Date()
+    date.setTime(date_parsed)
 
-    return date.toGMTString()
+    return date
 }
 
 exports.get_blog_config = (source_path) => {
