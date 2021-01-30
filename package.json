@@ -28,6 +28,7 @@
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-watch": "^1.1.0",
+    "highlight.js": "^10.5.0",
     "html-to-text": "^6.0.0",
     "marked": "^1.2.7",
     "mime": "^2.4.7",
