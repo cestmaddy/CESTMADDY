@@ -118,6 +118,9 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     if(post_shortcodes.values.hasOwnProperty("[TITLE]")) {
         post_data.title = post_shortcodes.values["[TITLE]"]
     }
+    else {
+        post_data.title = "Untitled"
+    }
 
     // DESCRIPTION
     if(post_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
@@ -263,6 +266,7 @@ exports.compile_html = (source_path, blog_config) => {
         return
     }
 
+    let post_data = this.get_post_data(source_file, blog_config, source_path)
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
@@ -270,12 +274,34 @@ exports.compile_html = (source_path, blog_config) => {
     )
     let source_html = markdown_compiler.compile(source_file)
 
-    ejs.renderFile("./res/templates/render_template.ejs", {
+    let render_options = {
+        site_title: config.get("string", ["content", "title"]),
+        page_title: post_data["title"],
         html_content: source_html,
         html_header: compiler.get_header_content(),
         html_footer: compiler.get_footer_content(),
-        theme: config.get("string", ["content", "theme"])
-    }, (err, str) => {
+        theme: config.get("string", ["content", "theme"]),
+        type: "blog"
+    }
+    let render_path = "./res/templates/render_template.ejs"
+    // if it's a blog post
+    console.log(source_file, post_data)
+    if(!source_path.endsWith("index.md")) {
+        render_options = Object.assign(
+            render_options,
+            {
+                post_content: source_html,
+                enclosure: post_data["enclosure"],
+                post_title: post_data["title"],
+                post_author: post_data["author"]["name"],
+                post_relative_date: shortcodes.date_to_relative_date(post_data["date"]),
+                post_date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"]))
+            }
+        )
+        render_path = "./res/templates/blog_template.ejs"
+    }
+
+    ejs.renderFile(render_path, render_options, (err, str) => {
         if(err) {
             console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
             console.log(`    ${err}`.red)

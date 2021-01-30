@@ -41,18 +41,29 @@ exports.compile_html = (source_path) => {
         return
     }
 
+    let page_shortcodes = shortcodes.get_shortcodes(source_file)
+
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
         "normal"
     )
     let source_html = markdown_compiler.compile(source_file)
+    
+    // PAGE TITLE
+    let page_title = ""
+    if(page_shortcodes.values.hasOwnProperty("[TITLE]")) {
+        page_title = page_shortcodes.values["[TITLE]"]
+    }
 
     ejs.renderFile("./res/templates/render_template.ejs", {
+        site_title: config.get("string", ["content", "title"]),
+        page_title: page_title,
         html_content: source_html,
         html_header: compiler.get_header_content(),
         html_footer: compiler.get_footer_content(),
-        theme: config.get("string", ["content", "theme"])
+        theme: config.get("string", ["content", "theme"]),
+        type: "normal"
     }, (err, str) => {
         if(err) {
             console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)

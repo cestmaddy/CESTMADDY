@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <% if(page_title == "") { %>
-        <title><%- site_title %></title>
-    <% } else { %>
-        <title><%- page_title %> | <%- site_title %></title>
-    <% } %>
+    <title><%- post_title %> | <%- site_title %></title>
 
     <%- include("favicons.ejs") %>
 
@@ -17,8 +13,11 @@
     <header class="markdown">
         <%- html_header %>
     </header>
-    <div id="content" class="markdown">
-        <%- html_content %> 
+    <div id="content" class="markdown post_content">
+        <img class="post_enclosure" src="<%- enclosure %>" />
+        <h1 class="post_title"><%- post_title %></h1>
+        <p class="post_infos"><%- post_author %>, <strong><%- post_relative_date %></strong> <%- post_date_string %></p>
+        <%- post_content %>
     </div>
     <footer class="markdown">
         <%- html_footer %> 

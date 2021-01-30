@@ -208,16 +208,11 @@ exports.list_blog_recursively = (source_path, file_content) => {
     })
 
     for(i_data in posts_data) {
-        let title = posts_data[i_data]["title"]
-        if(title == "") {
-            title = "Untitled"
-        }
-
         list_content += `<li>
             <a href="${posts_data[i_data]["link"]}">
-                <p class="post_date">${posts_data[i_data]["author"]["name"]}, <strong>${this.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
-                <p class="post_title">${title}</p>
-                <p class="post_description">${htmlToText(posts_data[i_data]["description"])}</p>
+                <p class="blog_list_recur_post_date">${posts_data[i_data]["author"]["name"]}, <strong>${this.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
+                <p class="blog_list_recur_post_title">${posts_data[i_data]["title"]}</p>
+                <p class="blog_list_recur_post_description">${htmlToText(posts_data[i_data]["description"])}</p>
             </a>
         </li>`
     }

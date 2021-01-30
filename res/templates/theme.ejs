@@ -1,7 +1,13 @@
 <% if(theme && theme != "") { %>
-<link rel="stylesheet" href="/front/themes/<%- theme %>/css/markdown.min.css">
-<link rel="stylesheet" href="/front/themes/<%- theme %>/css/page.min.css">
+    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/markdown.min.css">
+    <% if(type && type == "blog") { %>
+        <link rel="stylesheet" href="/front/themes/<%- theme %>/css/blog.min.css">
+    <% } %>
+    <link rel="stylesheet" href="/front/themes/<%- theme %>/css/page.min.css">
 <% } else { %>
-<link rel="stylesheet" href="/front/themes/clean/css/markdown.min.css">
-<link rel="stylesheet" href="/front/themes/clean/css/page.min.css">
-<% } %></link>
+    <link rel="stylesheet" href="/front/themes/clean/css/markdown.min.css">
+    <% if(type && type == "blog") { %>
+        <link rel="stylesheet" href="/front/themes/clean/css/blog.min.css">
+    <% } %>
+    <link rel="stylesheet" href="/front/themes/clean/css/page.min.css">
+<% } %>
