@@ -1,5 +1,7 @@
 package-lock.json
 node_modules
 
+res/templates/favicons.ejs
+
 *.min.*
 config.yml
