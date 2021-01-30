@@ -4,5 +4,4 @@ node_modules
 res/templates/favicons.ejs
 source
 
-*.min.*
 config.yml
