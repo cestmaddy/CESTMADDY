@@ -160,14 +160,14 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
 
     // ENCLOSURE
     if(post_shortcodes.values.hasOwnProperty("[ENCLOSURE]")) {
-        post_data.enclosure = post_shortcodes.values["[ENCLOSURE]"]
+        post_data.enclosure = config.get("string", ["server", "domain"]) + post_shortcodes.values["[ENCLOSURE]"]
     }
     else {
         let first_image = /!\[.+?\]\((.+?)\)/g.exec(post_md)
         if(first_image)
             first_image = first_image[1]
         if(first_image)
-            post_data.enclosure = first_image
+            post_data.enclosure = config.get("string", ["server", "domain"]) + first_image
     }
 
     // DATE
