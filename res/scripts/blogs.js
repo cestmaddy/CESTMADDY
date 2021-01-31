@@ -274,6 +274,13 @@ exports.compile_html = (source_path, blog_config) => {
     )
     let source_html = markdown_compiler.compile(source_file)
 
+    // theme
+    let theme = "clean"
+    let config_theme = config.get("string", ["content", "theme"])
+    if(config_theme != "") {
+        theme = config.get("string", ["content", "theme"])
+    }
+
     let render_options = {
         site_title: config.get("string", ["content", "title"]),
         page_title: post_data["title"],
@@ -283,7 +290,7 @@ exports.compile_html = (source_path, blog_config) => {
         theme: config.get("string", ["content", "theme"]),
         type: "blog"
     }
-    let render_path = "./res/templates/render_template.ejs"
+    let render_path = `./res/content/front/themes${theme}/templates/normal.ejs`
     // if it's a blog post
     console.log(source_file, post_data)
     if(!source_path.endsWith("index.md")) {
@@ -298,7 +305,7 @@ exports.compile_html = (source_path, blog_config) => {
                 post_date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"]))
             }
         )
-        render_path = "./res/templates/blog_template.ejs"
+        render_path = `./res/content/front/themes${theme}/templates/blog.ejs`
     }
 
     ejs.renderFile(render_path, render_options, (err, str) => {

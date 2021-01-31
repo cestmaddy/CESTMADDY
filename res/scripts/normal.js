@@ -56,7 +56,13 @@ exports.compile_html = (source_path) => {
         page_title = page_shortcodes.values["[TITLE]"]
     }
 
-    ejs.renderFile("./res/templates/render_template.ejs", {
+    // template_path
+    let template_path = "./res/content/front/themes/clean/templates/normal.ejs"
+    if(config.get("string", ["content", "theme"]) != "") {
+        template_path = `./res/content/front/themes/${config.get("string", ["content", "theme"])}/templates/normal.ejs`
+    }
+
+    ejs.renderFile(template_path, {
         site_title: config.get("string", ["content", "title"]),
         page_title: page_title,
         html_content: source_html,
