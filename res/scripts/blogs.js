@@ -64,7 +64,7 @@ exports.make_rss_feed = (blog_config) => {
             <title>${posts_data[i_data].title}</title>
             <link>${posts_data[i_data].link}</link>
             <description><![CDATA[${posts_data[i_data].description}]]></description>
-            <author>${posts_data[i_data].author.email}</author>
+            <author>${posts_data[i_data].author.email} (${posts_data[i_data].author.name})</author>
             <enclosure url="${posts_data[i_data].enclosure}"/>
             <pubDate>${posts_data[i_data].date}</pubDate>
         </item>
