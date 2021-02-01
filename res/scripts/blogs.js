@@ -247,7 +247,7 @@ exports.get_blog_config = (source_path) => {
             blog_config["authors"] = config.get("object", ["content", "blogs", conf_ctr, "authors"])
 
             // LOCAL BLOG PATH
-            blog_config["path"] = `/blog/${path.basename(blog_config["dir"])}`
+            blog_config["path"] = `/${path.basename(blog_config["dir"])}`
             blog_config["local_path"] = `${contentDir}${blog_config["path"]}`
 
             return blog_config
