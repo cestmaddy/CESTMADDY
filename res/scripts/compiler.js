@@ -228,7 +228,7 @@ exports.generate_favicons = () => {
             )
         }
         catch (err) {
-            console.log(`\n${compiler.remove_before_source_from_path(favicon_ejs).bold}`)
+            console.log(`\n${this.remove_before_source_from_path(favicon_ejs).bold}`)
             console.log(`    ${err}`.red)
         }
 
@@ -300,7 +300,7 @@ exports.generate_favicons = () => {
                         )
                     }
                     catch (err) {
-                        console.log(`\n${compiler.remove_before_source_from_path(favicon_ejs).bold}`)
+                        console.log(`\n${this.remove_before_source_from_path(favicon_ejs).bold}`)
                         console.log(`    ${err}`.red)
                     }
 
