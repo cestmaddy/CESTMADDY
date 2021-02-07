@@ -5,12 +5,13 @@ const fs = require("fs")
 const mime = require('mime')
 const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
+const ejs = require("ejs")
 
 const config = require("./config")
 const compiler = require("./compiler")
-const blogs = require("./blogs")
 const markdown_compiler = require("./markdown_compiler")
 const shortcodes = require("./shortcodes")
+const functions = require("./functions")
 
 const contentDir = "./res/content/generated"
 
@@ -19,10 +20,10 @@ exports.compile_podcast_dir = (source_path) => {
     
     if(!compiler.is_markdown_file(source_path)) {
         /*
-        let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
+        let podcast_dir_without_source = compiler.remove_source_from_path(podcast_config["dir"])
         let without_source = compiler.remove_source_from_path(source_path)
-        without_source = without_source.substr(blog_dir_without_source.length)
-        let copy_dest = `${generated_blog_path}${without_source}`
+        without_source = without_source.substr(podcast_dir_without_source.length)
+        let copy_dest = `${podcast_config["local_path"]}${without_source}`
         
         compiler.copy_file(source_path, `${copy_dest}`)
         */
@@ -31,6 +32,7 @@ exports.compile_podcast_dir = (source_path) => {
         mkdirp(podcast_config["local_path"]).then(() => {
             //this.make_rss_feed(podcast_config)
         })
+        this.compile_html(source_path, podcast_config)
     }
 }
 
@@ -39,20 +41,22 @@ exports.make_rss_feed = (podcast_config) => {
 
     itemsFeed = ""
     podcasts.forEach((podcast) => {
-        let source_file = ""
-        try {
-            source_file = fs.readFileSync(podcast, "utf-8")
-        }
-        catch(err) {
-            console.log(`\n${compiler.remove_before_source_from_path(podcast).bold}`)
-            console.log(`    ${err}`.red)
-            return
-        }
+        // exclude index.md from feed (because it's not a podcast)
+        if(!podcast.endsWith("index.md")) {
+            let source_file = ""
+            try {
+                source_file = fs.readFileSync(podcast, "utf-8")
+            }
+            catch(err) {
+                console.log(`\n${compiler.remove_before_source_from_path(podcast).bold}`)
+                console.log(`    ${err}`.red)
+                return
+            }
 
-        if(source_file != "") {
-            let podcast_data = this.get_podcast_data(source_file, podcast_config, podcast)
+            if(source_file != "") {
+                let podcast_data = this.get_podcast_data(source_file, podcast_config, podcast)
 
-            itemsFeed += `
+                itemsFeed += `
     <item>
         <title>${podcast_data.title}</title>
         <link>${podcast_data.link}</link>
@@ -65,6 +69,7 @@ exports.make_rss_feed = (podcast_config) => {
         <itunes:image href="${podcast_data.image}" />
     </item>
             `
+            }
         }
     })
 
@@ -138,6 +143,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
         title: "",
         description: "",
         date: "",
+        date_object: "",
         author: {
             name: "",
             email: ""
@@ -159,6 +165,9 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     // TITLE
     if(podcast_shortcodes.values.hasOwnProperty("[TITLE]")) {
         podcast_data.title = podcast_shortcodes.values["[TITLE]"]
+    }
+    else {
+        podcast_data.title = "Untitled"
     }
 
     // DESCRIPTION
@@ -233,7 +242,12 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
 
     // DATE
     if(podcast_shortcodes.values.hasOwnProperty("[DATE]")) {
-        podcast_data.date = blogs.user_date_to_pub_date(podcast_shortcodes.values["[DATE]"])
+        podcast_data.date_object = functions.user_date_to_pub_date(podcast_shortcodes.values["[DATE]"])
+        podcast_data.date = podcast_data.date_object.toGMTString()
+    }
+    else {
+        podcast_data.date_object = functions.user_date_to_pub_date()
+        podcast_data.date = podcast_data.date_object.toGMTString()
     }
 
     // AUTHOR
@@ -310,11 +324,11 @@ exports.get_podcast_config = (source_path) => {
             podcast_config["type"] = config.get("string", ["content", "podcasts", conf_ctr, "type"])
             podcast_config["limit"] = config.get("number", ["content", "podcasts", conf_ctr, "limit"])
             podcast_config["main_author"] = config.get("string", ["content", "podcasts", conf_ctr, "main_author"])
-            podcast_config["author"] = config.get("object", ["content", "podcasts", conf_ctr, "authors"])
+            podcast_config["authors"] = config.get("object", ["content", "podcasts", conf_ctr, "authors"])
 
 
             // LOCAL PODCAST PATH
-            podcast_config["path"] = `/podcast/${path.basename(podcast_config["dir"])}`
+            podcast_config["path"] = `/${path.basename(podcast_config["dir"])}`
             podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
 
             // PODCAST LINK
@@ -342,4 +356,115 @@ exports.get_podcast_config = (source_path) => {
             return podcast_config
         }
     }
+}
+
+exports.compile_html = (source_path, podcast_config) => {
+    let source_file = ""
+    try {
+        source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
+    }
+    catch(err) {
+        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+        console.log(`    ${err}`.red)
+        return
+    }
+
+    let podcast_data = this.get_podcast_data(source_file, podcast_config, source_path)
+    source_file = shortcodes.replace_shortcode(
+        source_file,
+        source_path,
+        "podcast"
+    )
+    let source_html = markdown_compiler.compile(source_file)
+
+    // site data
+    let site = {
+        title: config.get("string", ["content", "title"]),
+        header: compiler.get_header_content(),
+        footer: compiler.get_footer_content(),
+        theme: "clean",
+        type: "podcast"
+    }
+    if(config.get("string", ["content", "theme"]) != "") {
+        site.theme = config.get("string", ["content", "theme"])
+    }
+
+    let render_options = {
+        site: site
+    }
+    let render_path = `./res/content/front/themes/${site.theme}/templates/normal.ejs`
+
+
+    // if it's a podcast post
+    if(!source_path.endsWith("index.md")) {
+        render_options = Object.assign(
+            render_options,
+            {
+                podcast: Object.assign(
+                    podcast_data,
+                    {
+                        date_string: podcast_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
+                        relative_date: functions.date_to_relative_date(podcast_data["date"])
+                    }
+                )
+            }
+        )
+        render_path = `./res/content/front/themes/${site.theme}/templates/podcast.ejs`
+    }
+    else {
+        // if it's an index
+        render_options = Object.assign(
+            render_options,
+            {
+                normal: {
+                    title: podcast_data["title"],
+                    html: source_html
+                }
+            }
+        )
+    }
+
+    ejs.renderFile(render_path, render_options, (err, str) => {
+        if(err) {
+            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            // remove both source/ and .md
+            let blog_dir_without_source = compiler.remove_source_from_path(podcast_config["dir"])
+            let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
+            without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
+            let new_file_source_path = `${podcast_config["local_path"]}${without_source_and_ext}.html`
+            let folder = path.dirname(new_file_source_path)
+            
+            mkdirp(folder).then((made) => {
+                fs.writeFile(new_file_source_path, str, (err, data) => {
+                    if(!err) {
+                        compiler.look_for_conflict(source_path, new_file_source_path)
+                    }
+                    else {
+                        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                        console.log(`    ${err}`.red)
+                    }
+                }) 
+            }).catch((err) => {
+                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                console.log(`    ${err}`.red)
+            })
+        }
+    })
+}
+
+exports.remove_0_before_duration = (duration) => {
+    // duration = hh:mm:ss
+
+    if(duration.startsWith('00:')) {
+        duration = duration.substr(3)
+    }
+
+    if(duration.startsWith('0')) {
+        duration = duration.substr(1)
+    }
+
+    return duration
 }

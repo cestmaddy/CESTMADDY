@@ -7,6 +7,7 @@ const ejs = require("ejs")
 const config = require("./config")
 const compiler = require("./compiler")
 const shortcodes = require("./shortcodes")
+const functions = require("./functions")
 const markdown_compiler = require("./markdown_compiler")
 
 const contentDir = "./res/content/generated"
@@ -172,11 +173,11 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
 
     // DATE
     if(post_shortcodes.values.hasOwnProperty("[DATE]")) {
-        post_data.date_object = this.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
+        post_data.date_object = functions.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
         post_data.date = post_data.date_object.toGMTString()
     }
     else {
-        post_data.date_object = this.user_date_to_pub_date()
+        post_data.date_object = functions.user_date_to_pub_date()
         post_data.date = post_data.date_object.toGMTString()
     }
 
@@ -211,18 +212,6 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     }
 
     return post_data
-}
-
-exports.user_date_to_pub_date = (u_date = "") => {
-    // YYYY-MM-DDTHH:MM:SS
-    let date_parsed = Date.parse(u_date)
-    if(u_date == "") {
-        date_parsed = Date.now()
-    }
-    let date = new Date()
-    date.setTime(date_parsed)
-
-    return date
 }
 
 exports.get_blog_config = (source_path) => {
@@ -274,37 +263,50 @@ exports.compile_html = (source_path, blog_config) => {
     )
     let source_html = markdown_compiler.compile(source_file)
 
-    // theme
-    let theme = "clean"
-    let config_theme = config.get("string", ["content", "theme"])
-    if(config_theme != "") {
-        theme = config.get("string", ["content", "theme"])
+    // site data
+    let site = {
+        title: config.get("string", ["content", "title"]),
+        header: compiler.get_header_content(),
+        footer: compiler.get_footer_content(),
+        theme: "clean",
+        type: "blog"
+    }
+    if(config.get("string", ["content", "theme"]) != "") {
+        site.theme = config.get("string", ["content", "theme"])
     }
 
     let render_options = {
-        site_title: config.get("string", ["content", "title"]),
-        page_title: post_data["title"],
-        html_content: source_html,
-        html_header: compiler.get_header_content(),
-        html_footer: compiler.get_footer_content(),
-        theme: config.get("string", ["content", "theme"]),
-        type: "blog"
+        site: site
     }
-    let render_path = `./res/content/front/themes/${theme}/templates/normal.ejs`
+    let render_path = `./res/content/front/themes/${site.theme}/templates/normal.ejs`
     // if it's a blog post
     if(!source_path.endsWith("index.md")) {
         render_options = Object.assign(
             render_options,
             {
-                post_content: source_html,
-                enclosure: post_data["enclosure"],
-                post_title: post_data["title"],
-                post_author: post_data["author"]["name"],
-                post_relative_date: shortcodes.date_to_relative_date(post_data["date"]),
-                post_date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"]))
+                post: Object.assign(
+                    post_data,
+                    {
+                        html: source_html,
+                        date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
+                        relative_date: functions.date_to_relative_date(post_data["date"])
+                    }
+                )
             }
         )
-        render_path = `./res/content/front/themes/${theme}/templates/blog.ejs`
+        render_path = `./res/content/front/themes/${site.theme}/templates/blog.ejs`
+    }
+    else {
+        // if it's an index
+        render_options = Object.assign(
+            render_options,
+            {
+                normal: {
+                    title: post_data["title"],
+                    html: source_html
+                }
+            }
+        )
     }
 
     ejs.renderFile(render_path, render_options, (err, str) => {

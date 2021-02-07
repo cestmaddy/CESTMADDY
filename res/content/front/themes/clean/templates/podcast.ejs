@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- podcast.title %> | <%- site.title %></title>
+
+    <%- include("../../../../../templates/favicons.ejs") %>
+
+    <%- include("../../../../../templates/theme.ejs") %>
+</head>
+<body>
+    <header class="markdown">
+        <%- site.header %>
+    </header>
+    <div id="content" class="markdown">
+        <div class="podcast_image_n_title">
+            <img class="podcast_image" src="<%- podcast.image %>" />
+            <h1 class="podcast_title"><%- podcast.title %></h1>
+        </div>
+
+        <audio controls class="podcast_audio">
+            <source src="<%- podcast.enclosure.url %>" type="<%- podcast.enclosure.type %>">
+                <a href="<%- podcast.enclosure.url %>"><%- podcast.title %></a>
+        </audio>
+
+        <p class="podcast_infos"><%- podcast.author.name %>, <strong><%- podcast.relative_date %></strong> <%- podcast.date_string %></p>
+
+        <div class="podcast_description">
+            <%- podcast.description %> 
+        </div>
+    </div>
+    <footer class="markdown">
+        <%- site.footer %> 
+    </footer>
+</body>
+</html>

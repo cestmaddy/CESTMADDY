@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <% if(page_title == "") { %>
-        <title><%- site_title %></title>
+    <% if(normal.title == "") { %>
+        <title><%- site.title %></title>
     <% } else { %>
-        <title><%- page_title %> | <%- site_title %></title>
+        <title><%- normal.title %> | <%- site.title %></title>
     <% } %>
 
     <%- include("../../../../../templates/favicons.ejs") %>
@@ -15,13 +15,13 @@
 </head>
 <body>
     <header class="markdown">
-        <%- html_header %>
+        <%- site.header %>
     </header>
     <div id="content" class="markdown">
-        <%- html_content %> 
+        <%- normal.html %> 
     </div>
     <footer class="markdown">
-        <%- html_footer %> 
+        <%- site.footer %> 
     </footer>
 </body>
 </html>

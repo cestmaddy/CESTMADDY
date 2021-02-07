@@ -12,14 +12,6 @@ const markdown_compiler = require("./markdown_compiler")
 const contentDir = "./res/content/generated"
 
 exports.compile_normal_dir = (source_path) => {
-    /*
-    if(!compiler.should_it_be_compiled(source_path)) {
-        if(compiler.should_reload_every_files(source_path)) {
-            console.log(`\nRecompile everything because of the modification of a file included in all the others\n`.yellow.bold)
-            compiler.recompile_every_markdown()
-        }
-    }
-    */
     if(!compiler.is_markdown_file(source_path)) {
         let without_source = compiler.remove_source_from_path(source_path)
         let copy_dest = `${contentDir}${without_source}`
@@ -50,26 +42,30 @@ exports.compile_html = (source_path) => {
     )
     let source_html = markdown_compiler.compile(source_file)
     
-    // PAGE TITLE
-    let page_title = ""
-    if(page_shortcodes.values.hasOwnProperty("[TITLE]")) {
-        page_title = page_shortcodes.values["[TITLE]"]
-    }
-
-    // template_path
-    let template_path = "./res/content/front/themes/clean/templates/normal.ejs"
-    if(config.get("string", ["content", "theme"]) != "") {
-        template_path = `./res/content/front/themes/${config.get("string", ["content", "theme"])}/templates/normal.ejs`
-    }
-
-    ejs.renderFile(template_path, {
-        site_title: config.get("string", ["content", "title"]),
-        page_title: page_title,
-        html_content: source_html,
-        html_header: compiler.get_header_content(),
-        html_footer: compiler.get_footer_content(),
-        theme: config.get("string", ["content", "theme"]),
+    // site data
+    let site = {
+        title: config.get("string", ["content", "title"]),
+        header: compiler.get_header_content(),
+        footer: compiler.get_footer_content(),
+        theme: "clean",
         type: "normal"
+    }
+    if(config.get("string", ["content", "theme"]) != "") {
+        site.theme = config.get("string", ["content", "theme"])
+    }
+
+    // normal data
+    let normal = {
+        title: "",
+        html: source_html
+    }
+    if(page_shortcodes.values.hasOwnProperty("[TITLE]")) {
+        normal.title = page_shortcodes.values["[TITLE]"]
+    }
+
+    ejs.renderFile(`./res/content/front/themes/${site.theme}/templates/normal.ejs`, {
+        site: site,
+        normal: normal
     }, (err, str) => {
         if(err) {
             console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)

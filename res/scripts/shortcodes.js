@@ -5,7 +5,13 @@ const { htmlToText } = require('html-to-text')
 
 const config = require("./config")
 const compiler = require("./compiler")
-const blogs = require("./blogs")
+const blogs = require("./blogs") 
+const podcasts = require("./podcasts") 
+const functions = require("./functions")
+
+/*
+    SHORTCODES
+*/
 
 exports.get_shortcodes = (str) => {
     var results = {
@@ -39,7 +45,8 @@ exports.get_shortcodes = (str) => {
 
         // PODCAST
         'PODCAST_AUDIO',
-        'PODCAST_IMAGE'
+        'PODCAST_IMAGE',
+        'LIST_PODCAST_RECUR'
     ]
 
     for(short in shortcodes_to_define) {
@@ -96,9 +103,20 @@ exports.replace_shortcode = (str, source_path, type) => {
                         break
                 }
             }
+            else if(type == "podcast") {
+                switch (shortcode_data.replace[short_ctr].shortcode) {
+                    case "[LIST_PODCAST_RECUR]":
+                        str = str.replace(
+                            new RegExp(key, "g"),
+                            this.list_podcast_recursively(source_path, str)
+                        )
+                        replaced = true
+                        break
+                }
+            }
 
             if(!replaced && shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
-                str = str.replace(new RegExp(key, "g"), this.date_to_relative_date(
+                str = str.replace(new RegExp(key, "g"), functions.date_to_relative_date(
                     shortcode_data.values[shortcode_data.replace[short_ctr].shortcode]
                 ))
                 replaced = true
@@ -118,61 +136,18 @@ exports.replace_shortcode = (str, source_path, type) => {
     return str
 }
 
-exports.date_to_relative_date = (u_date) => {
-    u_date = new Date(u_date)
-    let formatter = new Intl.RelativeTimeFormat(config.get("string", ["content", "language"]), {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    })
+/*
+    FUNCTIONS
+*/
 
-    let divisions = [
-        { amount: 60, name: 'seconds' },
-        { amount: 60, name: 'minutes' },
-        { amount: 24, name: 'hours' },
-        { amount: 7, name: 'days' },
-        { amount: 4.34524, name: 'weeks' },
-        { amount: 12, name: 'months' },
-        { amount: Number.POSITIVE_INFINITY, name: 'years' }
-    ]
-      
-    let duration = (u_date - new Date()) / 1000
-        
-    for (i = 0; i <= divisions.length-1; i++) {
-        let division = divisions[i]
-        if (Math.abs(duration) < division.amount) {
-            return `${formatter.format(Math.round(duration), division.name)}`
-        }
-        duration /= division.amount
-    }
 
-    return "Invalid Date"
-}
 
-exports.list_dir_html = (source_path) => {
-    try {
-        files = fs.readdirSync(path.dirname(source_path), {withFileTypes: true})
-  
-        files.forEach(file => {
-            let filepath = `${path.dirname(source_path)}/${file.name}`
-            
-            if(compiler.should_it_be_compiled(filepath) && 
-                file.isFile() && 
-                path_resolve(filepath) != path_resolve(source_path)
-            ) {
-                console.log(`f ${filepath}`)
-            }
-        })    
-    }
-    catch(err) {
-        console.log(`\n${source_path.bold}`)
-        console.log(`    ${err}`.red)
-        return
-    }
-}
+/*
+    CONTENT GENERATION
+*/
 
 exports.list_blog_recursively = (source_path, file_content) => {
-    let list_content = `<ul class="list_blog_recur">`
+    let list_content = `<ul class="list_blog">`
 
     let blog_config = blogs.get_blog_config(source_path)
     let posts = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
@@ -210,9 +185,65 @@ exports.list_blog_recursively = (source_path, file_content) => {
     for(i_data in posts_data) {
         list_content += `<li>
             <a href="${posts_data[i_data]["link"]}">
-                <p class="blog_list_recur_post_date">${posts_data[i_data]["author"]["name"]}, <strong>${this.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
-                <p class="blog_list_recur_post_title">${posts_data[i_data]["title"]}</p>
-                <p class="blog_list_recur_post_description">${htmlToText(posts_data[i_data]["description"])}</p>
+                <p class="list_blog_date">${posts_data[i_data]["author"]["name"]}, <strong>${functions.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
+                <p class="list_blog_title">${posts_data[i_data]["title"]}</p>
+                <p class="list_blog_description">${htmlToText(posts_data[i_data]["description"])}</p>
+            </a>
+        </li>`
+    }
+
+    list_content += "</ul>"
+
+    return list_content
+}
+
+exports.list_podcast_recursively = (source_path, file_content) => {
+    let list_content = `<ul class="list_podcast">`
+
+    let podcast_config = podcasts.get_podcast_config(source_path)
+    let podcasts_list = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
+
+    console.log(podcasts_list)
+
+    // get podcasts_data
+    let podcasts_data = []
+    for(i_pod = 0; i_pod < podcasts_list.length; i_pod++) {
+        // exclude the current page from the list
+        if(path_resolve(source_path) != podcasts_list[i_pod]) {
+            let podcast_content = ""
+            try {
+                podcast_content = fs.readFileSync(podcasts_list[i_pod], "utf-8")
+            }
+            catch(err) {
+                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                console.log(`    ${err}`.red)
+                return
+            }
+
+            podcasts_data.push(
+                podcasts.get_podcast_data(
+                    podcast_content, 
+                    podcast_config, 
+                    podcasts_list[i_pod]
+                )
+            )
+        }
+    }
+
+    // sort by date
+    podcasts_data = podcasts_data.sort((a, b) => {
+        return a.date_object < b.date_object ? 1 : -1
+    })
+
+    for(i_data in podcasts_data) {
+        list_content += `<li>
+            <a href="${podcasts_data[i_data]["link"]}">
+                <p class="list_podcast_date">${podcasts_data[i_data]["author"]["name"]}, <strong>${functions.date_to_relative_date(podcasts_data[i_data]["date"])}</strong> ${podcasts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
+                <div class="list_podcast_tidur_box">
+                    <p class="list_podcast_duration">${podcasts.remove_0_before_duration(podcasts_data[i_data]["duration"])}</p>
+                    <p class="list_podcast_title">${podcasts_data[i_data]["title"]}</p>
+                </div>
+                <p class="list_podcast_description">${htmlToText(podcasts_data[i_data]["description"])}</p>
             </a>
         </li>`
     }

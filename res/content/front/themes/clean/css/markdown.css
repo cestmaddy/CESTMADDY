@@ -301,95 +301,95 @@
     }
     
     .markdown .border {
-    border: 1px solid #e1e4e8!important;
+    border: 1px solid #e1e4e8;
     }
     
     .markdown .border-0 {
-    border: 0!important;
+    border: 0;
     }
     
     .markdown .border-bottom {
-    border-bottom: 1px solid #e1e4e8!important;
+    border-bottom: 1px solid #e1e4e8;
     }
     
     .markdown .rounded-1 {
-    border-radius: 3px!important;
+    border-radius: 3px;
     }
     
     .markdown .bg-white {
-    background-color: #fff!important;
+    background-color: #fff;
     }
     
     .markdown .bg-gray-light {
-    background-color: #fafbfc!important;
+    background-color: #fafbfc;
     }
     
     .markdown .text-gray-light {
-    color: #6a737d!important;
+    color: #6a737d;
     }
     
     .markdown .mb-0 {
-    margin-bottom: 0!important;
+    margin-bottom: 0;
     }
     
     .markdown .my-2 {
-    margin-top: 8px!important;
-    margin-bottom: 8px!important;
+    margin-top: 8px;
+    margin-bottom: 8px;
     }
     
     .markdown .pl-0 {
-    padding-left: 0!important;
+    padding-left: 0;
     }
     
     .markdown .py-0 {
-    padding-top: 0!important;
-    padding-bottom: 0!important;
+    padding-top: 0;
+    padding-bottom: 0;
     }
     
     .markdown .pl-1 {
-    padding-left: 4px!important;
+    padding-left: 4px;
     }
     
     .markdown .pl-2 {
-    padding-left: 8px!important;
+    padding-left: 8px;
     }
     
     .markdown .py-2 {
-    padding-top: 8px!important;
-    padding-bottom: 8px!important;
+    padding-top: 8px;
+    padding-bottom: 8px;
     }
     
     .markdown .pl-3,
     .markdown .px-3 {
-    padding-left: 16px!important;
+    padding-left: 16px;
     }
     
     .markdown .px-3 {
-    padding-right: 16px!important;
+    padding-right: 16px;
     }
     
     .markdown .pl-4 {
-    padding-left: 24px!important;
+    padding-left: 24px;
     }
     
     .markdown .pl-5 {
-    padding-left: 32px!important;
+    padding-left: 32px;
     }
     
     .markdown .pl-6 {
-    padding-left: 40px!important;
+    padding-left: 40px;
     }
     
     .markdown .f6 {
-    font-size: 12px!important;
+    font-size: 12px;
     }
     
     .markdown .lh-condensed {
-    line-height: 1.25!important;
+    line-height: 1.25;
     }
     
     .markdown .text-bold {
-    font-weight: 600!important;
+    font-weight: 600;
     }
     
     .markdown .pl-c {
@@ -517,77 +517,77 @@
     }
     
     .markdown .mb-0 {
-    margin-bottom: 0!important;
+    margin-bottom: 0;
     }
     
     .markdown .my-2 {
-    margin-bottom: 8px!important;
+    margin-bottom: 8px;
     }
     
     .markdown .my-2 {
-    margin-top: 8px!important;
+    margin-top: 8px;
     }
     
     .markdown .pl-0 {
-    padding-left: 0!important;
+    padding-left: 0;
     }
     
     .markdown .py-0 {
-    padding-top: 0!important;
-    padding-bottom: 0!important;
+    padding-top: 0;
+    padding-bottom: 0;
     }
     
     .markdown .pl-1 {
-    padding-left: 4px!important;
+    padding-left: 4px;
     }
     
     .markdown .pl-2 {
-    padding-left: 8px!important;
+    padding-left: 8px;
     }
     
     .markdown .py-2 {
-    padding-top: 8px!important;
-    padding-bottom: 8px!important;
+    padding-top: 8px;
+    padding-bottom: 8px;
     }
     
     .markdown .pl-3 {
-    padding-left: 16px!important;
+    padding-left: 16px;
     }
     
     .markdown .pl-4 {
-    padding-left: 24px!important;
+    padding-left: 24px;
     }
     
     .markdown .pl-5 {
-    padding-left: 32px!important;
+    padding-left: 32px;
     }
     
     .markdown .pl-6 {
-    padding-left: 40px!important;
+    padding-left: 40px;
     }
     
     .markdown .pl-7 {
-    padding-left: 48px!important;
+    padding-left: 48px;
     }
     
     .markdown .pl-8 {
-    padding-left: 64px!important;
+    padding-left: 64px;
     }
     
     .markdown .pl-9 {
-    padding-left: 80px!important;
+    padding-left: 80px;
     }
     
     .markdown .pl-10 {
-    padding-left: 96px!important;
+    padding-left: 96px;
     }
     
     .markdown .pl-11 {
-    padding-left: 112px!important;
+    padding-left: 112px;
     }
     
     .markdown .pl-12 {
-    padding-left: 128px!important;
+    padding-left: 128px;
     }
     
     .markdown hr {
@@ -618,11 +618,11 @@
     }
     
     .markdown>:first-child {
-    margin-top: 0!important;
+    margin-top: 0;
     }
     
     .markdown>:last-child {
-    margin-bottom: 0!important;
+    margin-bottom: 0;
     }
     
     .markdown a:not([href]) {
