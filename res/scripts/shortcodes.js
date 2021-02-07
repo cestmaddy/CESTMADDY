@@ -37,16 +37,19 @@ exports.get_shortcodes = (str) => {
         'TITLE', 
         'DESCRIPTION',
 
-        // BLOG
-        'AUTHOR',
-        'ENCLOSURE',
+        // BLOG n PODCAST
         'DATE',
+        'AUTHOR',
+
+        // BLOG
+        'ENCLOSURE',
         'LIST_BLOG_RECUR',
 
         // PODCAST
         'PODCAST_AUDIO',
         'PODCAST_IMAGE',
-        'LIST_PODCAST_RECUR'
+        'LIST_PODCAST_RECUR',
+        'PODCAST_LINKS'
     ]
 
     for(short in shortcodes_to_define) {
@@ -137,12 +140,6 @@ exports.replace_shortcode = (str, source_path, type) => {
 }
 
 /*
-    FUNCTIONS
-*/
-
-
-
-/*
     CONTENT GENERATION
 */
 
@@ -202,8 +199,6 @@ exports.list_podcast_recursively = (source_path, file_content) => {
 
     let podcast_config = podcasts.get_podcast_config(source_path)
     let podcasts_list = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
-
-    console.log(podcasts_list)
 
     // get podcasts_data
     let podcasts_data = []

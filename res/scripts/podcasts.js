@@ -155,7 +155,8 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
         },
         image: "",
         duration: "",
-        link: ""
+        link: "",
+        links: {}
     }
 
     let podcast_dir_without_source = compiler.remove_source_from_path(podcast_config["dir"])
@@ -278,6 +279,16 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     }
     else {
         console.log(`Please provide a main_author and a list of authors for your blog ${podcast_config.title}`.red.bold)
+    }
+
+    // PODCAST LINKS
+    if(podcast_shortcodes.values.hasOwnProperty("[PODCAST_LINKS]")) {
+        podcast_data.links = Object.assign(
+            {
+                rss: `${config.get("string", ["server", "domain"])}${podcast_config["path"]}${without_source_and_ext}/feed.xml`
+            },
+            JSON.parse(podcast_shortcodes.values["[PODCAST_LINKS]"])
+        )
     }
 
     return podcast_data

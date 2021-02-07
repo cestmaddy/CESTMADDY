@@ -19,6 +19,12 @@
             <h1 class="podcast_title"><%- podcast.title %></h1>
         </div>
 
+        <div class="podcast_links">
+            <% for(service in podcast.links) { %>
+                <a href="<%= podcast.links[service] %>" class="podcast_link <%= service %>_icon"><svg><use xlink:href="/front/themes/clean/imgs/icons/<%= service %>.svg#icon"></use></svg></a>
+            <% } %>
+        </div>
+
         <audio controls class="podcast_audio">
             <source src="<%- podcast.enclosure.url %>" type="<%- podcast.enclosure.type %>">
                 <a href="<%- podcast.enclosure.url %>"><%- podcast.title %></a>

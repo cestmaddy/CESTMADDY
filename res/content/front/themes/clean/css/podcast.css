@@ -3,7 +3,6 @@
     display: flex;
     align-items: center;
     justify-content: start;
-    margin-bottom: 1em;
 }
 #content .podcast_image_n_title > .podcast_image {
     width: 20%;
@@ -28,6 +27,53 @@
         width: 7rem;
     }
 }
+
+    /* podcast links */
+.podcast_links {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 0 10px 10px;
+    border-radius: 15px;
+    margin-bottom: 1em;
+}
+.podcast_link {
+    height: 2em;
+    width: auto;
+    max-width: 2em;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+.podcast_link svg {
+    width: 100%;
+    height: 100%;
+    fill: #555;
+    transition: fill .3s;
+}
+.podcast_link:hover svg {
+    fill: #8e443d !important;
+}
+.podcast_link.spotify_icon svg {
+    fill: #1ED760;
+}
+.podcast_link.soundcloud_icon svg {
+    fill: #FF5500;
+}
+.podcast_link.youtube_icon svg {
+    fill: #FF0000;
+}
+.podcast_link.deezer_icon svg {
+    fill: #EF5466;
+}
+.podcast_link.googlepodcasts_icon svg {
+    fill: #4285f4;
+}
+.podcast_link.applepodcast_icon svg {
+    fill: #873dc1;
+}
+.podcast_link.rss_icon svg {
+    fill: #f87801;
+}
+    /* end podcast links */
 
 /* LIST_BLOG_RECUR */
 ul.list_podcast {
