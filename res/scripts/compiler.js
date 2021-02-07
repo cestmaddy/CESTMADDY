@@ -270,7 +270,7 @@ exports.generate_favicons = () => {
             
             favicons(config.get("string", ["content", "favicon", "path"]), configuration, (error, response) => {
                 if (error) {
-                    console.log(`    ${err}`.red)
+                    console.log(`    ${error}`.red)
                     resolve()
                 }
 
