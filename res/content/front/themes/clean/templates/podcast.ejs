@@ -21,7 +21,11 @@
 
         <div class="podcast_links">
             <% for(service in podcast.links) { %>
-                <a href="<%= podcast.links[service] %>" class="podcast_link <%= service %>_icon"><svg><use xlink:href="/front/themes/clean/imgs/icons/<%= service %>.svg#icon"></use></svg></a>
+                <% if(site.theme != "") { %>
+                    <a href="<%= podcast.links[service] %>" class="podcast_link <%= service %>_icon"><svg><use xlink:href="/front/themes/<%= site.theme %>/imgs/icons/<%= service %>.svg#icon"></use></svg></a>
+                <% } else { %>
+                    <a href="<%= podcast.links[service] %>" class="podcast_link <%= service %>_icon"><svg><use xlink:href="/front/themes/clean/imgs/icons/<%= service %>.svg#icon"></use></svg></a>
+                <% } %>
             <% } %>
         </div>
 
