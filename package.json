@@ -30,7 +30,7 @@
     "grunt-contrib-watch": "^1.1.0",
     "highlight.js": "^10.5.0",
     "html-to-text": "^6.0.0",
-    "marked": "^1.2.7",
+    "marked": "^2.0.0",
     "mime": "^2.4.7",
     "mkdirp": "^1.0.4",
     "mp3-duration": "^1.1.0",
