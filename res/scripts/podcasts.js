@@ -285,7 +285,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     if(podcast_shortcodes.values.hasOwnProperty("[PODCAST_LINKS]")) {
         podcast_data.links = Object.assign(
             {
-                rss: `${config.get("string", ["server", "domain"])}${podcast_config["path"]}${without_source_and_ext}/feed.xml`
+                rss: `${config.get("string", ["server", "domain"])}${podcast_config["path"]}/feed.xml`
             },
             JSON.parse(podcast_shortcodes.values["[PODCAST_LINKS]"])
         )
