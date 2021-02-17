@@ -181,6 +181,15 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
             )
         )
     }
+    else {
+        podcast_data.description = markdown_compiler.compile(
+            shortcodes.replace_shortcode(
+                podcast_md.substr(0, 500),
+                md_podcast_path,
+                "podcast"
+            )
+        )
+    }
 
     // LINK
     let podcast_link = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}${without_source_and_ext}`
@@ -415,7 +424,10 @@ exports.compile_html = (source_path, podcast_config) => {
                     podcast_data,
                     {
                         date_string: podcast_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: functions.date_to_relative_date(podcast_data["date"])
+                        relative_date: functions.date_to_relative_date(podcast_data["date"]),
+                        meta_description: functions.remove_html_tags(
+                            podcast_data.description
+                        )
                     }
                 )
             }
@@ -429,7 +441,10 @@ exports.compile_html = (source_path, podcast_config) => {
             {
                 normal: {
                     title: podcast_data["title"],
-                    html: source_html
+                    html: source_html,
+                    meta_description: functions.remove_html_tags(
+                        podcast_data.description
+                    )
                 }
             }
         )

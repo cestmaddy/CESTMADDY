@@ -8,6 +8,7 @@ const config = require("./config")
 const compiler = require("./compiler")
 const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
+const functions = require("./functions")
 
 const contentDir = "./res/content/generated"
 
@@ -57,10 +58,35 @@ exports.compile_html = (source_path) => {
     // normal data
     let normal = {
         title: "",
+        meta_description: "",
         html: source_html
     }
+    //title
     if(page_shortcodes.values.hasOwnProperty("[TITLE]")) {
         normal.title = page_shortcodes.values["[TITLE]"]
+    }
+    //description
+    if(page_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
+        normal.meta_description = functions.remove_html_tags(
+            markdown_compiler.compile(
+                shortcodes.replace_shortcode(
+                    page_shortcodes.values["[DESCRIPTION]"],
+                    source_path,
+                    "normal"
+                )
+            )
+        )
+    }
+    else {
+        normal.meta_description = functions.remove_html_tags(
+            markdown_compiler.compile(
+                shortcodes.replace_shortcode(
+                    source_file.substr(0, 500),
+                    source_path,
+                    "normal"
+                )
+            )
+        )
     }
 
     ejs.renderFile(`./res/content/front/themes/${site.theme}/templates/normal.ejs`, {

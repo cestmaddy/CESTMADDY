@@ -42,3 +42,9 @@ exports.date_to_relative_date = (u_date) => {
 
     return "Invalid Date"
 }
+
+exports.remove_html_tags = (html) => {
+    text = html.toString()
+    text = text.replace( /(<([^>]+)>)/ig, '')
+    return text
+}

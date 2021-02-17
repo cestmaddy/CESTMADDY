@@ -134,16 +134,13 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
         )
     }
     else {
-        let md_start = post_md.substr(0, 500)
-        let md_start_html = markdown_compiler.compile(
+        post_data.description = markdown_compiler.compile(
             shortcodes.replace_shortcode(
-                md_start,
+                post_md.substr(0, 500),
                 md_post_path,
-                "normal"
+                "blog"
             )
         )
-
-        post_data.description = md_start_html
     }
 
     // LINK
@@ -276,7 +273,8 @@ exports.compile_html = (source_path, blog_config) => {
     }
 
     let render_options = {
-        site: site
+        site: site,
+        meta_description: ""
     }
     let render_path = `./res/content/front/themes/${site.theme}/templates/normal.ejs`
     // if it's a blog post
@@ -289,7 +287,10 @@ exports.compile_html = (source_path, blog_config) => {
                     {
                         html: source_html,
                         date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: functions.date_to_relative_date(post_data["date"])
+                        relative_date: functions.date_to_relative_date(post_data["date"]),
+                        meta_description: functions.remove_html_tags(
+                            post_data.description
+                        )
                     }
                 )
             }
@@ -306,6 +307,10 @@ exports.compile_html = (source_path, blog_config) => {
                     html: source_html
                 }
             }
+        )
+        //description
+        render_options.normal.meta_description = functions.remove_html_tags(
+            post_data.description
         )
     }
 
