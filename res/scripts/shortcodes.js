@@ -20,13 +20,14 @@ exports.get_shortcodes = (str) => {
         replace: [
             /*
                 {
-                    is_get: true, // is_get => replace with values, else => define values (and erase)
+                    replace: true, // replace => replace with values, else => define values (and erase)
                     shortcode: '[TITLE]',
-                    index: 52
+                    index: 52,
+                    value: "The title" => To value to replace with (only if replace)
                 }
             */
         ],
-        values: {
+        values: { // the last defined values
             /*
                 '[TITLE]': "Good Title"
             */
@@ -63,9 +64,10 @@ exports.get_shortcodes = (str) => {
             if(found) {
                 if(found[1] == undefined || found[1] == '') { // is get
                     results.replace.push({
-                        is_get: true,
+                        replace: true,
                         shortcode: found[0],
-                        index: found.index
+                        index: found.index,
+                        value: results.values[found[0]]
                     })
                 }
                 else {
@@ -74,9 +76,9 @@ exports.get_shortcodes = (str) => {
                     }
 
                     results.replace.push({
-                        is_get: false,
+                        replace: false,
                         shortcode: found[0],
-                        index: found.index
+                        index: found.index,
                     })
                 }
             }
@@ -92,8 +94,8 @@ exports.replace_shortcode = (str, source_path, type) => {
     for(short_ctr in shortcode_data.replace) {
         let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
 
-        if(!shortcode_data.replace[short_ctr].is_get) {
-            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), "")
+        if(!shortcode_data.replace[short_ctr].replace) {
+            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
         }
         else {
             let replaced = false
@@ -102,7 +104,7 @@ exports.replace_shortcode = (str, source_path, type) => {
                 switch (shortcode_data.replace[short_ctr].shortcode) {
                     case "[LIST_BLOG_RECUR]":
                         str = str.replace(
-                            new RegExp(`\\w*(?<!\\$)${key}`, "g"),
+                            new RegExp(`\\w*(?<!\\$)${key}`),
                             this.list_blog_recursively(source_path, str)
                         )
                         replaced = true
@@ -113,7 +115,7 @@ exports.replace_shortcode = (str, source_path, type) => {
                 switch (shortcode_data.replace[short_ctr].shortcode) {
                     case "[LIST_PODCAST_RECUR]":
                         str = str.replace(
-                            new RegExp(`\\w*(?<!\\$)${key}`, "g"),
+                            new RegExp(`\\w*(?<!\\$)${key}`),
                             this.list_podcast_recursively(source_path, str)
                         )
                         replaced = true
@@ -122,18 +124,18 @@ exports.replace_shortcode = (str, source_path, type) => {
             }
 
             if(!replaced && shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
-                str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), functions.date_to_relative_date(
-                    shortcode_data.values[shortcode_data.replace[short_ctr].shortcode]
+                str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), functions.date_to_relative_date(
+                    shortcode_data.replace[short_ctr].value
                 ))
                 replaced = true
             }
 
             if(!replaced) {
-                if(shortcode_data.values.hasOwnProperty(shortcode_data.replace[short_ctr].shortcode)) {
-                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
+                if(shortcode_data.replace[short_ctr].value) {
+                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), shortcode_data.replace[short_ctr].value)
                 }
                 else {
-                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), "")
+                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
                 }
             }
         }
