@@ -13,6 +13,8 @@ const functions = require("./functions")
     SHORTCODES
 */
 
+// \w*(?<!\$) is used to not include the shortcodes that start with $.
+
 exports.get_shortcodes = (str) => {
     var results = {
         replace: [
@@ -53,7 +55,8 @@ exports.get_shortcodes = (str) => {
     ]
 
     for(short in shortcodes_to_define) {
-        let reg = new RegExp(`\\[${shortcodes_to_define[short]}([\\s\\S]*?)\\]`, 'g')
+        let reg = new RegExp(`\\w*(?<!\\$)\\[${shortcodes_to_define[short]}([\\s\\S]*?)\\]`, 'g')
+        
         let found
         do {
             found = reg.exec(str)
@@ -90,7 +93,7 @@ exports.replace_shortcode = (str, source_path, type) => {
         let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
 
         if(!shortcode_data.replace[short_ctr].is_get) {
-            str = str.replace(new RegExp(key, "g"), "")
+            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), "")
         }
         else {
             let replaced = false
@@ -99,7 +102,7 @@ exports.replace_shortcode = (str, source_path, type) => {
                 switch (shortcode_data.replace[short_ctr].shortcode) {
                     case "[LIST_BLOG_RECUR]":
                         str = str.replace(
-                            new RegExp(key, "g"),
+                            new RegExp(`\\w*(?<!\\$)${key}`, "g"),
                             this.list_blog_recursively(source_path, str)
                         )
                         replaced = true
@@ -110,7 +113,7 @@ exports.replace_shortcode = (str, source_path, type) => {
                 switch (shortcode_data.replace[short_ctr].shortcode) {
                     case "[LIST_PODCAST_RECUR]":
                         str = str.replace(
-                            new RegExp(key, "g"),
+                            new RegExp(`\\w*(?<!\\$)${key}`, "g"),
                             this.list_podcast_recursively(source_path, str)
                         )
                         replaced = true
@@ -119,7 +122,7 @@ exports.replace_shortcode = (str, source_path, type) => {
             }
 
             if(!replaced && shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
-                str = str.replace(new RegExp(key, "g"), functions.date_to_relative_date(
+                str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), functions.date_to_relative_date(
                     shortcode_data.values[shortcode_data.replace[short_ctr].shortcode]
                 ))
                 replaced = true
@@ -127,14 +130,17 @@ exports.replace_shortcode = (str, source_path, type) => {
 
             if(!replaced) {
                 if(shortcode_data.values.hasOwnProperty(shortcode_data.replace[short_ctr].shortcode)) {
-                    str = str.replace(new RegExp(key, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
+                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), shortcode_data.values[shortcode_data.replace[short_ctr].shortcode])
                 }
                 else {
-                    str = str.replace(new RegExp(key, "g"), "")
+                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`, "g"), "")
                 }
             }
         }
     }
+
+    // $[..] -> [..]
+    str = str.replace(/\$\[([\s\S]*?)\]/g, "[$1]")
 
     return str
 }
