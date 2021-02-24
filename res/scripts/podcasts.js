@@ -174,20 +174,12 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     // DESCRIPTION
     if(podcast_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
         podcast_data.description = markdown_compiler.compile(
-            shortcodes.replace_shortcode(
-                podcast_shortcodes.values["[DESCRIPTION]"],
-                md_podcast_path,
-                "podcast"
-            )
+            podcast_shortcodes.values["[DESCRIPTION]"]
         )
     }
     else {
         podcast_data.description = markdown_compiler.compile(
-            shortcodes.replace_shortcode(
-                podcast_md.substr(0, 500),
-                md_podcast_path,
-                "podcast"
-            )
+            podcast_md.substr(0, 500)
         )
     }
 

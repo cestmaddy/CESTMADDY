@@ -92,50 +92,66 @@ exports.replace_shortcode = (str, source_path, type) => {
     shortcode_data = this.get_shortcodes(str)
 
     for(short_ctr in shortcode_data.replace) {
-        let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
+        if(shortcode_data.replace[short_ctr]) {
+            let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
 
-        if(!shortcode_data.replace[short_ctr].replace) {
-            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
-        }
-        else {
-            let replaced = false
+            if(source_path == "/home/cestoliv/Documents/DOCS/Developpement/web_workspace/cestmaddy/source/index.md") {
+                console.log(shortcode_data.replace[short_ctr].shortcode)
+            }
 
-            if(type == "blog") {
+            if(!shortcode_data.replace[short_ctr].replace) {
+                str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
+            }
+            else {
                 switch (shortcode_data.replace[short_ctr].shortcode) {
                     case "[LIST_BLOG_RECUR]":
+                        let blog_source_path = source_path
+                        
+                        if(shortcode_data.replace[short_ctr].value) {
+                            // is there is some settings
+                            let list_data = JSON.parse(shortcode_data.replace[short_ctr].value)
+                            
+                            if(list_data.path) {
+                                blog_source_path = path_resolve(`source/${list_data.path}/index.md`)
+                            }
+                        }
+
                         str = str.replace(
                             new RegExp(`\\w*(?<!\\$)${key}`),
-                            this.list_blog_recursively(source_path, str)
+                            this.list_blog_recursively(blog_source_path, str)
                         )
-                        replaced = true
                         break
-                }
-            }
-            else if(type == "podcast") {
-                switch (shortcode_data.replace[short_ctr].shortcode) {
+
                     case "[LIST_PODCAST_RECUR]":
+                        let podcast_source_path = source_path
+                        
+                        if(shortcode_data.replace[short_ctr].value) {
+                            // is there is some settings
+                            let list_data = JSON.parse(shortcode_data.replace[short_ctr].value)
+                            
+                            if(list_data.path) {
+                                podcast_source_path = path_resolve(`source/${list_data.path}/index.md`)
+                            }
+                        }
+
                         str = str.replace(
                             new RegExp(`\\w*(?<!\\$)${key}`),
-                            this.list_podcast_recursively(source_path, str)
+                            this.list_podcast_recursively(podcast_source_path, str)
                         )
-                        replaced = true
                         break
-                }
-            }
 
-            if(!replaced && shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
-                str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), functions.date_to_relative_date(
-                    shortcode_data.replace[short_ctr].value
-                ))
-                replaced = true
-            }
-
-            if(!replaced) {
-                if(shortcode_data.replace[short_ctr].value) {
-                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), shortcode_data.replace[short_ctr].value)
-                }
-                else {
-                    str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
+                    default:
+                        if(shortcode_data.replace[short_ctr].shortcode == '[DATE]') {
+                            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), functions.date_to_relative_date(
+                                shortcode_data.replace[short_ctr].value
+                            ))
+                        }
+                        else if(shortcode_data.replace[short_ctr].value) {
+                            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), shortcode_data.replace[short_ctr].value)
+                        }
+                        else {
+                            str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")
+                        }
                 }
             }
         }

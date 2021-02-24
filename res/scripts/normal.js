@@ -69,22 +69,14 @@ exports.compile_html = (source_path) => {
     if(page_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
         normal.meta_description = functions.remove_html_tags(
             markdown_compiler.compile(
-                shortcodes.replace_shortcode(
-                    page_shortcodes.values["[DESCRIPTION]"],
-                    source_path,
-                    "normal"
-                )
+               page_shortcodes.values["[DESCRIPTION]"]
             )
         )
     }
     else {
         normal.meta_description = functions.remove_html_tags(
             markdown_compiler.compile(
-                shortcodes.replace_shortcode(
-                    source_file.substr(0, 500),
-                    source_path,
-                    "normal"
-                )
+                source_file.substr(0, 500)
             )
         )
     }

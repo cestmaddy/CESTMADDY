@@ -126,20 +126,12 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     // DESCRIPTION
     if(post_shortcodes.values.hasOwnProperty("[DESCRIPTION]")) {
         post_data.description = markdown_compiler.compile(
-            shortcodes.replace_shortcode(
-                post_shortcodes.values["[DESCRIPTION]"],
-                md_post_path,
-                "blog"
-            )
+           post_shortcodes.values["[DESCRIPTION]"]
         )
     }
     else {
         post_data.description = markdown_compiler.compile(
-            shortcodes.replace_shortcode(
-                post_md.substr(0, 500),
-                md_post_path,
-                "blog"
-            )
+            post_md.substr(0, 500)
         )
     }
 
