@@ -9,11 +9,27 @@ const podcasts = require("./podcasts")
 const sourceDir = "./source"
 const contentDir = "res/content/generated"
 
+var only_one_file = false
+var files = []
 
-files = compiler.get_every_files_of_dir(sourceDir)
+if(process.argv[2]) {
+    only_one_file = true
+    files = [process.argv[2]]
+}
+else {
+    files = compiler.get_every_files_of_dir(sourceDir)
+}
 
 let blogs_list = {}
 let podcasts_list = {}
+
+if(only_one_file) { // eg: if it's footer or header
+    source_path = path_resolve(files[0])
+
+    if(compiler.should_reload_every_files(source_path)) {
+        files = compiler.get_every_files_of_dir(sourceDir)
+    }
+}
 
 for(f in files) {
     source_path = path_resolve(files[f])

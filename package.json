@@ -6,11 +6,10 @@
   "scripts": {
     "build": "node res/scripts/build.js",
     "minify": "grunt minify",
-    "favicons": "node res/scripts/favicons.js",
-    "clear": "node res/scripts/clear.js",
-    "generate": "npm run clear && npm run favicons && npm run build && npm run minify",
-    "start": "npm run generate && node server.js",
-    "quick-start": "npm run clear && npm run build && npm run minify && node server.js"
+    "clear": "grunt-clear-all",
+    "favicons": "grunt clear-favicons && node res/scripts/favicons.js",
+    "generate": "grunt clear-generated && npm run build && npm run minify",
+    "start": "node server.js"
   },
   "author": "cestoliv",
   "license": "MIT",
@@ -25,9 +24,11 @@
     "express": "^4.17.1",
     "favicons": "^6.2.0",
     "grunt": "^1.3.0",
+    "grunt-concurrent": "^3.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-run": "^0.8.1",
     "highlight.js": "^10.5.0",
     "html-to-text": "^6.0.0",
     "marked": "^2.0.0",
