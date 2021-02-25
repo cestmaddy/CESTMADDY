@@ -179,7 +179,7 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     }
     else {
         podcast_data.description = markdown_compiler.compile(
-            podcast_md.substr(0, 500)
+            shortcodes.remove_shortcode(podcast_md.substr(0, 500))
         )
     }
 

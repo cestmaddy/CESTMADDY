@@ -131,7 +131,7 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     }
     else {
         post_data.description = markdown_compiler.compile(
-            post_md.substr(0, 500)
+            shortcodes.remove_shortcode(post_md.substr(0, 500))
         )
     }
 

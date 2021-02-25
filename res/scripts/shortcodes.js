@@ -15,6 +15,26 @@ const functions = require("./functions")
 
 // \w*(?<!\$) is used to not include the shortcodes that start with $.
 
+let shortcodes_arr = [
+    // GENERAL
+    'TITLE', 
+    'DESCRIPTION',
+
+    // BLOG n PODCAST
+    'DATE',
+    'AUTHOR',
+
+    // BLOG
+    'ENCLOSURE',
+    'LIST_BLOG_RECUR',
+
+    // PODCAST
+    'PODCAST_AUDIO',
+    'PODCAST_IMAGE',
+    'LIST_PODCAST_RECUR',
+    'PODCAST_LINKS'
+]
+
 exports.get_shortcodes = (str) => {
     var results = {
         replace: [
@@ -34,29 +54,8 @@ exports.get_shortcodes = (str) => {
         }
     }
 
-    // Shortcodes of value to define
-    let shortcodes_to_define = [
-        // GENERAL
-        'TITLE', 
-        'DESCRIPTION',
-
-        // BLOG n PODCAST
-        'DATE',
-        'AUTHOR',
-
-        // BLOG
-        'ENCLOSURE',
-        'LIST_BLOG_RECUR',
-
-        // PODCAST
-        'PODCAST_AUDIO',
-        'PODCAST_IMAGE',
-        'LIST_PODCAST_RECUR',
-        'PODCAST_LINKS'
-    ]
-
-    for(short in shortcodes_to_define) {
-        let reg = new RegExp(`\\w*(?<!\\$)\\[${shortcodes_to_define[short]}([\\s\\S]*?)\\]`, 'g')
+    for(short in shortcodes_arr) {
+        let reg = new RegExp(`\\w*(?<!\\$)\\[${shortcodes_arr[short]}([\\s\\S]*?)\\]`, 'g')
         
         let found
         do {
@@ -72,7 +71,7 @@ exports.get_shortcodes = (str) => {
                 }
                 else {
                     if(found[1].startsWith("=")) {
-                        results.values[`[${shortcodes_to_define[short]}]`] = found[1].substr(1)
+                        results.values[`[${shortcodes_arr[short]}]`] = found[1].substr(1)
                     }
 
                     results.replace.push({
@@ -88,16 +87,20 @@ exports.get_shortcodes = (str) => {
     return results
 }
 
+exports.remove_shortcode = (str) => {
+    for(short in shortcodes_arr) {
+        str = str.replace(new RegExp(`\\w*(?<!\\$)\\[${shortcodes_arr[short]}([\\s\\S]*?)\\]`, "g"), "")
+    }
+    return str
+}
+
+
 exports.replace_shortcode = (str, source_path, type) => {
     shortcode_data = this.get_shortcodes(str)
 
     for(short_ctr in shortcode_data.replace) {
         if(shortcode_data.replace[short_ctr]) {
             let key = shortcode_data.replace[short_ctr].shortcode.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // [ => \[
-
-            if(source_path == "/home/cestoliv/Documents/DOCS/Developpement/web_workspace/cestmaddy/source/index.md") {
-                console.log(shortcode_data.replace[short_ctr].shortcode)
-            }
 
             if(!shortcode_data.replace[short_ctr].replace) {
                 str = str.replace(new RegExp(`\\w*(?<!\\$)${key}`), "")

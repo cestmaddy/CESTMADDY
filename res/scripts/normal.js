@@ -76,7 +76,7 @@ exports.compile_html = (source_path) => {
     else {
         normal.meta_description = functions.remove_html_tags(
             markdown_compiler.compile(
-                source_file.substr(0, 500)
+                shortcodes.remove_shortcode(source_file.substr(0, 500))
             )
         )
     }
