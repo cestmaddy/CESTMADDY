@@ -1,9 +1,10 @@
 version: "3.9"
 services:
   cestmaddy:
-    image: "cestoliv/cestmaddy:latest"
+    build: .
+    command: bash -c "bash /cestmaddy/entrypoint.sh ${THEME} ${THEME_REPO} && npm start"
     ports:
       - "${PORT}:80"
     volumes:
-      - ./config.yml:/cestmaddy/config.yml
+      - ./config.yml:/cestmaddy/config.yml.original
       - ./source/:/cestmaddy/source
