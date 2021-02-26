@@ -139,8 +139,24 @@ exports.copy_file = (source_path, dest, silent = false) => {
         fs.unlink(dest, (err) => {
             fs.link(`${source_path}`, dest, (err) => {
                 if(err && err.code != "EEXIST") {
-                    console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                    console.log(`    ${err}`.red)
+                    if(err.code == "EXDEV") { // unable to link file (eg. with docker), fallback with copy
+                        fs.copyFile(`${source_path}`, dest, (err) => {
+                            if(err && err.code != "EEXIST") {
+                                console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                                console.log(`    ${err}`.red)
+                            }
+                            else {
+                                if(!silent) {
+                                    console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                                    console.log(`    Successfully copied! (only .md are compiled)`.green)
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                        console.log(`    ${err}`.red)
+                    }
                 }
                 else {
                     if(!silent) {
@@ -260,11 +276,11 @@ exports.generate_favicons = () => {
                     android: true,
                     appleIcon: true,
                     appleStartup: true,
-                    coast: true,
+                    coast: false,
                     favicons: true,
-                    firefox: true,
+                    firefox: false,
                     windows: true,
-                    yandex: true
+                    yandex: false
                 }
             }
             

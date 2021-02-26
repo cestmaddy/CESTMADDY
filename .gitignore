@@ -6,3 +6,4 @@ res/content/generated
 
 source
 config.yml
+.env

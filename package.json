@@ -9,7 +9,7 @@
     "clear": "grunt-clear-all",
     "favicons": "grunt clear-favicons && node res/scripts/favicons.js",
     "generate": "grunt clear-generated && npm run build && npm run minify",
-    "start": "node server.js"
+    "start": "npm run generate && node server.js"
   },
   "author": "cestoliv",
   "license": "MIT",
@@ -20,6 +20,7 @@
     "chokidar": "^3.4.3",
     "colors": "^1.4.0",
     "config-yaml": "^1.1.6",
+    "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "favicons": "^6.2.0",

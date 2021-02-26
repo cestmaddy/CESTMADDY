@@ -1,7 +1,16 @@
 const configYaml = require('config-yaml')
 const config = configYaml("./config.yml")
+require('dotenv').config()
 
 exports.get = (type, conf_path_arr, required=true) => {
+    // FROM ENV VAR
+    if(conf_path_arr[0] == "server" && conf_path_arr[1] == "port") {
+        if(process.env.PORT) {
+            return process.env.PORT
+        }
+    }
+
+    // FROM CONFIG
     if(conf_path_arr.length != 0) {
         let current_config = config
         let found = false
