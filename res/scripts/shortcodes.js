@@ -1,7 +1,6 @@
 const fs = require("fs")
 const path = require("path")
 const path_resolve = require("path").resolve
-const { htmlToText } = require('html-to-text')
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -211,7 +210,7 @@ exports.list_blog_recursively = (source_path, file_content) => {
             <a href="${posts_data[i_data]["link"]}">
                 <p class="list_blog_date">${posts_data[i_data]["author"]["name"]}, <strong>${functions.date_to_relative_date(posts_data[i_data]["date"])}</strong> ${posts_data[i_data]["date_object"].toLocaleString(config.get("string", ["content", "language"]))}</p>
                 <p class="list_blog_title">${posts_data[i_data]["title"]}</p>
-                <div class="list_blog_description">${htmlToText(posts_data[i_data]["description"])}</div>
+                <div class="list_blog_description">${functions.remove_html_tags(posts_data[i_data]["description"])}</div>
             </a>
         </li>`
     }
@@ -265,7 +264,7 @@ exports.list_podcast_recursively = (source_path, file_content) => {
                     <p class="list_podcast_duration">${podcasts.remove_0_before_duration(podcasts_data[i_data]["duration"])}</p>
                     <p class="list_podcast_title">${podcasts_data[i_data]["title"]}</p>
                 </div>
-                <div class="list_podcast_description">${htmlToText(podcasts_data[i_data]["description"])}</div>
+                <div class="list_podcast_description">${functions.remove_html_tags(podcasts_data[i_data]["description"])}</div>
             </a>
         </li>`
     }
