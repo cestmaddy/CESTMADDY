@@ -14,7 +14,7 @@ exports.user_date_to_pub_date = (u_date = "") => {
 
 exports.date_to_relative_date = (u_date) => {
     u_date = new Date(u_date)
-    let formatter = new Intl.RelativeTimeFormat(config.get("string", ["content", "language"]), {
+    let formatter = new Intl.RelativeTimeFormat({
         localeMatcher: "best fit",
         numeric: "always",
         style: "long",
