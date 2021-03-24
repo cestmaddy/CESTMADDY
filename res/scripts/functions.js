@@ -1,6 +1,6 @@
 const config = require("./config")
 
-exports.user_date_to_pub_date = (u_date = "") => {
+exports.user_date_to_date_object = (u_date = "") => {
     // YYYY-MM-DDTHH:MM:SS
     let date_parsed = Date.parse(u_date)
     if(u_date == "") {
