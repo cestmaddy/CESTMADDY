@@ -1,18 +1,24 @@
 const express = require('express')
 const fs = require("fs")
-const rimraf = require("rimraf")
+const path = require("path")
 const colors = require('colors')
+const rateSpeedLimiter = require("express-slow-down")
 
 const config = require("./res/scripts/config")
+const functions = require("./res/scripts/functions")
 
 const contentDir = "res/content/generated"
 
-// Remove Generated folder and start watcher
-/* rimraf(contentDir, () => { 
-    const watcher = require("./res/scripts/watcher")
-}) */
-
 const app = express()
+const rateSpeedLimit = rateSpeedLimiter({
+    delayAfter: 300, // slow down limit (in reqs)
+    windowMs: 1 * 60 * 1000, // 1 minute - time where limit applies
+    delayMs: 2500 // slow down time
+})
+
+app.set('trust proxy', 1)
+
+app.use(rateSpeedLimit)
 
 app.use((req, res, next) => {
     if(!req.path.startsWith("/front/")) {
@@ -83,8 +89,31 @@ app.use((req, res, next) => {
     }
 })
 
-app.use("/", express.static(contentDir))
 app.use("/front", express.static("res/content/front"))
+
+app.use("/", (req, res) => {
+    let file_path = path.join(contentDir, req.path)
+
+    if(file_path.endsWith("/")) {
+        file_path += "index.html"
+    }
+
+    if(file_path.endsWith(".html")) {
+        fs.readFile(file_path, 'utf-8', (err, html) => {
+            if (err) throw err;
+
+            html = html.replace(/\w*(?<!\$)\[RELATIVE_DATE([\s\S]*?)\]/g, (_, iso_date) => {
+                iso_date = iso_date.substr(1) // remove the =
+                return functions.date_to_relative_date(functions.user_date_to_date_object(iso_date))
+            })
+
+            res.send(html)
+        })
+    }
+    else {
+        res.sendFile(path.resolve(file_path))
+    }
+})
 
 app.listen(config.get("number", ["server", "port"]), () => {
     console.log(`\ncestmaddy started on ::${config.get("number", ["server", "port"])}`.magenta.bold)

@@ -162,11 +162,11 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
 
     // DATE
     if(post_shortcodes.values.hasOwnProperty("[DATE]")) {
-        post_data.date_object = functions.user_date_to_pub_date(post_shortcodes.values["[DATE]"])
+        post_data.date_object = functions.user_date_to_date_object(post_shortcodes.values["[DATE]"])
         post_data.date = post_data.date_object.toGMTString()
     }
     else {
-        post_data.date_object = functions.user_date_to_pub_date()
+        post_data.date_object = functions.user_date_to_date_object()
         post_data.date = post_data.date_object.toGMTString()
     }
 
@@ -279,7 +279,7 @@ exports.compile_html = (source_path, blog_config) => {
                     {
                         html: source_html,
                         date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: functions.date_to_relative_date(post_data["date"]),
+                        relative_date: `[RELATIVE_DATE=${post_data["date_object"].toISOString()}]`,
                         meta_description: functions.remove_html_tags(
                             post_data.description
                         )

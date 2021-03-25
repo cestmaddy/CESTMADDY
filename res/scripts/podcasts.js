@@ -244,11 +244,11 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
 
     // DATE
     if(podcast_shortcodes.values.hasOwnProperty("[DATE]")) {
-        podcast_data.date_object = functions.user_date_to_pub_date(podcast_shortcodes.values["[DATE]"])
+        podcast_data.date_object = functions.user_date_to_date_object(podcast_shortcodes.values["[DATE]"])
         podcast_data.date = podcast_data.date_object.toGMTString()
     }
     else {
-        podcast_data.date_object = functions.user_date_to_pub_date()
+        podcast_data.date_object = functions.user_date_to_date_object()
         podcast_data.date = podcast_data.date_object.toGMTString()
     }
 
@@ -416,7 +416,7 @@ exports.compile_html = (source_path, podcast_config) => {
                     podcast_data,
                     {
                         date_string: podcast_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: functions.date_to_relative_date(podcast_data["date"]),
+                        relative_date: `[RELATIVE_DATE=${podcast_data["date_object"].toISOString()}]`,
                         meta_description: functions.remove_html_tags(
                             podcast_data.description
                         )
