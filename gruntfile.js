@@ -127,7 +127,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('clear-generated', ['clean:generated'])
     grunt.registerTask('clear-favicons', ['clean:favicons'])
-    grunt.registerTask('clear-all', ['clear-generated', 'clear-favicons', 'clear-css'])
+    grunt.registerTask('clear-all', ['clear-generated', 'clear-favicons', 'clean:css'])
 
     grunt.registerTask('watch_all', ['concurrent:watch_all'])
 }
