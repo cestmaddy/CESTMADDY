@@ -39,7 +39,9 @@ var replaceInHtml = interceptor((req, res) => {
 
 app.use(replaceInHtml)
 
-app.use("/front", express.static("res/content/front"))
+app.use("/front", express.static("res/content/front", {
+    fallthrough: true
+}))
 
 // redirect 
 //      /index.html to /
@@ -75,18 +77,22 @@ app.use((req, res, next) => {
 app.use("/", express.static(contentDir, {
     extensions: ["html"],
     dotfiles: "deny",
-    index: ["index.html", "post.html", "podcast.html"]
+    index: ["index.html", "post.html", "podcast.html"],
+    fallthrough: true
 }))
+
+app.use((req, res, next) => {
+    error("404", req, res)
+})
 
 app.listen(config.get("number", ["server", "port"]), () => {
     console.log(`\ncestmaddy started on ::${config.get("number", ["server", "port"])}`.magenta.bold)
 })
 
-error = (code, res, req) => {
+error = (code, req, res) => {
     switch(code) {
         case "404":
-            res.status(404)
-            res.send("404 - Not found.")
+            res.status(404).sendFile(path.resolve(path.join(contentDir, "__errors", "404.html")))
             break;
         default:
             res.status(500)

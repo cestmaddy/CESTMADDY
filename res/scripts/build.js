@@ -62,3 +62,5 @@ for(key in blogs_list) {
         blogs.make_rss_feed(blogs_list[key])
     }
 }
+
+compiler.generate_errors()
