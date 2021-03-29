@@ -95,8 +95,7 @@ error = (code, req, res) => {
             res.status(404).sendFile(path.resolve(path.join(contentDir, "__errors", "404.html")))
             break;
         default:
-            res.status(500)
-            res.send("500 - Error")
+            res.status(500).sendFile(path.resolve(path.join(contentDir, "__errors", "500.html")))
             break;
     }
 }
