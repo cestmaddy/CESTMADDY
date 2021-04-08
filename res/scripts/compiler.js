@@ -233,6 +233,54 @@ exports.get_footer_content = () => {
     }
 }
 
+exports.generate_errors = () => {
+    return new Promise((resolve, reject) => {
+
+        let errors = ["404", "500"]
+
+        for(error in errors) {
+            let site = {
+                title: config.get("string", ["content", "title"]),
+                theme: "clean",
+                type: "error"
+            }
+            if(config.get("string", ["content", "theme"]) != "") {
+                site.theme = config.get("string", ["content", "theme"])
+            }
+
+            let render_path = `./res/content/front/themes/${site.theme}/templates/errors/${errors[error]}.ejs`
+
+            ejs.renderFile(render_path, {
+                site: site
+            }, (err, str) => {
+                if(err) {
+                    console.log(`\n${render_path.bold}`)
+                    console.log(`    ${err}`.red)
+                }
+                else {
+                    let new_file_source_path = path.join(contentDir, "__errors", `${errors[error]}.html`)
+                    let folder = path.dirname(new_file_source_path)
+                    
+                    mkdirp(folder).then((made) => {
+                        fs.writeFile(new_file_source_path, str, (err, data) => {
+                            if(!err) {
+                                this.look_for_conflict(source_path, new_file_source_path)
+                            }
+                            else {
+                                console.log(`\n${render_path.bold}`)
+                                console.log(`    ${err}`.red)
+                            }
+                        }) 
+                    }).catch((err) => {
+                        console.log(`\n${render_path.bold}`)
+                        console.log(`    ${err}`.red)
+                    })
+                }
+            })
+        }
+    })
+}
+
 exports.generate_favicons = () => {
     return new Promise((resolve, reject) => {
         var favicon_ejs = path.join("res", "templates", "favicons.ejs")

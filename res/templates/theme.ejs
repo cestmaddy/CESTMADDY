@@ -1,23 +1,16 @@
-<% if(site.theme != "") { %>
-    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/markdown.min.css">
-    <% if(site.type == "blog") { %>
-        <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/blog.min.css">
-    <% } else if(site.type == "podcast") { %>
-        <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/podcast.min.css">
-    <% } %>
-    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/blog_general.min.css">
-    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/podcast_general.min.css">
-    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/hljs.min.css">
-    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/page.min.css">
-<% } else { %>
-    <link rel="stylesheet" href="/front/themes/clean/css/markdown.min.css">
-    <% if(site.type == "blog") { %>
-        <link rel="stylesheet" href="/front/themes/clean/css/blog.min.css">
-    <% } else if(site.type == "podcast") { %>
-        <link rel="stylesheet" href="/front/themes/clean/css/podcast.min.css">
-    <% } %>
-    <link rel="stylesheet" href="/front/themes/clean/css/blog_general.min.css">
-    <link rel="stylesheet" href="/front/themes/clean/css/podcast_general.min.css">
-    <link rel="stylesheet" href="/front/themes/clean/css/hljs.min.css">
-    <link rel="stylesheet" href="/front/themes/clean/css/page.min.css">
+<% if(site.theme == "") { %>
+    <% site.theme = "clean" %>
 <% } %>
+
+<link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/markdown.min.css">
+<% if(site.type == "blog") { %>
+    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/blog.min.css">
+<% } else if(site.type == "podcast") { %>
+    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/podcast.min.css">
+<% } else if(site.type == "error") { %>
+    <link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/errors.min.css">
+<% } %>
+<link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/blog_general.min.css">
+<link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/podcast_general.min.css">
+<link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/hljs.min.css">
+<link rel="stylesheet" href="/front/themes/<%- site.theme %>/css/page.min.css">
