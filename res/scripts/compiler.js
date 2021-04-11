@@ -241,8 +241,8 @@ exports.generate_errors = () => {
         for(error in errors) {
             let site = {
                 title: config.get("string", ["content", "title"]),
-                header: compiler.get_header_content(),
-                footer: compiler.get_footer_content(),
+                header: this.get_header_content(),
+                footer: this.get_footer_content(),
                 theme: "clean",
                 type: "error"
             }
