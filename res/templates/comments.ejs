@@ -1,0 +1,9 @@
+<% if(site.comments) { %>
+    <% switch (site.comments.provider) {
+        case "commento": %>
+            <script defer src="<%= site.comments.settings.url %>/js/commento.js"></script>
+            <div id="commento"></div>
+            <%
+            break;
+    } %>
+<% } %>

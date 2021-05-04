@@ -181,7 +181,7 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
                 }
             }
             else {
-                console.log(`The ${post_shortcodes.values["[AUTHOR]"]} author is not referenced in your configuration`.red.bold)
+                console.log(`The ${post_shortcodes.values["[AUTHOR]"]} author is not referenced in your configuration for the ${blog_config.title} blog`.red)
             }
         }
         else {
@@ -192,12 +192,12 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
                 }
             }
             else {
-                console.log(`The ${blog_config.main_author} author is not referenced in your configuration`.red.bold)
+                console.log(`The ${blog_config.main_author} author is not referenced in your configuration for the ${blog_config.title} blog`.red)
             }
         }
     }
     else {
-        console.log(`Please provide a main_author and a list of authors for your blog ${blog_config.title}`.red.bold)
+        console.log(`Please provide a main_author and a list of authors for the ${blog_config.title} blog`.red)
     }
 
     return post_data
@@ -223,6 +223,25 @@ exports.get_blog_config = (source_path) => {
             blog_config["language"] = config.get("string", ["content", "blogs", conf_ctr, "language"])
             blog_config["main_author"] = config.get("string", ["content", "blogs", conf_ctr, "main_author"])
             blog_config["authors"] = config.get("object", ["content", "blogs", conf_ctr, "authors"])
+
+            // check comments settings
+            blog_config["comments"] = undefined
+            comments = config.get("object", ["content", "blogs", conf_ctr, "comments"])
+            if(comments.hasOwnProperty("provider")) {
+                if(comments["provider"] == "commento") {
+                    if(comments.hasOwnProperty("settings")) {
+                        if(!comments["settings"].hasOwnProperty("url"))
+                            console.log(`You have not specified the ${`url`.bold} parameter for the ${comments["provider"]} comment provider on your CESTOLIV blog`.red)
+                        else
+                            blog_config["comments"] = comments
+                    }
+                    else
+                        console.log(`You have not specified any settings for the ${comments["provider"]} comment provider on your ${blog_config["title"]} blog`.red)
+                }
+                else
+                    console.log(`Your comment provider is not supported for the ${blog_config["title"]} blog`.red)
+            }
+
 
             // LOCAL BLOG PATH
             blog_config["path"] = `/${path.basename(blog_config["dir"])}`
@@ -258,8 +277,10 @@ exports.compile_html = (source_path, blog_config) => {
         header: compiler.get_header_content(),
         footer: compiler.get_footer_content(),
         theme: "clean",
-        type: "blog"
+        type: "blog",
+        comments: blog_config["comments"]
     }
+    // get theme
     if(config.get("string", ["content", "theme"]) != "") {
         site.theme = config.get("string", ["content", "theme"])
     }
