@@ -224,19 +224,8 @@ exports.list_podcast_recursively = (source_path, file_content) => {
     for (i_pod = 0; i_pod < podcasts_list.length; i_pod++) {
         // exclude the current page from the list
         if (path_resolve(source_path) != podcasts_list[i_pod]) {
-            let podcast_content = ""
-            try {
-                podcast_content = fs.readFileSync(podcasts_list[i_pod], "utf-8")
-            }
-            catch (err) {
-                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                console.log(`    ${err}`.red)
-                return
-            }
-
             podcasts_data.push(
                 podcasts.get_podcast_data(
-                    podcast_content,
                     podcast_config,
                     podcasts_list[i_pod]
                 )

@@ -6,6 +6,7 @@ const mime = require('mime')
 const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
 const ejs = require("ejs")
+const { v4: uuidv4 } = require('uuid')
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -54,7 +55,7 @@ exports.make_rss_feed = (podcast_config) => {
             }
 
             if(source_file != "") {
-                let podcast_data = this.get_podcast_data(source_file, podcast_config, podcast)
+                let podcast_data = this.get_podcast_data(podcast_config, podcast)
 
                 itemsFeed += `
     <item>
@@ -137,13 +138,13 @@ exports.make_rss_feed = (podcast_config) => {
     
 }
 
-exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
-    let podcast_shortcodes = shortcodes.get_shortcodes(podcast_md)
+exports.get_podcast_data = (podcast_config, md_podcast_path) => {
     let podcast_data = {
-        title: "",
+        id: uuidv4(),
+        title: "Untitled",
         description: "",
-        date: "",
-        date_object: "",
+        date: functions.user_date_to_date_object().toGMTString(),
+        date_object: functions.user_date_to_date_object(),
         author: {
             name: "",
             email: ""
@@ -163,12 +164,40 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(md_podcast_path)
     without_source_and_ext = without_source_and_ext.substr(podcast_dir_without_source.length)
 
+    // get podcast content
+    let podcast_md = ""
+    try {
+        podcast_md = fs.readFileSync(md_podcast_path, "utf-8")
+    }
+    catch(err) {
+        console.log(`\n${md_podcast_path}`)
+        console.log(`    ${err}`.red)
+        return podcast_data
+    }
+
+    // get shortcodes
+    let podcast_shortcodes = shortcodes.get_shortcodes(podcast_md)
+
+    // ID
+    if(podcast_shortcodes.values.hasOwnProperty("[ID]")) {
+        podcast_data.id = podcast_shortcodes.values["[ID]"]
+    }
+    else {
+        // define the [ID] shortcode in the podcast file
+        if(!md_podcast_path.endsWith('index.md')) {
+            try {
+                podcast_md = `[ID=${podcast_data.id}]\n\n${podcast_md}`
+                fs.writeFileSync(md_podcast_path, podcast_md)
+            }
+            catch (e) {
+                console.log(`The podcast ${md_podcast_path} has no ID and we can't add it automatically.`.red)
+            }
+        }
+    }
+    
     // TITLE
     if(podcast_shortcodes.values.hasOwnProperty("[TITLE]")) {
         podcast_data.title = podcast_shortcodes.values["[TITLE]"]
-    }
-    else {
-        podcast_data.title = "Untitled"
     }
 
     // DESCRIPTION
@@ -245,10 +274,6 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     // DATE
     if(podcast_shortcodes.values.hasOwnProperty("[DATE]")) {
         podcast_data.date_object = functions.user_date_to_date_object(podcast_shortcodes.values["[DATE]"])
-        podcast_data.date = podcast_data.date_object.toGMTString()
-    }
-    else {
-        podcast_data.date_object = functions.user_date_to_date_object()
         podcast_data.date = podcast_data.date_object.toGMTString()
     }
 
@@ -363,6 +388,24 @@ exports.get_podcast_config = (source_path) => {
                     console.log(`    ${err}`.red)
                 }
             }
+
+            // COMMENTS
+            podcast_config["comments"] = undefined
+            comments = config.get("object", ["content", "podcasts", conf_ctr, "comments"])
+            if(comments.hasOwnProperty("provider")) {
+                if(comments["provider"] == "commento") {
+                    if(comments.hasOwnProperty("settings")) {
+                        if(!comments["settings"].hasOwnProperty("url"))
+                            console.log(`You have not specified the ${`url`.bold} parameter for the ${comments["provider"]} comment provider on your CESTOLIV blog`.red)
+                        else
+                        podcast_config["comments"] = comments
+                    }
+                    else
+                        console.log(`You have not specified any settings for the ${comments["provider"]} comment provider on your ${podcast_config["title"]} blog`.red)
+                }
+                else
+                    console.log(`Your comment provider is not supported for the ${podcast_config["title"]} blog`.red)
+            }
             
 
             return podcast_config
@@ -381,7 +424,7 @@ exports.compile_html = (source_path, podcast_config) => {
         return
     }
 
-    let podcast_data = this.get_podcast_data(source_file, podcast_config, source_path)
+    let podcast_data = this.get_podcast_data(podcast_config, source_path)
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
@@ -395,7 +438,8 @@ exports.compile_html = (source_path, podcast_config) => {
         header: compiler.get_header_content(),
         footer: compiler.get_footer_content(),
         theme: "clean",
-        type: "podcast"
+        type: "podcast",
+        comments: podcast_config["comments"]
     }
     if(config.get("string", ["content", "theme"]) != "") {
         site.theme = config.get("string", ["content", "theme"])
