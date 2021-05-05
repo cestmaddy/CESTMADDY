@@ -70,7 +70,6 @@ exports.make_rss_feed = (blog_config) => {
         <link>${config.get("string", ["server", "domain"])}${blog_config["path"]}</link>
         <category>${blog_config["category"]}</category>
         <language>${blog_config["language"]}</language>
-
         ${itemsFeed}
     </channel>
 </rss>`

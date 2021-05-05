@@ -41,26 +41,35 @@ exports.make_rss_feed = (podcast_config) => {
     let podcasts = compiler.get_every_files_with_extension_of_dir(podcast_config['dir'], "md")
 
     itemsFeed = ""
+
+    let podcasts_data = []
     podcasts.forEach((podcast) => {
         // exclude index.md from feed (because it's not a podcast)
         if(!podcast.endsWith("index.md")) {
-            let podcast_data = this.get_podcast_data(podcast_config, podcast)
-
-            itemsFeed += `
-    <item>
-        <title>${podcast_data.title}</title>
-        <link>${podcast_data.link}</link>
-        <guid>${podcast_data.link}</guid>
-        <description><![CDATA[${podcast_data.description}]]></description>
-        <author>${podcast_data.author.email} (${podcast_data.author.name})</author>
-        <enclosure url="${podcast_data.enclosure.url}" length="${podcast_data.enclosure.length}" type="${podcast_data.enclosure.type}"/>
-        <pubDate>${podcast_data.date}</pubDate>
-        <itunes:duration>${podcast_data.duration}</itunes:duration>
-        <itunes:image href="${podcast_data.image}" />
-    </item>
-            `
+            podcasts_data.push(this.get_podcast_data(podcast_config, podcast))
         }
     })
+
+    // sort by date
+    podcasts_data = podcasts_data.sort((a, b) => {
+        return a.date_object < b.date_object ? 1 : -1
+    })
+
+    for(i_data in podcasts_data) {
+        itemsFeed += `
+        <item>
+            <title>${podcasts_data[i_data].title}</title>
+            <link>${podcasts_data[i_data].link}</link>
+            <guid>${podcasts_data[i_data].link}</guid>
+            <description><![CDATA[${podcasts_data[i_data].description}]]></description>
+            <author>${podcasts_data[i_data].author.email} (${podcasts_data[i_data].author.name})</author>
+            <enclosure url="${podcasts_data[i_data].enclosure.url}" length="${podcasts_data[i_data].enclosure.length}" type="${podcasts_data[i_data].enclosure.type}"/>
+            <pubDate>${podcasts_data[i_data].date}</pubDate>
+            <itunes:duration>${podcasts_data[i_data].duration}</itunes:duration>
+            <itunes:image href="${podcasts_data[i_data].image}" />
+        </item>
+            `
+    }
 
     let author_email = undefined
     if(podcast_config.hasOwnProperty("authors") && podcast_config["authors"].hasOwnProperty(podcast_config["main_author"])) {
@@ -77,36 +86,36 @@ exports.make_rss_feed = (podcast_config) => {
     xmlns:dcterms="https://purl.org/dc/terms"
     xmlns:psc="https://podlove.org/simple-chapters/"
 >
-<channel>
-    <atom:link href="${podcast_config["link"]}/feed.xml" rel="self" type="application/rss+xml" />
-    <title>${podcast_config["title"]}</title>
-    <link>${podcast_config["link"]}</link>
-    <description>${podcast_config["description"]}</description>
-    <image>
-        <link>${podcast_config["link"]}</link>
+    <channel>
+        <atom:link href="${podcast_config["link"]}/feed.xml" rel="self" type="application/rss+xml" />
         <title>${podcast_config["title"]}</title>
-        <url>${podcast_config["image_url"]}</url>
-    </image>
-    <language>${podcast_config["language"]}</language>
+        <link>${podcast_config["link"]}</link>
+        <description>${podcast_config["description"]}</description>
+        <image>
+            <link>${podcast_config["link"]}</link>
+            <title>${podcast_config["title"]}</title>
+            <url>${podcast_config["image_url"]}</url>
+        </image>
+        <language>${podcast_config["language"]}</language>
 
-    <googleplay:author>${podcast_config["main_author"]}</googleplay:author> 
-    <googleplay:image href="${podcast_config["image_url"]}"/>
-    <googleplay:category text="${podcast_config["category"]}"/>
-    <googleplay:explicit>"${podcast_config["explicit"]}</googleplay:explicit>
+        <googleplay:author>${podcast_config["main_author"]}</googleplay:author> 
+        <googleplay:image href="${podcast_config["image_url"]}"/>
+        <googleplay:category text="${podcast_config["category"]}"/>
+        <googleplay:explicit>"${podcast_config["explicit"]}</googleplay:explicit>
 
-    <itunes:owner>
-        <itunes:name>${podcast_config["main_author"]}</itunes:name>
-        <itunes:email>${author_email}</itunes:email>
-    </itunes:owner>
-    <itunes:author>${podcast_config["main_author"]}</itunes:author> 
-    <itunes:image href="${podcast_config["image_url"]}"/>
-    <itunes:category text="${podcast_config["category"]}"/>
-    <itunes:complete>${podcast_config["complete"]}</itunes:complete>
-    <itunes:explicit>${podcast_config["explicit"]}</itunes:explicit>
-    <itunes:type>${podcast_config["type"]}</itunes:type>
+        <itunes:owner>
+            <itunes:name>${podcast_config["main_author"]}</itunes:name>
+            <itunes:email>${author_email}</itunes:email>
+        </itunes:owner>
+        <itunes:author>${podcast_config["main_author"]}</itunes:author> 
+        <itunes:image href="${podcast_config["image_url"]}"/>
+        <itunes:category text="${podcast_config["category"]}"/>
+        <itunes:complete>${podcast_config["complete"]}</itunes:complete>
+        <itunes:explicit>${podcast_config["explicit"]}</itunes:explicit>
+        <itunes:type>${podcast_config["type"]}</itunes:type>
 
-    <spotify:limit>${podcast_config["limit"]}</spotify:limit>
-    <spotify:countryOfOrigin>${podcast_config["country"]}</spotify:countryOfOrigin>
+        <spotify:limit>${podcast_config["limit"]}</spotify:limit>
+        <spotify:countryOfOrigin>${podcast_config["country"]}</spotify:countryOfOrigin>
     ${itemsFeed}
     </channel>
 </rss>`
