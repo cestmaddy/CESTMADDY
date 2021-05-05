@@ -39,19 +39,7 @@ exports.make_rss_feed = (blog_config) => {
     posts.forEach((post) => {
         // exclude index.md from feed (because it's not an article)
         if(!post.endsWith("index.md")) {
-          let source_file = ""
-            try {
-                source_file = fs.readFileSync(post, "utf-8")
-            }
-            catch(err) {
-                console.log(`\n${compiler.remove_before_source_from_path(post).bold}`)
-                console.log(`    ${err}`.red)
-                return
-            }
-
-            if(source_file != "") {
-                posts_data.push(this.get_post_data(blog_config, post))
-            }
+            posts_data.push(this.get_post_data(blog_config, post))
         }
     })
 

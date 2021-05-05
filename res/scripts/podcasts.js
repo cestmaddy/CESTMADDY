@@ -44,20 +44,9 @@ exports.make_rss_feed = (podcast_config) => {
     podcasts.forEach((podcast) => {
         // exclude index.md from feed (because it's not a podcast)
         if(!podcast.endsWith("index.md")) {
-            let source_file = ""
-            try {
-                source_file = fs.readFileSync(podcast, "utf-8")
-            }
-            catch(err) {
-                console.log(`\n${compiler.remove_before_source_from_path(podcast).bold}`)
-                console.log(`    ${err}`.red)
-                return
-            }
+            let podcast_data = this.get_podcast_data(podcast_config, podcast)
 
-            if(source_file != "") {
-                let podcast_data = this.get_podcast_data(podcast_config, podcast)
-
-                itemsFeed += `
+            itemsFeed += `
     <item>
         <title>${podcast_data.title}</title>
         <link>${podcast_data.link}</link>
@@ -70,7 +59,6 @@ exports.make_rss_feed = (podcast_config) => {
         <itunes:image href="${podcast_data.image}" />
     </item>
             `
-            }
         }
     })
 
