@@ -1,0 +1,17 @@
+<% if(site.comments) { %>
+    <% switch (site.comments.provider) {
+        case "commento": %>
+            <script defer 
+                src="<%= site.comments.settings.url %>/js/commento.js"
+                data-no-fonts="true"
+                <% if(site.type == "blog") { %>
+                data-page-id="<%= post.id %>"
+                <% } else if(site.type == "podcast") { %>
+                data-page-id="<%= podcast.id %>"
+                <% } %>>
+            </script>
+            <div id="commento"></div>
+            <%
+            break;
+    } %>
+<% } %>

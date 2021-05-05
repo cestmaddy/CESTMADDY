@@ -19,6 +19,8 @@
         <h1 class="post_title"><%- post.title %></h1>
         <p class="post_infos"><%- post.author.name %>, <strong><%- post.relative_date %></strong> <%- post.date_string %></p>
         <%- post.html %>
+
+        <%- include("../../../../../templates/comments.ejs") %>
     </div>
     <footer class="markdown">
         <%- site.footer %> 

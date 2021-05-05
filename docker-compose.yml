@@ -11,3 +11,25 @@ services:
       # Website
       - ./config.yml:/cestmaddy/config.yml.original
       - ./source/:/cestmaddy/source
+
+  ###
+  # COMMENTO
+  ###
+  #commento:
+  #  image: registry.gitlab.com/commento/commento:latest
+  #  ports:
+  #    - ${COMMENTO_PORT}:${COMMENTO_PORT}
+  #  environment:
+  #    COMMENTO_CONFIG_FILE: /.env
+  #  depends_on:
+  #    - commento-db
+  #  volumes:
+  #    - ./.env:/.env
+  #commento-db:
+  #  image: postgres
+  #  environment:
+  #    POSTGRES_DB: commento
+  #    POSTGRES_USER: postgres
+  #    POSTGRES_PASSWORD: ${COMMENTO_POSTGRES_PASSWORD}
+  #  volumes:
+  #    - ./commento_db:/var/lib/postgresql/data

@@ -6,6 +6,7 @@ const mime = require('mime')
 const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
 const ejs = require("ejs")
+const { v4: uuidv4 } = require('uuid')
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -40,38 +41,35 @@ exports.make_rss_feed = (podcast_config) => {
     let podcasts = compiler.get_every_files_with_extension_of_dir(podcast_config['dir'], "md")
 
     itemsFeed = ""
+
+    let podcasts_data = []
     podcasts.forEach((podcast) => {
         // exclude index.md from feed (because it's not a podcast)
         if(!podcast.endsWith("index.md")) {
-            let source_file = ""
-            try {
-                source_file = fs.readFileSync(podcast, "utf-8")
-            }
-            catch(err) {
-                console.log(`\n${compiler.remove_before_source_from_path(podcast).bold}`)
-                console.log(`    ${err}`.red)
-                return
-            }
-
-            if(source_file != "") {
-                let podcast_data = this.get_podcast_data(source_file, podcast_config, podcast)
-
-                itemsFeed += `
-    <item>
-        <title>${podcast_data.title}</title>
-        <link>${podcast_data.link}</link>
-        <guid>${podcast_data.link}</guid>
-        <description><![CDATA[${podcast_data.description}]]></description>
-        <author>${podcast_data.author.email} (${podcast_data.author.name})</author>
-        <enclosure url="${podcast_data.enclosure.url}" length="${podcast_data.enclosure.length}" type="${podcast_data.enclosure.type}"/>
-        <pubDate>${podcast_data.date}</pubDate>
-        <itunes:duration>${podcast_data.duration}</itunes:duration>
-        <itunes:image href="${podcast_data.image}" />
-    </item>
-            `
-            }
+            podcasts_data.push(this.get_podcast_data(podcast_config, podcast))
         }
     })
+
+    // sort by date
+    podcasts_data = podcasts_data.sort((a, b) => {
+        return a.date_object < b.date_object ? 1 : -1
+    })
+
+    for(i_data in podcasts_data) {
+        itemsFeed += `
+        <item>
+            <title>${podcasts_data[i_data].title}</title>
+            <link>${podcasts_data[i_data].link}</link>
+            <guid>${podcasts_data[i_data].link}</guid>
+            <description><![CDATA[${podcasts_data[i_data].description}]]></description>
+            <author>${podcasts_data[i_data].author.email} (${podcasts_data[i_data].author.name})</author>
+            <enclosure url="${podcasts_data[i_data].enclosure.url}" length="${podcasts_data[i_data].enclosure.length}" type="${podcasts_data[i_data].enclosure.type}"/>
+            <pubDate>${podcasts_data[i_data].date}</pubDate>
+            <itunes:duration>${podcasts_data[i_data].duration}</itunes:duration>
+            <itunes:image href="${podcasts_data[i_data].image}" />
+        </item>
+            `
+    }
 
     let author_email = undefined
     if(podcast_config.hasOwnProperty("authors") && podcast_config["authors"].hasOwnProperty(podcast_config["main_author"])) {
@@ -88,36 +86,36 @@ exports.make_rss_feed = (podcast_config) => {
     xmlns:dcterms="https://purl.org/dc/terms"
     xmlns:psc="https://podlove.org/simple-chapters/"
 >
-<channel>
-    <atom:link href="${podcast_config["link"]}/feed.xml" rel="self" type="application/rss+xml" />
-    <title>${podcast_config["title"]}</title>
-    <link>${podcast_config["link"]}</link>
-    <description>${podcast_config["description"]}</description>
-    <image>
-        <link>${podcast_config["link"]}</link>
+    <channel>
+        <atom:link href="${podcast_config["link"]}/feed.xml" rel="self" type="application/rss+xml" />
         <title>${podcast_config["title"]}</title>
-        <url>${podcast_config["image_url"]}</url>
-    </image>
-    <language>${podcast_config["language"]}</language>
+        <link>${podcast_config["link"]}</link>
+        <description>${podcast_config["description"]}</description>
+        <image>
+            <link>${podcast_config["link"]}</link>
+            <title>${podcast_config["title"]}</title>
+            <url>${podcast_config["image_url"]}</url>
+        </image>
+        <language>${podcast_config["language"]}</language>
 
-    <googleplay:author>${podcast_config["main_author"]}</googleplay:author> 
-    <googleplay:image href="${podcast_config["image_url"]}"/>
-    <googleplay:category text="${podcast_config["category"]}"/>
-    <googleplay:explicit>"${podcast_config["explicit"]}</googleplay:explicit>
+        <googleplay:author>${podcast_config["main_author"]}</googleplay:author> 
+        <googleplay:image href="${podcast_config["image_url"]}"/>
+        <googleplay:category text="${podcast_config["category"]}"/>
+        <googleplay:explicit>"${podcast_config["explicit"]}</googleplay:explicit>
 
-    <itunes:owner>
-        <itunes:name>${podcast_config["main_author"]}</itunes:name>
-        <itunes:email>${author_email}</itunes:email>
-    </itunes:owner>
-    <itunes:author>${podcast_config["main_author"]}</itunes:author> 
-    <itunes:image href="${podcast_config["image_url"]}"/>
-    <itunes:category text="${podcast_config["category"]}"/>
-    <itunes:complete>${podcast_config["complete"]}</itunes:complete>
-    <itunes:explicit>${podcast_config["explicit"]}</itunes:explicit>
-    <itunes:type>${podcast_config["type"]}</itunes:type>
+        <itunes:owner>
+            <itunes:name>${podcast_config["main_author"]}</itunes:name>
+            <itunes:email>${author_email}</itunes:email>
+        </itunes:owner>
+        <itunes:author>${podcast_config["main_author"]}</itunes:author> 
+        <itunes:image href="${podcast_config["image_url"]}"/>
+        <itunes:category text="${podcast_config["category"]}"/>
+        <itunes:complete>${podcast_config["complete"]}</itunes:complete>
+        <itunes:explicit>${podcast_config["explicit"]}</itunes:explicit>
+        <itunes:type>${podcast_config["type"]}</itunes:type>
 
-    <spotify:limit>${podcast_config["limit"]}</spotify:limit>
-    <spotify:countryOfOrigin>${podcast_config["country"]}</spotify:countryOfOrigin>
+        <spotify:limit>${podcast_config["limit"]}</spotify:limit>
+        <spotify:countryOfOrigin>${podcast_config["country"]}</spotify:countryOfOrigin>
     ${itemsFeed}
     </channel>
 </rss>`
@@ -137,13 +135,13 @@ exports.make_rss_feed = (podcast_config) => {
     
 }
 
-exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
-    let podcast_shortcodes = shortcodes.get_shortcodes(podcast_md)
+exports.get_podcast_data = (podcast_config, md_podcast_path) => {
     let podcast_data = {
-        title: "",
+        id: uuidv4(),
+        title: "Untitled",
         description: "",
-        date: "",
-        date_object: "",
+        date: functions.user_date_to_date_object().toGMTString(),
+        date_object: functions.user_date_to_date_object(),
         author: {
             name: "",
             email: ""
@@ -163,12 +161,40 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(md_podcast_path)
     without_source_and_ext = without_source_and_ext.substr(podcast_dir_without_source.length)
 
+    // get podcast content
+    let podcast_md = ""
+    try {
+        podcast_md = fs.readFileSync(md_podcast_path, "utf-8")
+    }
+    catch(err) {
+        console.log(`\n${md_podcast_path}`)
+        console.log(`    ${err}`.red)
+        return podcast_data
+    }
+
+    // get shortcodes
+    let podcast_shortcodes = shortcodes.get_shortcodes(podcast_md)
+
+    // ID
+    if(podcast_shortcodes.values.hasOwnProperty("[ID]")) {
+        podcast_data.id = podcast_shortcodes.values["[ID]"]
+    }
+    else {
+        // define the [ID] shortcode in the podcast file
+        if(!md_podcast_path.endsWith('index.md')) {
+            try {
+                podcast_md = `[ID=${podcast_data.id}]\n\n${podcast_md}`
+                fs.writeFileSync(md_podcast_path, podcast_md)
+            }
+            catch (e) {
+                console.log(`The podcast ${md_podcast_path} has no ID and we can't add it automatically.`.red)
+            }
+        }
+    }
+    
     // TITLE
     if(podcast_shortcodes.values.hasOwnProperty("[TITLE]")) {
         podcast_data.title = podcast_shortcodes.values["[TITLE]"]
-    }
-    else {
-        podcast_data.title = "Untitled"
     }
 
     // DESCRIPTION
@@ -245,10 +271,6 @@ exports.get_podcast_data = (podcast_md, podcast_config, md_podcast_path) => {
     // DATE
     if(podcast_shortcodes.values.hasOwnProperty("[DATE]")) {
         podcast_data.date_object = functions.user_date_to_date_object(podcast_shortcodes.values["[DATE]"])
-        podcast_data.date = podcast_data.date_object.toGMTString()
-    }
-    else {
-        podcast_data.date_object = functions.user_date_to_date_object()
         podcast_data.date = podcast_data.date_object.toGMTString()
     }
 
@@ -363,6 +385,24 @@ exports.get_podcast_config = (source_path) => {
                     console.log(`    ${err}`.red)
                 }
             }
+
+            // COMMENTS
+            podcast_config["comments"] = undefined
+            comments = config.get("object", ["content", "podcasts", conf_ctr, "comments"])
+            if(comments.hasOwnProperty("provider")) {
+                if(comments["provider"] == "commento") {
+                    if(comments.hasOwnProperty("settings")) {
+                        if(!comments["settings"].hasOwnProperty("url"))
+                            console.log(`You have not specified the ${`url`.bold} parameter for the ${comments["provider"]} comment provider on your CESTOLIV blog`.red)
+                        else
+                        podcast_config["comments"] = comments
+                    }
+                    else
+                        console.log(`You have not specified any settings for the ${comments["provider"]} comment provider on your ${podcast_config["title"]} blog`.red)
+                }
+                else
+                    console.log(`Your comment provider is not supported for the ${podcast_config["title"]} blog`.red)
+            }
             
 
             return podcast_config
@@ -381,7 +421,7 @@ exports.compile_html = (source_path, podcast_config) => {
         return
     }
 
-    let podcast_data = this.get_podcast_data(source_file, podcast_config, source_path)
+    let podcast_data = this.get_podcast_data(podcast_config, source_path)
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
@@ -395,7 +435,8 @@ exports.compile_html = (source_path, podcast_config) => {
         header: compiler.get_header_content(),
         footer: compiler.get_footer_content(),
         theme: "clean",
-        type: "podcast"
+        type: "podcast",
+        comments: podcast_config["comments"]
     }
     if(config.get("string", ["content", "theme"]) != "") {
         site.theme = config.get("string", ["content", "theme"])
