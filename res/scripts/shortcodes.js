@@ -16,6 +16,7 @@ const functions = require("./functions")
 
 let shortcodes_arr = [
     // GENERAL
+    'ID',
     'TITLE',
     'DESCRIPTION',
 
@@ -180,19 +181,8 @@ exports.list_blog_recursively = (source_path, file_content) => {
     for (i_post = 0; i_post < posts.length; i_post++) {
         // exclude the current page from the list
         if (path_resolve(source_path) != posts[i_post]) {
-            let post_content = ""
-            try {
-                post_content = fs.readFileSync(posts[i_post], "utf-8")
-            }
-            catch (err) {
-                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                console.log(`    ${err}`.red)
-                return
-            }
-
             posts_data.push(
                 blogs.get_post_data(
-                    post_content,
                     blog_config,
                     posts[i_post]
                 )

@@ -1,7 +1,11 @@
 <% if(site.comments) { %>
     <% switch (site.comments.provider) {
         case "commento": %>
-            <script defer src="<%= site.comments.settings.url %>/js/commento.js"></script>
+            <script defer 
+                src="<%= site.comments.settings.url %>/js/commento.js"
+                data-no-fonts="true"
+                data-page-id="<%= post.id %>">
+            </script>
             <div id="commento"></div>
             <%
             break;

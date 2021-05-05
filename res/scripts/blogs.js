@@ -3,6 +3,7 @@ const path_resolve = require("path").resolve
 var mkdirp = require('mkdirp')
 const fs = require("fs")
 const ejs = require("ejs")
+const { v4: uuidv4 } = require('uuid')
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -49,7 +50,7 @@ exports.make_rss_feed = (blog_config) => {
             }
 
             if(source_file != "") {
-                posts_data.push(this.get_post_data(source_file, blog_config, post))
+                posts_data.push(this.get_post_data(blog_config, post))
             }
         }
     })
@@ -100,13 +101,13 @@ exports.make_rss_feed = (blog_config) => {
     })
 }
 
-exports.get_post_data = (post_md, blog_config, md_post_path) => {
-    let post_shortcodes = shortcodes.get_shortcodes(post_md)
+exports.get_post_data = (blog_config, md_post_path) => {
     let post_data = {
-        title: "",
+        id: uuidv4(),
+        title: "Untitled",
         description: "",
-        date: "",
-        date_object: "",
+        date: functions.user_date_to_date_object().toGMTString(),
+        date_object: functions.user_date_to_date_object(),
         author: {
             name: "",
             email: ""
@@ -115,12 +116,38 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
         link: ""
     }
 
+    // get post content
+    let post_md = ""
+    try {
+        post_md = fs.readFileSync(md_post_path, "utf-8")
+    }
+    catch(err) {
+        console.log(`\n${md_post_path}`)
+        console.log(`    ${err}`.red)
+        return post_data
+    }
+
+    // get shortcode
+    let post_shortcodes = shortcodes.get_shortcodes(post_md)
+
+    // ID
+    if(post_shortcodes.values.hasOwnProperty("[ID]")) {
+        post_data.id = post_shortcodes.values["[ID]"]
+    }
+    else {
+        // define the [ID] shortcode in the post file
+        try {
+            post_md = `[ID=${post_data.id}]\n\n${post_md}`
+            fs.writeFileSync(md_post_path, post_md)
+        }
+        catch (e) {
+            console.log(`The post ${md_post_path} has no ID and we can't add it automatically.`.red)
+        }
+    }
+
     // TITLE
     if(post_shortcodes.values.hasOwnProperty("[TITLE]")) {
         post_data.title = post_shortcodes.values["[TITLE]"]
-    }
-    else {
-        post_data.title = "Untitled"
     }
 
     // DESCRIPTION
@@ -163,10 +190,6 @@ exports.get_post_data = (post_md, blog_config, md_post_path) => {
     // DATE
     if(post_shortcodes.values.hasOwnProperty("[DATE]")) {
         post_data.date_object = functions.user_date_to_date_object(post_shortcodes.values["[DATE]"])
-        post_data.date = post_data.date_object.toGMTString()
-    }
-    else {
-        post_data.date_object = functions.user_date_to_date_object()
         post_data.date = post_data.date_object.toGMTString()
     }
 
@@ -263,7 +286,7 @@ exports.compile_html = (source_path, blog_config) => {
         return
     }
 
-    let post_data = this.get_post_data(source_file, blog_config, source_path)
+    let post_data = this.get_post_data(blog_config, source_path)
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
