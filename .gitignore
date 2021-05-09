@@ -2,7 +2,6 @@
 /node_modules
 /commento_db
 
-/res/templates/favicons.ejs
 /res/content/generated
 
 /source
