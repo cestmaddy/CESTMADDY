@@ -2,10 +2,8 @@ const path = require("path")
 const path_resolve = require("path").resolve
 const fs = require("fs")
 const colors = require('colors')
-const mkdirp = require('mkdirp')
 const ejs = require('ejs')
 const favicons = require('favicons')
-const sp = require('synchronized-promise')
 
 const config = require("./config")
 const shortcodes = require("./shortcodes")
@@ -134,39 +132,45 @@ exports.is_markdown_file = (source_path) => {
     return true
 }
 
-exports.copy_file = (source_path, dest, silent = false) => {    
-    mkdirp(path.dirname(dest)).then((made) => {
-        fs.unlink(dest, (err) => {
-            fs.link(`${source_path}`, dest, (err) => {
-                if(err && err.code != "EEXIST") {
-                    if(err.code == "EXDEV") { // unable to link file (eg. with docker), fallback with copy
-                        fs.copyFile(`${source_path}`, dest, (err) => {
-                            if(err && err.code != "EEXIST") {
-                                console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                                console.log(`    ${err}`.red)
-                            }
-                            else {
-                                if(!silent) {
+exports.copy_file = (source_path, dest, silent = false) => {
+    fs.mkdir(path.dirname(dest), {recursive: true}, (err) => {
+        if(err) {
+            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            fs.unlink(dest, (err) => {
+                fs.link(`${source_path}`, dest, (err) => {
+                    if(err && err.code != "EEXIST") {
+                        if(err.code == "EXDEV") { // unable to link file (eg. with docker), fallback with copy
+                            fs.copyFile(`${source_path}`, dest, (err) => {
+                                if(err && err.code != "EEXIST") {
                                     console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                                    console.log(`    Successfully copied! (only .md are compiled)`.green)
+                                    console.log(`    ${err}`.red)
                                 }
-                            }
-                        })
+                                else {
+                                    if(!silent) {
+                                        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                                        console.log(`    Successfully copied! (only .md are compiled)`.green)
+                                    }
+                                }
+                            })
+                        }
+                        else {
+                            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
                     }
                     else {
-                        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                        console.log(`    ${err}`.red)
+                        if(!silent) {
+                            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
+                            console.log(`    Successfully copied! (only .md are compiled)`.green)
+                        }
                     }
-                }
-                else {
-                    if(!silent) {
-                        console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-                        console.log(`    Successfully copied! (only .md are compiled)`.green)
-                    }
-                }
-            })  
-        })  
-    }) 
+                })  
+            })
+        }
+    })
 }
 
 exports.look_for_conflict = (source_path, new_file_source_path) => {
@@ -263,19 +267,22 @@ exports.generate_errors = () => {
                     let new_file_source_path = path.join(contentDir, "__errors", `${errors[error]}.html`)
                     let folder = path.dirname(new_file_source_path)
                     
-                    mkdirp(folder).then((made) => {
-                        fs.writeFile(new_file_source_path, str, (err, data) => {
-                            if(!err) {
-                                this.look_for_conflict(source_path, new_file_source_path)
-                            }
-                            else {
-                                console.log(`\n${render_path.bold}`)
-                                console.log(`    ${err}`.red)
-                            }
-                        }) 
-                    }).catch((err) => {
-                        console.log(`\n${render_path.bold}`)
-                        console.log(`    ${err}`.red)
+                    fs.mkdir(folder, {recursive: true}, (err) => {
+                        if(err) {
+                            console.log(`\n${render_path.bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+                        else {
+                            fs.writeFile(new_file_source_path, str, (err) => {
+                                if(!err) {
+                                    this.look_for_conflict(source_path, new_file_source_path)
+                                }
+                                else {
+                                    console.log(`\n${render_path.bold}`)
+                                    console.log(`    ${err}`.red)
+                                }
+                            }) 
+                        }
                     })
                 }
             })
@@ -342,36 +349,42 @@ exports.generate_favicons = () => {
 
                 var favicons_path = path.join(contentDir, "__favicons")
 
-                mkdirp(favicons_path).then(() => {
-                    var images_files = response.images.concat(response.files)
-                    // Write Images
-                    for(i_img = 0; i_img < images_files.length; i_img++) {
-                        var file_name = path.join(favicons_path, images_files[i_img].name)
-                        try {
-                            fs.writeFileSync(
-                                file_name,
-                                images_files[i_img].contents
-                            )
-                        }
-                        catch (err) {
-                            console.log(`\n${this.remove_before_source_from_path(file_name).bold}`)
-                            console.log(`    ${err}`.red)
-                        }
-                    }
-
-                    try {
-                        fs.writeFileSync(
-                            favicon_ejs,
-                            response.html.join('\n')
-                        )
-                    }
-                    catch (err) {
+                fs.mkdir(favicons_path, {recursive: true}, (err) => {
+                    if(err) {
                         console.log(`\n${this.remove_before_source_from_path(favicon_ejs).bold}`)
                         console.log(`    ${err}`.red)
                     }
+                    else {
+                        var images_files = response.images.concat(response.files)
+                        // Write Images
+                        for(i_img = 0; i_img < images_files.length; i_img++) {
+                            var file_name = path.join(favicons_path, images_files[i_img].name)
+                            try {
+                                fs.writeFileSync(
+                                    file_name,
+                                    images_files[i_img].contents
+                                )
+                            }
+                            catch (err) {
+                                console.log(`\n${this.remove_before_source_from_path(file_name).bold}`)
+                                console.log(`    ${err}`.red)
+                            }
+                        }
 
-                    console.log(`    generated !`.green)
-                    resolve()
+                        try {
+                            fs.writeFileSync(
+                                favicon_ejs,
+                                response.html.join('\n')
+                            )
+                        }
+                        catch (err) {
+                            console.log(`\n${this.remove_before_source_from_path(favicon_ejs).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+
+                        console.log(`    generated !`.green)
+                        resolve()
+                    }
                 })
             })
         }

@@ -1,6 +1,5 @@
 const path = require("path")
 const path_resolve = require("path").resolve
-var mkdirp = require('mkdirp')
 const fs = require("fs")
 const ejs = require("ejs")
 
@@ -94,19 +93,22 @@ exports.compile_html = (source_path) => {
             let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
             let new_file_source_path = `${contentDir}${without_source_and_ext}.html`
             
-            mkdirp(path.dirname(new_file_source_path)).then(() => {
-                fs.writeFile(new_file_source_path, str, (err, data) => {
-                    if(!err) {
-                        compiler.look_for_conflict(source_path, new_file_source_path)
-                    }
-                    else {
-                        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                        console.log(`    ${err}`.red)
-                    }
-                }) 
-            }).catch((err) => {
-                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                console.log(`    ${err}`.red)
+            fs.mkdir(path.dirname(new_file_source_path), {recursive: true}, (err) => {
+                if(err) {
+                    console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                    console.log(`    ${err}`.red)
+                }
+                else {
+                    fs.writeFile(new_file_source_path, str, (err, data) => {
+                        if(!err) {
+                            compiler.look_for_conflict(source_path, new_file_source_path)
+                        }
+                        else {
+                            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+                    }) 
+                }
             })
         }
     })

@@ -1,6 +1,5 @@
 const path = require("path")
 const path_resolve = require("path").resolve
-var mkdirp = require('mkdirp')
 const fs = require("fs")
 const mime = require('mime')
 const mp3Duration = require('mp3-duration')
@@ -20,19 +19,9 @@ exports.compile_podcast_dir = (source_path) => {
     let podcast_config = this.get_podcast_config(source_path)
     
     if(!compiler.is_markdown_file(source_path)) {
-        /*
-        let podcast_dir_without_source = compiler.remove_source_from_path(podcast_config["dir"])
-        let without_source = compiler.remove_source_from_path(source_path)
-        without_source = without_source.substr(podcast_dir_without_source.length)
-        let copy_dest = `${podcast_config["local_path"]}${without_source}`
         
-        compiler.copy_file(source_path, `${copy_dest}`)
-        */
     }
     else {
-        mkdirp(podcast_config["local_path"]).then(() => {
-            //this.make_rss_feed(podcast_config)
-        })
         this.compile_html(source_path, podcast_config)
     }
 }
@@ -120,19 +109,24 @@ exports.make_rss_feed = (podcast_config) => {
     </channel>
 </rss>`
     
-    mkdirp(podcast_config["local_path"]).then(() => {
-        fs.writeFile(`${podcast_config["local_path"]}/feed.xml`, feed, (err, data) => {
-            if(!err) {
-                console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold.magenta)
-                console.log(`    generated !`.green)
-            }
-            else {
-                console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
-                console.log(`    ${err}`.red)
-            }
-        })
+    fs.mkdir(podcast_config["local_path"], {recursive: true}, (err) => {
+        if(err) {
+            console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            fs.writeFile(`${podcast_config["local_path"]}/feed.xml`, feed, (err, data) => {
+                if(!err) {
+                    console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold.magenta)
+                    console.log(`    generated !`.green)
+                }
+                else {
+                    console.log(`\nfeed for podcast ${podcast_config["title"]}`.bold)
+                    console.log(`    ${err}`.red)
+                }
+            })
+        }
     })
-    
 }
 
 exports.get_podcast_data = (podcast_config, md_podcast_path) => {
@@ -496,19 +490,22 @@ exports.compile_html = (source_path, podcast_config) => {
             let new_file_source_path = `${podcast_config["local_path"]}${without_source_and_ext}.html`
             let folder = path.dirname(new_file_source_path)
             
-            mkdirp(folder).then((made) => {
-                fs.writeFile(new_file_source_path, str, (err, data) => {
-                    if(!err) {
-                        compiler.look_for_conflict(source_path, new_file_source_path)
-                    }
-                    else {
-                        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                        console.log(`    ${err}`.red)
-                    }
-                }) 
-            }).catch((err) => {
-                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                console.log(`    ${err}`.red)
+            fs.mkdir(folder, {recursive: true}, (err) => {
+                if(err) {
+                    console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                    console.log(`    ${err}`.red)
+                }
+                else {
+                    fs.writeFile(new_file_source_path, str, (err, data) => {
+                        if(!err) {
+                            compiler.look_for_conflict(source_path, new_file_source_path)
+                        }
+                        else {
+                            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+                    }) 
+                }
             })
         }
     })

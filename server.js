@@ -2,7 +2,6 @@ const express = require('express')
 const fs = require("fs")
 const path = require("path")
 const colors = require('colors')
-const rateSpeedLimiter = require("express-slow-down")
 var interceptor = require('express-interceptor')
 
 const config = require("./res/scripts/config")
@@ -11,11 +10,6 @@ const functions = require("./res/scripts/functions")
 const contentDir = "res/content/generated"
 
 const app = express()
-const rateSpeedLimit = rateSpeedLimiter({
-    delayAfter: 300, // slow down limit (in reqs)
-    windowMs: 1 * 60 * 1000, // 1 minute - time where limit applies
-    delayMs: 2500 // slow down time
-})
 
 app.set('trust proxy', 1)
 

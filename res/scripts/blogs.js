@@ -1,6 +1,5 @@
 const path = require("path")
 const path_resolve = require("path").resolve
-var mkdirp = require('mkdirp')
 const fs = require("fs")
 const ejs = require("ejs")
 const { v4: uuidv4 } = require('uuid')
@@ -74,17 +73,23 @@ exports.make_rss_feed = (blog_config) => {
     </channel>
 </rss>`
 
-    mkdirp(blog_config["local_path"]).then(() => {
-        fs.writeFile(`${blog_config["local_path"]}/feed.xml`, feed, (err, data) => {
-            if(!err) {
-                console.log(`\nfeed for blog ${blog_config["title"]}`.bold.magenta)
-                console.log(`    generated !`.green)
-            }
-            else {
-                console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
-                console.log(`    ${err}`.red)
-            }
-        })  
+    fs.mkdir(blog_config["local_path"], {recursive: true}, (err) => {
+        if(err) {
+            console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
+            console.log(`    ${err}`.red)
+        }
+        else {
+            fs.writeFile(`${blog_config["local_path"]}/feed.xml`, feed, (err, data) => {
+                if(!err) {
+                    console.log(`\nfeed for blog ${blog_config["title"]}`.bold.magenta)
+                    console.log(`    generated !`.green)
+                }
+                else {
+                    console.log(`\nfeed for blog ${blog_config["title"]}`.bold)
+                    console.log(`    ${err}`.red)
+                }
+            })
+        }
     })
 }
 
@@ -350,19 +355,22 @@ exports.compile_html = (source_path, blog_config) => {
             let new_file_source_path = `${blog_config["local_path"]}${without_source_and_ext}.html`
             let folder = path.dirname(new_file_source_path)
             
-            mkdirp(folder).then((made) => {
-                fs.writeFile(new_file_source_path, str, (err, data) => {
-                    if(!err) {
-                        compiler.look_for_conflict(source_path, new_file_source_path)
-                    }
-                    else {
-                        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                        console.log(`    ${err}`.red)
-                    }
-                }) 
-            }).catch((err) => {
-                console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-                console.log(`    ${err}`.red)
+            fs.mkdir(folder, {recursive: true}, (err) => {
+                if(err) {
+                    console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                    console.log(`    ${err}`.red)
+                }
+                else {
+                    fs.writeFile(new_file_source_path, str, (err, data) => {
+                        if(!err) {
+                            compiler.look_for_conflict(source_path, new_file_source_path)
+                        }
+                        else {
+                            console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
+                            console.log(`    ${err}`.red)
+                        }
+                    })
+                }
             })
         }
     })
