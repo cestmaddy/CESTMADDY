@@ -1,13 +1,13 @@
-package-lock.json
-node_modules
-commento_db
+/package-lock.json
+/node_modules
+/commento_db
 
-res/templates/favicons.ejs
-res/content/generated
+/res/templates/favicons.ejs
+/res/content/generated
 
-source
-config.yml
-.env
-dev.env
-docker-compose.dev.yml
-dev.md
+/source
+/config.yml
+/.env
+/docker-compose.yml
+/entrypoint.sh
+/dev.md
