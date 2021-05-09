@@ -12,8 +12,8 @@ COPY package.json package.json
 RUN apk --no-cache --virtual build-dependencies add \
     python3 \
     make \
-    g++ \
-    npm i \
+    g++ && \
+    npm i && \
     apk del build-dependencies
 
 COPY res res
