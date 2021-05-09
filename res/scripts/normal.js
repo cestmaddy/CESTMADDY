@@ -48,7 +48,11 @@ exports.compile_html = (source_path) => {
         header: compiler.get_header_content(),
         footer: compiler.get_footer_content(),
         theme: "clean",
-        type: "normal"
+        type: "normal",
+        favicon: {
+            theme_color: config.get("string", ["content", "favicon", "theme_color"]),
+            background: config.get("string", ["content", "favicon", "background"]),
+        }
     }
     if(config.get("string", ["content", "theme"]) != "") {
         site.theme = config.get("string", ["content", "theme"])

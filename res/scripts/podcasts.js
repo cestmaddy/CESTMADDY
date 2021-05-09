@@ -430,7 +430,11 @@ exports.compile_html = (source_path, podcast_config) => {
         footer: compiler.get_footer_content(),
         theme: "clean",
         type: "podcast",
-        comments: podcast_config["comments"]
+        comments: podcast_config["comments"],
+        favicon: {
+            theme_color: config.get("string", ["content", "favicon", "theme_color"]),
+            background: config.get("string", ["content", "favicon", "background"]),
+        }
     }
     if(config.get("string", ["content", "theme"]) != "") {
         site.theme = config.get("string", ["content", "theme"])

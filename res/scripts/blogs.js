@@ -293,7 +293,11 @@ exports.compile_html = (source_path, blog_config) => {
         footer: compiler.get_footer_content(),
         theme: "clean",
         type: "blog",
-        comments: blog_config["comments"]
+        comments: blog_config["comments"],
+        favicon: {
+            theme_color: config.get("string", ["content", "favicon", "theme_color"]),
+            background: config.get("string", ["content", "favicon", "background"]),
+        }
     }
     // get theme
     if(config.get("string", ["content", "theme"]) != "") {
