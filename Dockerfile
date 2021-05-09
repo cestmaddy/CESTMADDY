@@ -14,7 +14,6 @@ RUN npm i
 COPY res res
 COPY gruntfile.js gruntfile.js
 COPY server.js server.js
-COPY entrypoint.sh entrypoint.sh
 
 EXPOSE 80
 ENV PORT=80

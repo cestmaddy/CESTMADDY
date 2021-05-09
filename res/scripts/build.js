@@ -1,5 +1,7 @@
-const path_resolve = require("path").resolve
+const path = require("path")
 const colors = require('colors')
+const fs = require("fs")
+const fse = require("fs-extra")
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -8,6 +10,33 @@ const podcasts = require("./podcasts")
 
 const sourceDir = "./source"
 const contentDir = "res/content/generated"
+
+// copy custom theme
+//#region 
+// empty theme folder except 'clean' and .gitignore
+let installed_themes = fs.readdirSync('./res/content/front/themes')
+
+installed_themes.forEach((file) => {
+    file_path = path.join('./res/content/front/themes', file)
+
+    if(fs.lstatSync(file_path).isDirectory()) {
+        if(file != "clean") {
+            fs.rmdirSync(file_path, {recursive: true})
+        }
+    }
+    else {
+        if(file != ".gitignore") {
+            fs.unlinkSync(file_path)
+        }
+    }
+})
+
+// copy current theme
+let theme = config.get("string", ["content", "theme"])
+if(theme != "clean" && theme != "") {
+    fse.copySync(`./custom/themes/${theme}`, `./res/content/front/themes/${theme}`)
+}
+//#endregion
 
 var only_one_file = false
 var files = []
@@ -24,7 +53,7 @@ let blogs_list = {}
 let podcasts_list = {}
 
 if(only_one_file) { // eg: if it's footer or header
-    source_path = path_resolve(files[0])
+    source_path = path.resolve(files[0])
 
     if(compiler.should_reload_every_files(source_path)) {
         files = compiler.get_every_files_of_dir(sourceDir)
@@ -32,7 +61,7 @@ if(only_one_file) { // eg: if it's footer or header
 }
 
 for(f in files) {
-    source_path = path_resolve(files[f])
+    source_path = path.resolve(files[f])
 
     if(!compiler.should_reload_every_files(source_path)) {
         compiler.compile(source_path)

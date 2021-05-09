@@ -6,6 +6,7 @@
 /res/content/generated
 
 /source
+/custom
 /config.yml
 /.env
 /docker-compose.yml
