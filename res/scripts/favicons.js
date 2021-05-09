@@ -7,8 +7,6 @@ const { optimize } = require('svgo')
 
 const config = require("./config")
 
-var favicon_ejs = path.join("res", "templates", "favicons.ejs")
-
 if(config.get("object", ["content", "favicon"])) {
     if(config.get("string", ["content", "favicon", "path"])) {
         console.log(`\ngenerating favicons`.bold.magenta)

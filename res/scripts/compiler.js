@@ -3,7 +3,6 @@ const path_resolve = require("path").resolve
 const fs = require("fs")
 const colors = require('colors')
 const ejs = require('ejs')
-const favicons = require('favicons')
 
 const config = require("./config")
 const shortcodes = require("./shortcodes")

@@ -13,8 +13,6 @@ const app = express()
 
 app.set('trust proxy', 1)
 
-app.use(rateSpeedLimit)
-
 var replaceInHtml = interceptor((req, res) => {
     return {
         // Only HTML responses will be intercepted

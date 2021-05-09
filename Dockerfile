@@ -1,8 +1,7 @@
-FROM node:current-buster
+FROM node:current-alpine
 
-RUN apt update
-RUN apt upgrade -y
-RUN apt install -y git
+RUN apk update
+RUN apk add imagemagick
 
 RUN mkdir /cestmaddy
 
