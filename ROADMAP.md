@@ -4,7 +4,7 @@ Current version : **v0.1.1**
 
 - **v0.1.2** :
     + [ ] Removed the need for the `.env` file when cestmaddy is not launched with docker.
-    + [ ] Make the generation of rss feeds faster (do not recompile each file)
+    + [X] ~~*Make the generation of rss feeds faster (do not recompile each file)*~~ [2021-05-13]
     + [X] ~~*Update of docker configuration files*~~ [2021-05-13]
     + [ ] Better documentation and commenting of the code
     + [ ] Do not cut the content in the rss feed
