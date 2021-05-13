@@ -6,6 +6,7 @@ const mp3Duration = require('mp3-duration')
 const sp = require('synchronized-promise')
 const ejs = require("ejs")
 const { v4: uuidv4 } = require('uuid')
+const colors = require("colors")
 
 const config = require("./config")
 const compiler = require("./compiler")
@@ -15,29 +16,27 @@ const functions = require("./functions")
 
 const contentDir = "./res/content/generated"
 
-exports.compile_podcast_dir = (source_path) => {
-    let podcast_config = this.get_podcast_config(source_path)
+exports.compile = (source_path, podcast_config) => {
+    let podcast_data = undefined
     
     if(!compiler.is_markdown_file(source_path)) {
         
     }
     else {
-        this.compile_html(source_path, podcast_config)
+        podcast_data = this.compile_html(source_path, podcast_config)
+    }
+
+    return {
+        podcast_config: podcast_config,
+        podcast_data: podcast_data
     }
 }
 
-exports.make_rss_feed = (podcast_config) => {
-    let podcasts = compiler.get_every_files_with_extension_of_dir(podcast_config['dir'], "md")
+exports.make_rss_feed = (podcast_data) => {
+    podcast_config = podcast_data["podcast_config"]
+    podcasts_data = podcast_data["podcasts_data"]
 
     itemsFeed = ""
-
-    let podcasts_data = []
-    podcasts.forEach((podcast) => {
-        // exclude index.md from feed (because it's not a podcast)
-        if(!podcast.endsWith("index.md")) {
-            podcasts_data.push(this.get_podcast_data(podcast_config, podcast))
-        }
-    })
 
     // sort by date
     podcasts_data = podcasts_data.sort((a, b) => {
@@ -329,6 +328,7 @@ exports.seconds_to_hours_minutes_seconds = (duration) => {
 }
 
 exports.get_podcast_config = (source_path) => {
+    console.log("get podcast config")
     let absolute_source_path = path_resolve(source_path)
 
     let config_podcasts = config.get("array", ["content", "podcasts"])
@@ -354,7 +354,6 @@ exports.get_podcast_config = (source_path) => {
             podcast_config["main_author"] = config.get("string", ["content", "podcasts", conf_ctr, "main_author"])
             podcast_config["authors"] = config.get("object", ["content", "podcasts", conf_ctr, "authors"])
 
-
             // LOCAL PODCAST PATH
             podcast_config["path"] = `/${path.basename(podcast_config["dir"])}`
             podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
@@ -369,7 +368,6 @@ exports.get_podcast_config = (source_path) => {
                     fs.accessSync(podcast_config["image_url"], fs.constants.R_OK)
                     let new_image_path = `${podcast_config["local_path"]}/${path.basename(podcast_config["image_url"])}`
 
-                    // problem : called for every podcast file
                     compiler.copy_file(podcast_config["image_url"], new_image_path, true)
 
                     podcast_config["image_url"] = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}/${path.basename(podcast_config["image_url"])}`
@@ -405,81 +403,39 @@ exports.get_podcast_config = (source_path) => {
 }
 
 exports.compile_html = (source_path, podcast_config) => {
-    let source_file = ""
-    try {
-        source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
-    }
-    catch(err) {
-        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-        console.log(`    ${err}`.red)
-        return
-    }
-
     let podcast_data = this.get_podcast_data(podcast_config, source_path)
-    source_file = shortcodes.replace_shortcode(
-        source_file,
-        source_path,
-        "podcast"
-    )
-    let source_html = markdown_compiler.compile(source_file)
-
-    // site data
-    let site = {
-        title: config.get("string", ["content", "title"]),
-        header: compiler.get_header_content(),
-        footer: compiler.get_footer_content(),
-        theme: "clean",
-        type: "podcast",
-        comments: podcast_config["comments"],
-        favicon: {
-            theme_color: config.get("string", ["content", "favicon", "theme_color"]),
-            background: config.get("string", ["content", "favicon", "background"]),
-        }
-    }
-    if(config.get("string", ["content", "theme"]) != "") {
-        site.theme = config.get("string", ["content", "theme"])
-    }
 
     let render_options = {
-        site: site
-    }
-    let render_path = `./res/content/front/themes/${site.theme}/templates/normal.ejs`
-
-
-    // if it's a podcast post
-    if(!source_path.endsWith("index.md")) {
-        render_options = Object.assign(
-            render_options,
+        site: {
+            title: config.get("string", ["content", "title"]),
+            header: compiler.get_header_content(),
+            footer: compiler.get_footer_content(),
+            theme: "clean",
+            type: "podcast",
+            comments: podcast_config["comments"],
+            favicon: {
+                theme_color: config.get("string", ["content", "favicon", "theme_color"]),
+                background: config.get("string", ["content", "favicon", "background"]),
+            }
+        },
+        podcast: Object.assign(
+            podcast_data,
             {
-                podcast: Object.assign(
-                    podcast_data,
-                    {
-                        date_string: podcast_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: `[RELATIVE_DATE=${podcast_data["date_object"].toISOString()}]`,
-                        meta_description: functions.remove_html_tags(
-                            podcast_data.description
-                        )
-                    }
+                date_string: podcast_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
+                relative_date: `[RELATIVE_DATE=${podcast_data["date_object"].toISOString()}]`,
+                meta_description: functions.remove_html_tags(
+                    podcast_data.description
                 )
             }
         )
-        render_path = `./res/content/front/themes/${site.theme}/templates/podcast.ejs`
     }
-    else {
-        // if it's an index
-        render_options = Object.assign(
-            render_options,
-            {
-                normal: {
-                    title: podcast_data["title"],
-                    html: source_html,
-                    meta_description: functions.remove_html_tags(
-                        podcast_data.description
-                    )
-                }
-            }
-        )
+
+    // get theme
+    if(config.get("string", ["content", "theme"]) != "") {
+        render_options.site.theme = config.get("string", ["content", "theme"])
     }
+
+    let render_path = `./res/content/front/themes/${render_options.site.theme}/templates/podcast.ejs`
 
     ejs.renderFile(render_path, render_options, (err, str) => {
         if(err) {
@@ -513,6 +469,8 @@ exports.compile_html = (source_path, podcast_config) => {
             })
         }
     })
+
+    return podcast_data
 }
 
 exports.remove_0_before_duration = (duration) => {

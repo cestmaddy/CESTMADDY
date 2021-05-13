@@ -12,8 +12,8 @@ const markdown_compiler = require("./markdown_compiler")
 
 const contentDir = "./res/content/generated"
 
-exports.compile_blog_dir = (source_path) => {
-    let blog_config = this.get_blog_config(source_path)
+exports.compile = (source_path, blog_config) => {
+    let post_data = undefined
 
     if(!compiler.is_markdown_file(source_path)) {
         let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
@@ -24,23 +24,20 @@ exports.compile_blog_dir = (source_path) => {
         compiler.copy_file(source_path, `${copy_dest}`)
     }
     else {
-        this.compile_html(source_path, blog_config)
+        post_data = this.compile_html(source_path, blog_config)
+    }
+
+    return {
+        blog_config: blog_config,
+        post_data: post_data
     }
 }
 
-exports.make_rss_feed = (blog_config) => {
-    let posts = compiler.get_every_files_with_extension_of_dir(blog_config['dir'], "md")
+exports.make_rss_feed = (blog_data) => {
+    blog_config = blog_data["blog_config"]
+    posts_data = blog_data["posts_data"]
 
     itemsFeed = ""
-
-    // get posts data
-    let posts_data = []
-    posts.forEach((post) => {
-        // exclude index.md from feed (because it's not an article)
-        if(!post.endsWith("index.md")) {
-            posts_data.push(this.get_post_data(blog_config, post))
-        }
-    })
 
     // sort by date
     posts_data = posts_data.sort((a, b) => {
@@ -281,70 +278,42 @@ exports.compile_html = (source_path, blog_config) => {
     let post_data = this.get_post_data(blog_config, source_path)
     source_file = shortcodes.replace_shortcode(
         source_file,
-        source_path,
-        "blog"
+        source_path
     )
     let source_html = markdown_compiler.compile(source_file)
 
-    // site data
-    let site = {
-        title: config.get("string", ["content", "title"]),
-        header: compiler.get_header_content(),
-        footer: compiler.get_footer_content(),
-        theme: "clean",
-        type: "blog",
-        comments: blog_config["comments"],
-        favicon: {
-            theme_color: config.get("string", ["content", "favicon", "theme_color"]),
-            background: config.get("string", ["content", "favicon", "background"]),
-        }
-    }
-    // get theme
-    if(config.get("string", ["content", "theme"]) != "") {
-        site.theme = config.get("string", ["content", "theme"])
-    }
-
     let render_options = {
-        site: site,
-        meta_description: ""
-    }
-    let render_path = `./res/content/front/themes/${site.theme}/templates/normal.ejs`
-    // if it's a blog post
-    if(!source_path.endsWith("index.md")) {
-        render_options = Object.assign(
-            render_options,
+        site: {
+            title: config.get("string", ["content", "title"]),
+            header: compiler.get_header_content(),
+            footer: compiler.get_footer_content(),
+            theme: "clean",
+            type: "blog",
+            comments: blog_config["comments"],
+            favicon: {
+                theme_color: config.get("string", ["content", "favicon", "theme_color"]),
+                background: config.get("string", ["content", "favicon", "background"]),
+            }
+        },
+        post: Object.assign(
+            post_data,
             {
-                post: Object.assign(
-                    post_data,
-                    {
-                        html: source_html,
-                        date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
-                        relative_date: `[RELATIVE_DATE=${post_data["date_object"].toISOString()}]`,
-                        meta_description: functions.remove_html_tags(
-                            post_data.description
-                        )
-                    }
+                html: source_html,
+                date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
+                relative_date: `[RELATIVE_DATE=${post_data["date_object"].toISOString()}]`,
+                meta_description: functions.remove_html_tags(
+                    post_data.description
                 )
             }
         )
-        render_path = `./res/content/front/themes/${site.theme}/templates/blog.ejs`
     }
-    else {
-        // if it's an index
-        render_options = Object.assign(
-            render_options,
-            {
-                normal: {
-                    title: post_data["title"],
-                    html: source_html
-                }
-            }
-        )
-        //description
-        render_options.normal.meta_description = functions.remove_html_tags(
-            post_data.description
-        )
+
+    // get theme
+    if(config.get("string", ["content", "theme"]) != "") {
+        render_options.site.theme = config.get("string", ["content", "theme"])
     }
+
+    let render_path = `./res/content/front/themes/${render_options.site.theme}/templates/blog.ejs`
 
     ejs.renderFile(render_path, render_options, (err, str) => {
         if(err) {
@@ -356,6 +325,7 @@ exports.compile_html = (source_path, blog_config) => {
             let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
             let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(source_path)
             without_source_and_ext = without_source_and_ext.substr(blog_dir_without_source.length)
+            
             let new_file_source_path = `${blog_config["local_path"]}${without_source_and_ext}.html`
             let folder = path.dirname(new_file_source_path)
             
@@ -378,4 +348,6 @@ exports.compile_html = (source_path, blog_config) => {
             })
         }
     })
+
+    return post_data
 }

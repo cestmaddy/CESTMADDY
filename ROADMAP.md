@@ -6,6 +6,13 @@ Current version : **v0.1.1**
     + [ ] Removed the need for the `.env` file when cestmaddy is not launched with docker.
     + [ ] Make the generation of rss feeds faster (do not recompile each file)
     + [X] ~~*Update of docker configuration files*~~ [2021-05-13]
+    + [ ] Better documentation and commenting of the code
+    + [ ] Do not cut the content in the rss feed
+
+- **v0.1.3** :
+    + [ ] Log cleanup
+    + [ ] Display configuration errors in the logs
+    + [ ] Use multiple threads during generation
 
 - **v0.2.0 : Shortcodes update** :
     + [ ] `LIST_BLOG_RECUR` and `LIST_PODCAST_RECUR` replaced by `LIST` with parameters (recur, type, enclosure) and page list added

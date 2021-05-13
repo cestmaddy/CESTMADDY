@@ -95,7 +95,7 @@ exports.remove_shortcode = (str) => {
 }
 
 
-exports.replace_shortcode = (str, source_path, type) => {
+exports.replace_shortcode = (str, source_path, additional_data) => {
     shortcode_data = this.get_shortcodes(str)
 
     for (short_ctr in shortcode_data.replace) {
@@ -119,9 +119,18 @@ exports.replace_shortcode = (str, source_path, type) => {
                             }
                         }
 
+                        let blog_data = {}
+                        if(additional_data.hasOwnProperty('blogs')) {
+                            for(bcp in additional_data["blogs"]) {
+                                if(blog_source_path.startsWith(bcp)) {
+                                    blog_data = additional_data['blogs'][bcp]
+                                }
+                            }
+                        }
+
                         str = str.replace(
                             new RegExp(`\\w*(?<!\\$)${key}`),
-                            this.list_blog_recursively(blog_source_path, str)
+                            this.list_blog_recursively(blog_data)
                         )
                         break
 
@@ -137,9 +146,18 @@ exports.replace_shortcode = (str, source_path, type) => {
                             }
                         }
 
+                        let podcast_data = {}
+                        if(additional_data.hasOwnProperty('podcasts')) {
+                            for(pcp in additional_data["podcasts"]) {
+                                if(podcast_source_path.startsWith(pcp)) {
+                                    podcast_data = additional_data['podcasts'][pcp]
+                                }
+                            }
+                        }
+
                         str = str.replace(
                             new RegExp(`\\w*(?<!\\$)${key}`),
-                            this.list_podcast_recursively(podcast_source_path, str)
+                            this.list_podcast_recursively(podcast_data)
                         )
                         break
 
@@ -170,25 +188,10 @@ exports.replace_shortcode = (str, source_path, type) => {
     CONTENT GENERATION
 */
 
-exports.list_blog_recursively = (source_path, file_content) => {
+exports.list_blog_recursively = (blog_data) => {
     let list_content = `<ul class="list_blog">`
 
-    let blog_config = blogs.get_blog_config(source_path)
-    let posts = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
-
-    // get posts_datas
-    let posts_data = []
-    for (i_post = 0; i_post < posts.length; i_post++) {
-        // exclude the current page from the list
-        if (path_resolve(source_path) != posts[i_post]) {
-            posts_data.push(
-                blogs.get_post_data(
-                    blog_config,
-                    posts[i_post]
-                )
-            )
-        }
-    }
+    let posts_data = blog_data["posts_data"]
 
     // sort by date
     posts_data = posts_data.sort((a, b) => {
@@ -213,25 +216,10 @@ exports.list_blog_recursively = (source_path, file_content) => {
     return list_content
 }
 
-exports.list_podcast_recursively = (source_path, file_content) => {
+exports.list_podcast_recursively = (podcast_data) => {
     let list_content = `<ul class="list_podcast">`
 
-    let podcast_config = podcasts.get_podcast_config(source_path)
-    let podcasts_list = compiler.get_every_files_with_extension_of_dir(path.dirname(source_path), "md")
-
-    // get podcasts_data
-    let podcasts_data = []
-    for (i_pod = 0; i_pod < podcasts_list.length; i_pod++) {
-        // exclude the current page from the list
-        if (path_resolve(source_path) != podcasts_list[i_pod]) {
-            podcasts_data.push(
-                podcasts.get_podcast_data(
-                    podcast_config,
-                    podcasts_list[i_pod]
-                )
-            )
-        }
-    }
+    let podcasts_data = podcast_data["podcasts_data"]
 
     // sort by date
     podcasts_data = podcasts_data.sort((a, b) => {

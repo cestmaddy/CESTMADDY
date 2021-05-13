@@ -11,18 +11,18 @@ const functions = require("./functions")
 
 const contentDir = "./res/content/generated"
 
-exports.compile_normal_dir = (source_path) => {
+exports.compile = (source_path, additional_data={}) => {
     if(!compiler.is_markdown_file(source_path)) {
         let without_source = compiler.remove_source_from_path(source_path)
         let copy_dest = `${contentDir}${without_source}`
         compiler.copy_file(source_path, `${copy_dest}`)
     }
     else {
-        this.compile_html(source_path)
+        this.compile_html(source_path, additional_data)
     }
 }
 
-exports.compile_html = (source_path) => {
+exports.compile_html = (source_path, additional_data={}) => {
     let source_file = ""
     try {
         source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
@@ -38,7 +38,7 @@ exports.compile_html = (source_path) => {
     source_file = shortcodes.replace_shortcode(
         source_file,
         source_path,
-        "normal"
+        additional_data
     )
     let source_html = markdown_compiler.compile(source_file)
     

@@ -9,74 +9,52 @@ const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
 const podcasts = require("./podcasts")
 const blogs = require("./blogs")
-const normal = require("./normal")
+const normal = require("./page")
 
 const contentDir = path.join("res", "content", "generated")
-
-exports.should_it_be_compiled = (source_path) => {
-    let absolute_source_path = path_resolve(source_path)
-
-    if(this.special_content_type(source_path) != "normal") {
-        return false
-    }
-    else if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
-        return false
-    }
-    else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
-        return false
-    }
-
-    return true
-}
 
 exports.special_content_type = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
+    /* PAGE */
+    if(source_path.endsWith("index.md")) {
+        return {
+            type: "page"
+        }
+    }
+    /* NOT TO COMPILE */
+    if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
+        return {
+            type: "not_to_compile"
+        }
+    }
+    else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
+        return {
+            type: "not_to_compile"
+        }
+    }
     /* PODCAST */
-    let config_podcasts = config.get("array", ["content", "podcasts"], false)
-    for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
-        if(absolute_source_path.startsWith(
-            path_resolve(
-                config.get("string", ["content", "podcasts", conf_ctr, "dir"])
-            )
-        )) {
-            return "podcast"
+    for(i in config.get_absolute_podcasts_paths()) {
+        if(absolute_source_path.startsWith(config.get_absolute_podcasts_paths()[i])) {
+            return {
+                type: "podcast",
+                podcast_path: config.get_absolute_podcasts_paths()[i]
+            }
         }
     }
     /* BLOG */
-    let config_blogs = config.get("array", ["content", "blogs"], false)
-    for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
-        if(absolute_source_path.startsWith(
-            path_resolve(
-                config.get("string", ["content", "blogs", conf_ctr, "dir"])
-            )
-        )) {
-            return "blog"
+    for(i in config.get_absolute_blogs_paths()) {
+        if(absolute_source_path.startsWith(config.get_absolute_blogs_paths()[i])) {
+            return {
+                type: "blog",
+                blog_path: config.get_absolute_blogs_paths()[i]
+            }
         }
     }
 
-    return "normal"
-}
-
-exports.should_reload_every_files = (source_path) => {
-    let absolute_source_path = path_resolve(source_path)
-
-    if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
-        return true
+    return {
+        type: "page"
     }
-    else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
-        return true
-    }
-
-    return false
-}
-
-exports.recompile_every_markdown = (startDir = contentDir) => {
-    this.get_every_files_with_extension_of_dir('./source', "md").forEach((file) => {
-        if(!this.should_reload_every_files(file)) {
-            this.compile(file)
-        }
-    })
 }
 
 exports.get_every_files_with_extension_of_dir = (startDir = "./source", extension = "md") => {
@@ -278,7 +256,6 @@ exports.generate_errors = () => {
                         else {
                             fs.writeFile(new_file_source_path, str, (err) => {
                                 if(!err) {
-                                    this.look_for_conflict(source_path, new_file_source_path)
                                 }
                                 else {
                                     console.log(`\n${render_path.bold}`)
@@ -291,24 +268,4 @@ exports.generate_errors = () => {
             })
         }
     })
-}
-
-exports.compile = (source_path) => {
-    source_path = path_resolve(source_path)
-    let content_type = this.special_content_type(source_path)
-    
-    switch (content_type) {
-        case "normal":
-            normal.compile_normal_dir(source_path)
-            break
-        case "podcast":
-            podcasts.compile_podcast_dir(source_path)
-            break
-        case "blog":
-            blogs.compile_blog_dir(source_path)
-            break
-        default:
-            console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
-            console.log(`    Unknown special content type`.red)
-    }
 }

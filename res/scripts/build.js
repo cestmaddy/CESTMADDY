@@ -7,6 +7,7 @@ const config = require("./config")
 const compiler = require("./compiler")
 const blogs = require("./blogs")
 const podcasts = require("./podcasts")
+const page = require("./page")
 
 const sourceDir = "./source"
 const contentDir = "res/content/generated"
@@ -38,46 +39,59 @@ if(theme != "clean" && theme != "") {
 }
 //#endregion
 
-var only_one_file = false
 var files = []
 
-if(process.argv[2]) {
-    only_one_file = true
-    files = [process.argv[2]]
-}
-else {
-    files = compiler.get_every_files_of_dir(sourceDir)
-}
+files = compiler.get_every_files_of_dir(sourceDir)
 
 let blogs_list = {}
 let podcasts_list = {}
 
-if(only_one_file) { // eg: if it's footer or header
-    source_path = path.resolve(files[0])
-
-    if(compiler.should_reload_every_files(source_path)) {
-        files = compiler.get_every_files_of_dir(sourceDir)
-    }
-}
+let pages_paths = []
 
 for(f in files) {
     source_path = path.resolve(files[f])
-
-    if(!compiler.should_reload_every_files(source_path)) {
-        compiler.compile(source_path)
-    }
     
     // FEEDS
     let content_type = compiler.special_content_type(source_path)
-    if(content_type == "podcast") {
-        podcasts_list[
-            podcasts.get_podcast_config(source_path)["local_path"]
-        ] = podcasts.get_podcast_config(source_path)
+    
+    if(content_type.type == "podcast") {
+        if(!podcasts_list.hasOwnProperty(content_type.podcast_path)) {
+            podcasts_list[content_type.podcast_path] = {
+                podcast_config: podcasts.get_podcast_config(source_path),
+                podcasts_data: []
+            }
+        }
+
+        compiled_podcast = podcasts.compile(
+            source_path, 
+            podcasts_list[content_type.podcast_path]["podcast_config"]
+        )
+
+        if(compiled_podcast["podcast_data"] != undefined) {
+            podcasts_list[content_type.podcast_path]["podcasts_data"]
+                .push(compiled_podcast["podcast_data"])
+        }
     }
-    if(content_type == "blog") {
-        blogs_list[
-            blogs.get_blog_config(source_path)["local_path"]
-        ] = blogs.get_blog_config(source_path)
+    else if(content_type.type == "blog") {
+        if(!blogs_list.hasOwnProperty(content_type.blog_path)) {
+            blogs_list[content_type.blog_path] = {
+                blog_config: blogs.get_blog_config(source_path),
+                posts_data: []
+            }
+        }
+
+        compiled_post = blogs.compile(
+            source_path, 
+            blogs_list[content_type.blog_path]["blog_config"]
+        )
+
+        if(compiled_post["post_data"] != undefined) {
+            blogs_list[content_type.blog_path]["posts_data"]
+                .push(compiled_post["post_data"])
+        }
+    }
+    else if(content_type.type == "page") {
+        pages_paths.push(source_path)
     }
 }
 
@@ -90,6 +104,13 @@ for(key in blogs_list) {
     if(blogs_list.hasOwnProperty(key)) {
         blogs.make_rss_feed(blogs_list[key])
     }
+}
+
+for(i in pages_paths) {
+    page.compile(pages_paths[i], {
+        blogs: blogs_list,
+        podcasts: podcasts_list
+    })
 }
 
 compiler.generate_errors()

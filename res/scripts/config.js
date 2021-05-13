@@ -1,4 +1,6 @@
 const configYaml = require('config-yaml')
+const path = require("path")
+
 const config = configYaml("./config.yml")
 require('dotenv').config()
 
@@ -63,4 +65,42 @@ exports.get = (type, conf_path_arr, required=true) => {
         case 'boolean':
             return false
     }
+}
+
+let absolute_blogs_paths = []
+let config_blogs = this.get("array", ["content", "blogs"], false)
+for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
+    if(!absolute_blogs_paths.includes(
+        path.resolve(
+            this.get("string", ["content", "blogs", conf_ctr, "dir"])
+        )
+    )) {
+        absolute_blogs_paths.push(
+            path.resolve(
+                this.get("string", ["content", "blogs", conf_ctr, "dir"])
+            )
+        )
+    }
+}
+exports.get_absolute_blogs_paths = () => {
+    return absolute_blogs_paths
+}
+
+let absolute_podcasts_paths = []
+let config_podcasts = this.get("array", ["content", "podcasts"], false)
+for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
+    if(!absolute_podcasts_paths.includes(
+        path.resolve(
+            this.get("string", ["content", "podcasts", conf_ctr, "dir"])
+        )
+    )) {
+        absolute_podcasts_paths.push(
+            path.resolve(
+                this.get("string", ["content", "podcasts", conf_ctr, "dir"])
+            )
+        )
+    }
+}
+exports.get_absolute_podcasts_paths = () => {
+    return absolute_podcasts_paths
 }
