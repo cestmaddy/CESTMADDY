@@ -1,4 +1,5 @@
 server:
+  port: 8625
   hide_html_extension: true
   domain: "http://localhost:8625"
 

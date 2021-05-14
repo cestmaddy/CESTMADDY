@@ -3,14 +3,14 @@ services:
   cestmaddy:
     # If you want to compile from a dockerfile
     # build: .
-    image: "cestoliv/cestmaddy:latest"
-    command: bash -c "ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone && bash /cestmaddy/entrypoint.sh ${THEME} ${THEME_REPO} && npm run start-favicons"
+    image: "cestoliv/cestmaddy:0.1.1"
+    command: sh -c "ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone && npm run start-favicons"
     ports:
       - "${PORT}:80"
     volumes:
-      # Website
-      - ./config.yml:/cestmaddy/config.yml.original
+      - ./config.yml:/cestmaddy/config.yml
       - ./source/:/cestmaddy/source
+      - ./custom/:/cestmaddy/custom
 
   ###
   # COMMENTO
