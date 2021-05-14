@@ -49,7 +49,7 @@ exports.make_rss_feed = (blog_data) => {
         <item>
             <title>${posts_data[i_data].title}</title>
             <link>${posts_data[i_data].link}</link>
-            <description><![CDATA[${posts_data[i_data].description}]]></description>
+            <description><![CDATA[${posts_data[i_data].content}]]></description>
             <author>${posts_data[i_data].author.email} (${posts_data[i_data].author.name})</author>
             <enclosure url="${posts_data[i_data].enclosure}"/>
             <pubDate>${posts_data[i_data].date}</pubDate>
@@ -90,11 +90,12 @@ exports.make_rss_feed = (blog_data) => {
     })
 }
 
-exports.get_post_data = (blog_config, md_post_path) => {
+exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
     let post_data = {
         id: uuidv4(),
         title: "Untitled",
         description: "",
+        content: "",
         date: functions.user_date_to_date_object().toGMTString(),
         date_object: functions.user_date_to_date_object(),
         author: {
@@ -212,6 +213,15 @@ exports.get_post_data = (blog_config, md_post_path) => {
         console.log(`Please provide a main_author and a list of authors for the ${blog_config.title} blog`.red)
     }
 
+    if(return_content) {
+        post_data.content = markdown_compiler.compile(
+            shortcodes.replace_shortcode(
+                post_md,
+                md_post_path
+            )
+        )
+    }
+
     return post_data
 }
 
@@ -265,22 +275,7 @@ exports.get_blog_config = (source_path) => {
 }
 
 exports.compile_html = (source_path, blog_config) => {
-    let source_file = ""
-    try {
-        source_file = fs.readFileSync(path_resolve(source_path), "utf-8")
-    }
-    catch(err) {
-        console.log(`\n${compiler.remove_before_source_from_path(source_path).bold}`)
-        console.log(`    ${err}`.red)
-        return
-    }
-
-    let post_data = this.get_post_data(blog_config, source_path)
-    source_file = shortcodes.replace_shortcode(
-        source_file,
-        source_path
-    )
-    let source_html = markdown_compiler.compile(source_file)
+    let post_data = this.get_post_data(blog_config, source_path, true)
 
     let render_options = {
         site: {
@@ -298,7 +293,7 @@ exports.compile_html = (source_path, blog_config) => {
         post: Object.assign(
             post_data,
             {
-                html: source_html,
+                html: post_data.content,
                 date_string: post_data["date_object"].toLocaleString(config.get("string", ["content", "language"])),
                 relative_date: `[RELATIVE_DATE=${post_data["date_object"].toISOString()}]`,
                 meta_description: functions.remove_html_tags(
@@ -335,7 +330,7 @@ exports.compile_html = (source_path, blog_config) => {
                     console.log(`    ${err}`.red)
                 }
                 else {
-                    fs.writeFile(new_file_source_path, str, (err, data) => {
+                    fs.writeFile(new_file_source_path, str, (err) => {
                         if(!err) {
                             compiler.look_for_conflict(source_path, new_file_source_path)
                         }
