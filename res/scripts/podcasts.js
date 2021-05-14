@@ -196,11 +196,6 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
             podcast_shortcodes.values["[DESCRIPTION]"]
         )
     }
-    else {
-        podcast_data.description = markdown_compiler.compile(
-            shortcodes.remove_shortcode(podcast_md.substr(0, 500))
-        )
-    }
 
     // LINK
     let podcast_link = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}${without_source_and_ext}`
