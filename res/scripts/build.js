@@ -1,9 +1,9 @@
-//Importing external modules
+// Importing external modules
 const path = require("path")
 const colors = require('colors')
 const fs = require("fs")
 const fse = require("fs-extra")
-//Importing local modules
+// Importing local modules
 const config = require("./config")
 const compiler = require("./compiler")
 const blogs = require("./blogs")

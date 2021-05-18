@@ -1,16 +1,15 @@
+// Importing external modules
 const path = require("path")
 const path_resolve = require("path").resolve
 const fs = require("fs")
 const ejs = require("ejs")
 const { v4: uuidv4 } = require('uuid')
-
+// Importing local modules
 const config = require("./config")
 const compiler = require("./compiler")
 const shortcodes = require("./shortcodes")
 const functions = require("./functions")
 const markdown_compiler = require("./markdown_compiler")
-
-const contentDir = "./res/content/generated"
 
 exports.compile = (source_path, blog_config) => {
     /*
@@ -347,7 +346,7 @@ exports.get_blog_config = (source_path) => {
 
             // LOCAL BLOG PATH
             blog_config["path"] = `/${path.basename(blog_config["dir"])}`
-            blog_config["local_path"] = `${contentDir}${blog_config["path"]}`
+            blog_config["local_path"] = `./res/content/generated${blog_config["path"]}`
 
             return blog_config
         }
