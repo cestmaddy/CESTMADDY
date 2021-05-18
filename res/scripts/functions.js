@@ -1,7 +1,12 @@
-const config = require("./config")
-
 exports.user_date_to_date_object = (u_date = "") => {
-    // YYYY-MM-DDTHH:MM:SS
+    /*
+        Convert a date string ("YYYY-MM-DDTHH:MM:SS")
+        to a date object
+
+        Takes the date string
+
+        Returns a date object
+    */
     let date_parsed = Date.parse(u_date)
     if(u_date == "") {
         date_parsed = Date.now()
@@ -13,6 +18,13 @@ exports.user_date_to_date_object = (u_date = "") => {
 }
 
 exports.date_to_relative_date = (u_date) => {
+    /*
+        Convert a date to a relative date
+
+        Takes a date
+
+        Return a relative date string or "Invalid Date"
+    */
     u_date = new Date(u_date)
     let formatter = new Intl.RelativeTimeFormat({
         localeMatcher: "best fit",
@@ -44,6 +56,9 @@ exports.date_to_relative_date = (u_date) => {
 }
 
 exports.remove_html_tags = (html) => {
+    /*
+        Remove the html tags of a string and return it with regex
+    */
     text = html.toString()
     text = text.replace( /(<([^>]+)>)/ig, '')
     return text
