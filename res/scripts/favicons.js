@@ -1,10 +1,11 @@
+// Importing external modules
 const path = require("path")
 const fs = require("fs")
 const colors = require("colors")
 const im = require('imagemagick')
 const potrace = require('potrace')
 const { optimize } = require('svgo')
-
+// Importing local modules
 const config = require("./config")
 
 if(config.get("object", ["content", "favicon"])) {
@@ -14,6 +15,7 @@ if(config.get("object", ["content", "favicon"])) {
         let favicon_path = config.get("string", ["content", "favicon", "path"])
         let favicons_dir = "./res/content/generated/__favicons"
 
+        // create dir for favicons
         fs.mkdir(favicons_dir, {recursive: true}, (err) => {
             if(err) {
                 console.log(`\n${`generating favicons`.bold}`)
