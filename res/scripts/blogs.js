@@ -346,7 +346,7 @@ exports.get_blog_config = (source_path) => {
 
             // LOCAL BLOG PATH
             blog_config["path"] = `/${path.basename(blog_config["dir"])}`
-            blog_config["local_path"] = `./res/content/generated${blog_config["path"]}`
+            blog_config["local_path"] = path.join("res", "content", "generated", blog_config["path"])
 
             return blog_config
         }

@@ -5,11 +5,7 @@ const colors = require('colors')
 const ejs = require('ejs')
 
 const config = require("./config")
-const shortcodes = require("./shortcodes")
 const markdown_compiler = require("./markdown_compiler")
-const podcasts = require("./podcasts")
-const blogs = require("./blogs")
-const normal = require("./page")
 
 const contentDir = path.join("res", "content", "generated")
 
