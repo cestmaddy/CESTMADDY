@@ -5,7 +5,7 @@ Current version : **v0.1.1**
 - **v0.1.2** :
     + [X] ~~*Make the generation 2x faster (do not recompile each file)*~~ [2021-05-13]
     + [X] ~~*Update of docker configuration files*~~ [2021-05-14]
-    + [ ] Better documentation and commenting of the code
+    + [X] ~~*Better documentation and commenting of the code*~~ [2021-05-18]
     + [X] ~~*Do not cut the content in the rss feed*~~ [2021-05-14]
 
 - **v0.1.3** :

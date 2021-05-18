@@ -3,7 +3,7 @@ services:
   cestmaddy:
     # If you want to compile from a dockerfile
     # build: .
-    image: "cestoliv/cestmaddy:v0.1.1"
+    image: "cestoliv/cestmaddy:v0.1.2"
     command: sh -c "ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone && npm run start-favicons"
     ports:
       - "${PORT}:80"
