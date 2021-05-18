@@ -13,9 +13,30 @@ const markdown_compiler = require("./markdown_compiler")
 const contentDir = "./res/content/generated"
 
 exports.compile = (source_path, blog_config) => {
+    /*
+        Main function, call the function to compile post,
+        copy the others files and return the post data
+
+        Take the source_path of the post file
+        Take the blog config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+
+        Return the post_data (e.g. {
+            "id",
+            "title"
+            "description",
+            ...
+        })
+    */
+
     let post_data = undefined
 
+    // if it's not a post but an image
     if(!compiler.is_markdown_file(source_path)) {
+        // create the destination path
         let blog_dir_without_source = compiler.remove_source_from_path(blog_config["dir"])
         let without_source = compiler.remove_source_from_path(source_path)
         without_source = without_source.substr(blog_dir_without_source.length)
@@ -27,13 +48,18 @@ exports.compile = (source_path, blog_config) => {
         post_data = this.compile_html(source_path, blog_config)
     }
 
-    return {
-        blog_config: blog_config,
-        post_data: post_data
-    }
+    return post_data
 }
 
 exports.make_rss_feed = (blog_data) => {
+    /*
+        Create the blog feed with the blog data
+
+        Take blog_data (e.g. {
+            "blog_config": {}
+            "posts_data": [{}]
+        })
+    */
     blog_config = blog_data["blog_config"]
     posts_data = blog_data["posts_data"]
 
@@ -91,6 +117,33 @@ exports.make_rss_feed = (blog_data) => {
 }
 
 exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
+    /*
+        Get the posts data by reading the source file
+
+        Take the blog config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+        Take the markdown file path
+        Take an optional return_content to know if it 
+          have to return the post content or just the metadata
+
+        Return the post_data {
+            "id": str,
+            "title": str,
+            "description": str,
+            "date": str,
+            "date_object": date,
+            "author": {
+                "name": str,
+                "email": str
+            },
+            "enclosure": str,
+            "link": str
+        }
+    */
+
     let post_data = {
         id: uuidv4(),
         title: "Untitled",
@@ -106,7 +159,7 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
         link: ""
     }
 
-    // get post content
+    // get post content from source file
     let post_md = ""
     try {
         post_md = fs.readFileSync(md_post_path, "utf-8")
@@ -186,6 +239,7 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
     // AUTHOR
     if(blog_config.hasOwnProperty("main_author") && 
     blog_config.hasOwnProperty('authors')) {
+        // if there ar specified author
         if(post_shortcodes.values.hasOwnProperty("[AUTHOR]")) {
             if(blog_config.authors.hasOwnProperty(post_shortcodes.values["[AUTHOR]"])) {
                 post_data.author = {
@@ -197,6 +251,7 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
                 console.log(`The ${post_shortcodes.values["[AUTHOR]"]} author is not referenced in your configuration for the ${blog_config.title} blog`.red)
             }
         }
+        // if not we take the default blog author
         else {
             if(blog_config.authors.hasOwnProperty(blog_config.main_author)) {
                 post_data.author = {
@@ -226,10 +281,35 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
 }
 
 exports.get_blog_config = (source_path) => {
+    /* 
+        Get the blog config from the config.yml
+
+        Take the source path of the file
+          to identify the blog
+
+        Return the blog config {
+            "title": str,
+            "description": str,
+            "category": str,
+            "language": str,
+            "main_author": str,
+            "authors": [str],
+            "comments": {
+                "provider": str,
+                settings: {
+                    url: str
+                }
+            }
+        }
+    */
+
     let absolute_source_path = path_resolve(source_path)
 
+    // get blogs config from config.yml
     let config_blogs = config.get("array", ["content", "blogs"])
     for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
+
+        // if the blog dir match with source_path
         if(absolute_source_path.startsWith(
             path_resolve(
                 config.get("string", ["content", "blogs", conf_ctr, "dir"])
@@ -275,6 +355,24 @@ exports.get_blog_config = (source_path) => {
 }
 
 exports.compile_html = (source_path, blog_config) => {
+    /*
+        Compile the post with it's data and the template (ejs) of the theme
+
+        Take the source file of the file
+        Take the blog config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+
+        Return the posts data (e.g. {
+            "id",
+            "title"
+            "description",
+            ...
+        })
+    */
+
     let post_data = this.get_post_data(blog_config, source_path, true)
 
     let render_options = {

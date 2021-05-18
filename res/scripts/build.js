@@ -69,15 +69,16 @@ for(f in files) {
         }
 
         // compile the podcast page
-        compiled_podcast = podcasts.compile(
+        compiled_podcast_data = podcasts.compile(
             source_path, 
             podcasts_list[content_type.podcast_path]["podcast_config"]
         )
 
-        if(compiled_podcast["podcast_data"] != undefined) {
+        // if it was a podcast (and not an image, audio, etc.)
+        if(compiled_podcast_data != undefined) {
             // store podcast content
             podcasts_list[content_type.podcast_path]["podcasts_data"]
-                .push(compiled_podcast["podcast_data"])
+                .push(compiled_podcast_data)
         }
     }
     else if(content_type.type == "blog") {
@@ -91,15 +92,16 @@ for(f in files) {
         }
 
         // compile the post page
-        compiled_post = blogs.compile(
+        compiled_post_data = blogs.compile(
             source_path, 
             blogs_list[content_type.blog_path]["blog_config"]
         )
 
-        if(compiled_post["post_data"] != undefined) {
+        // if it was a post (and not an image, etc.)
+        if(compiled_post_data != undefined) {
             // store the post content
             blogs_list[content_type.blog_path]["posts_data"]
-                .push(compiled_post["post_data"])
+                .push(compiled_post_data)
         }
     }
     else if(content_type.type == "page") {

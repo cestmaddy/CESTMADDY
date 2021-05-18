@@ -26,10 +26,7 @@ exports.compile = (source_path, podcast_config) => {
         podcast_data = this.compile_html(source_path, podcast_config)
     }
 
-    return {
-        podcast_config: podcast_config,
-        podcast_data: podcast_data
-    }
+    return podcast_data
 }
 
 exports.make_rss_feed = (podcast_data) => {
