@@ -16,8 +16,8 @@ exports.compile = (source_path, blog_config) => {
         Main function, call the function to compile post,
         copy the others files and return the post data
 
-        Take the source_path of the post file
-        Take the blog config (e.g. {
+        Takes the source_path of the post file
+        Takes the blog config (e.g. {
             "title",
             "description",
             ...
@@ -54,7 +54,7 @@ exports.make_rss_feed = (blog_data) => {
     /*
         Create the blog feed with the blog data
 
-        Take blog_data (e.g. {
+        Takes blog_data (e.g. {
             "blog_config": {}
             "posts_data": [{}]
         })
@@ -119,13 +119,13 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
     /*
         Get the posts data by reading the source file
 
-        Take the blog config (e.g. {
+        Takes the blog config (e.g. {
             "title",
             "description",
             ...
         })
-        Take the markdown file path
-        Take an optional return_content to know if it 
+        Takes the markdown file path
+        Takes an optional return_content to know if it 
           have to return the post content or just the metadata
 
         Return the post_data {
@@ -283,7 +283,7 @@ exports.get_blog_config = (source_path) => {
     /* 
         Get the blog config from the config.yml
 
-        Take the source path of the file
+        Takes the source path of the file
           to identify the blog
 
         Return the blog config {
@@ -357,8 +357,8 @@ exports.compile_html = (source_path, blog_config) => {
     /*
         Compile the post with it's data and the template (ejs) of the theme
 
-        Take the source file of the file
-        Take the blog config (e.g. {
+        Takes the source file of the file
+        Takes the blog config (e.g. {
             "title",
             "description",
             ...

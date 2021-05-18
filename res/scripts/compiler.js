@@ -218,7 +218,7 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
 
 exports.remove_before_source_from_path = (u_path) => {
     /*
-        Take a path, and return it without the path before the starting source
+        Takes a path, and return it without the path before the starting source
 
         e.g.
             ./source/blog => source/blog
