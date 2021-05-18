@@ -1,3 +1,4 @@
+// Importing external modules
 const path = require("path")
 const path_resolve = require("path").resolve
 const fs = require("fs")
@@ -7,18 +8,36 @@ const sp = require('synchronized-promise')
 const ejs = require("ejs")
 const { v4: uuidv4 } = require('uuid')
 const colors = require("colors")
-
+// Importing local modules
 const config = require("./config")
 const compiler = require("./compiler")
 const markdown_compiler = require("./markdown_compiler")
 const shortcodes = require("./shortcodes")
 const functions = require("./functions")
 
-const contentDir = "./res/content/generated"
-
 exports.compile = (source_path, podcast_config) => {
+    /*
+        Main function, call the function to compile podcast,
+        copy the others files and return the podcast data
+
+        Takes the source_path of the podcast file
+        Takes the podcast config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+
+        Return the podcast_data (e.g. {
+            "id",
+            "title"
+            "description",
+            ...
+        })
+    */
+
     let podcast_data = undefined
     
+    // if it's not a post but an image
     if(!compiler.is_markdown_file(source_path)) {
         
     }
@@ -30,6 +49,14 @@ exports.compile = (source_path, podcast_config) => {
 }
 
 exports.make_rss_feed = (podcast_data) => {
+    /*
+        Create the podcasts feed with the podcast data
+
+        Takes podcast_data (e.g. {
+            "podcast_config": {}
+            "podcasts_data": [{}]
+        })
+    */
     podcast_config = podcast_data["podcast_config"]
     podcasts_data = podcast_data["podcasts_data"]
 
@@ -126,6 +153,41 @@ exports.make_rss_feed = (podcast_data) => {
 }
 
 exports.get_podcast_data = (podcast_config, md_podcast_path) => {
+    /*
+        Get the podcasts data by reading the source file
+
+        Takes the podcast config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+        Takes the markdown file path
+
+        Return the podcast_data {
+            "id": str,
+            "title": str,
+            "description": str,
+            "date": str,
+            "date_object": date,
+            "author": {
+                "name": str,
+                "email": str
+            },
+            "enclosure": {
+                "url": str,
+                "type": str,
+                "length": int
+            },
+            "image": str,
+            "duration": str,
+            "link": str,
+            "links": {
+                "rss": str,
+                "...": str
+            }
+        }
+    */
+
     let podcast_data = {
         id: uuidv4(),
         title: "Untitled",
@@ -151,7 +213,7 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
     let without_source_and_ext = compiler.remove_source_and_md_extension_from_path(md_podcast_path)
     without_source_and_ext = without_source_and_ext.substr(podcast_dir_without_source.length)
 
-    // get podcast content
+    // get podcast content from source file
     let podcast_md = ""
     try {
         podcast_md = fs.readFileSync(md_podcast_path, "utf-8")
@@ -212,7 +274,7 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
             fs.accessSync(audio_path, fs.constants.R_OK)
             let new_audio_path = `${podcast_config["path"]}${without_source_and_ext}/${path.basename(audio_path)}`
 
-            let copy_dest = `${contentDir}${new_audio_path}`
+            let copy_dest = path.join("res", "content", "generated", new_audio_path)
             
             compiler.copy_file(audio_path, copy_dest)
 
@@ -241,7 +303,7 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
             fs.accessSync(image_path, fs.constants.R_OK)
             let new_image_path = `${podcast_config["path"]}${without_source_and_ext}/${path.basename(image_path)}`
 
-            let copy_dest = `${contentDir}${new_image_path}`
+            let copy_dest = path.join("res", "content", "generated", new_image_path)
             
             compiler.copy_file(image_path, copy_dest)
 
@@ -262,6 +324,7 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
     // AUTHOR
     if(podcast_config.hasOwnProperty("main_author") && 
     podcast_config.hasOwnProperty('authors')) {
+        // if there are specified author
         if(podcast_shortcodes.values.hasOwnProperty("[AUTHOR]")) {
             if(podcast_config.authors.hasOwnProperty(podcast_shortcodes.values["[AUTHOR]"])) {
                 podcast_data.author = {
@@ -273,6 +336,7 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
                 console.log(`The ${podcast_shortcodes.values["[AUTHOR]"]} author is not referenced in your configuration`.red.bold)
             }
         }
+        // if not we take the default blog author
         else {
             if(podcast_config.authors.hasOwnProperty(podcast_config.main_author)) {
                 podcast_data.author = {
@@ -303,6 +367,13 @@ exports.get_podcast_data = (podcast_config, md_podcast_path) => {
 }
 
 exports.seconds_to_hours_minutes_seconds = (duration) => {
+    /*
+        Convert seconds (int) to string (hh:mm:ss)
+
+        Takes the duration (int) in seconds
+
+        Returns the duration as a hh:mm:ss string
+    */
     let hours = Math.floor(duration / 3600)
     let minutes = Math.floor((duration-(hours*3600)) / 60)
     let seconds = Math.floor(duration-minutes*60-hours*3600)
@@ -320,11 +391,46 @@ exports.seconds_to_hours_minutes_seconds = (duration) => {
 }
 
 exports.get_podcast_config = (source_path) => {
-    console.log("get podcast config")
+    /* 
+        Get the podcast config from the config.yml
+
+        Takes the source path of the file
+          to identify the podcast
+
+        Return the podcast config {
+            "dir": str,
+            "title": str,
+            "description": str,
+            "image": str,
+            "category": str,
+            "language": str,
+            "country": str,
+            "explicit": str,
+            "complete": str,
+            "type": str,
+            "limit": int,
+            "main_author": str,
+            "authors": str,
+            "path": str,
+            "local_path": str,
+            "link": str,
+            "image_url": str,
+            "comments": {
+                "provider": str,
+                "settings": {
+                    "url": str
+                }
+            }
+        }
+    */
+
     let absolute_source_path = path_resolve(source_path)
 
+    // get podcasts config from config.yml
     let config_podcasts = config.get("array", ["content", "podcasts"])
     for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {
+
+        // if the podcast dir match with source_path
         if(absolute_source_path.startsWith(
             path_resolve(
                 config.get("string", ["content", "podcasts", conf_ctr, "dir"])
@@ -348,7 +454,7 @@ exports.get_podcast_config = (source_path) => {
 
             // LOCAL PODCAST PATH
             podcast_config["path"] = `/${path.basename(podcast_config["dir"])}`
-            podcast_config["local_path"] = `${contentDir}${podcast_config["path"]}`
+            podcast_config["local_path"] = path.join("res", "content", "generated", podcast_config["path"])
 
             // PODCAST LINK
             podcast_config["link"] = `${config.get("string", ["server", "domain"])}${podcast_config["path"]}`
@@ -395,6 +501,23 @@ exports.get_podcast_config = (source_path) => {
 }
 
 exports.compile_html = (source_path, podcast_config) => {
+    /*
+        Compile the podcast with it's data and the template (ejs) of the theme
+
+        Takes the source file of the file
+        Takes the podcast config (e.g. {
+            "title",
+            "description",
+            ...
+        })
+
+        Return the podcast data (e.g. {
+            "id",
+            "title"
+            "description",
+            ...
+        })
+    */
     let podcast_data = this.get_podcast_data(podcast_config, source_path)
 
     let render_options = {

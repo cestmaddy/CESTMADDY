@@ -238,7 +238,7 @@ exports.get_post_data = (blog_config, md_post_path, return_content=false) => {
     // AUTHOR
     if(blog_config.hasOwnProperty("main_author") && 
     blog_config.hasOwnProperty('authors')) {
-        // if there ar specified author
+        // if there are specified author
         if(post_shortcodes.values.hasOwnProperty("[AUTHOR]")) {
             if(blog_config.authors.hasOwnProperty(post_shortcodes.values["[AUTHOR]"])) {
                 post_data.author = {
@@ -295,8 +295,8 @@ exports.get_blog_config = (source_path) => {
             "authors": [str],
             "comments": {
                 "provider": str,
-                settings: {
-                    url: str
+                "settings": {
+                    "url": str
                 }
             }
         }
