@@ -1,10 +1,20 @@
+// Importing external modules
 const configYaml = require('config-yaml')
 const path = require("path")
-
-const config = configYaml("./config.yml")
 require('dotenv').config()
+// Importing local modules
+const config = configYaml("./config.yml")
 
 exports.get = (type, conf_path_arr, required=true) => {
+    /*
+        Return values from the config
+
+        Takes a string type : the type of the value, can be "string", "object", "array"
+        Takes an array of the path of the value:
+            e.g. ["content", "favicon", "path"]
+        Takes an optional required how log an error if the value doesn't exist
+    */
+
     // FROM ENV VAR
     if(conf_path_arr[0] == "server" && conf_path_arr[1] == "port") {
         if(process.env.PORT) {
@@ -17,8 +27,11 @@ exports.get = (type, conf_path_arr, required=true) => {
         let current_config = config
         let found = false
 
+        // loop in the asked path
         for(i_conf in conf_path_arr) {
+            // if the current conf have the next path item
             if(current_config.hasOwnProperty(conf_path_arr[i_conf])) {
+                // change current conf to the next item
                 current_config = current_config[conf_path_arr[i_conf]]
             }
             else {
@@ -27,11 +40,13 @@ exports.get = (type, conf_path_arr, required=true) => {
                 break
             }
 
+            // if we arrive at the end, that's it
             if(i_conf == conf_path_arr.length-1) {
                 found = true
             }
         }
 
+        // check if the type is correct
         if(found) {
             if(typeof(current_config) == type) {
                 return current_config
@@ -67,6 +82,7 @@ exports.get = (type, conf_path_arr, required=true) => {
     }
 }
 
+// get paths of every blogs from config.yml
 let absolute_blogs_paths = []
 let config_blogs = this.get("array", ["content", "blogs"], false)
 for(conf_ctr = 0; conf_ctr < config_blogs.length; conf_ctr++) {
@@ -86,6 +102,7 @@ exports.get_absolute_blogs_paths = () => {
     return absolute_blogs_paths
 }
 
+// get paths of every podcasts from config.yml
 let absolute_podcasts_paths = []
 let config_podcasts = this.get("array", ["content", "podcasts"], false)
 for(conf_ctr = 0; conf_ctr < config_podcasts.length; conf_ctr++) {

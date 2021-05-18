@@ -1,15 +1,23 @@
+// Importing external modules
 const path = require("path")
 const path_resolve = require("path").resolve
 const fs = require("fs")
 const colors = require('colors')
 const ejs = require('ejs')
-
+// Importing local modules
 const config = require("./config")
 const markdown_compiler = require("./markdown_compiler")
 
-const contentDir = path.join("res", "content", "generated")
-
 exports.special_content_type = (source_path) => {
+    /*
+        Get the content type of a file
+
+        Take the path of file
+
+        Return the type as a string
+            ("page", "not_to_compile", "podcast", "blog")
+    */
+
     let absolute_source_path = path_resolve(source_path)
 
     /* NOT TO COMPILE */
@@ -54,6 +62,15 @@ exports.special_content_type = (source_path) => {
 }
 
 exports.get_every_files_with_extension_of_dir = (startDir = "./source", extension = "md") => {
+    /*
+        Get every files of a directory (recursively) 
+        which have the specified extension
+
+        Takes the path of the root dir
+        Takes the extension that returned files will match
+
+        Return an array of string (the path)
+    */
     let files = []
     
     files_of_dir=fs.readdirSync(startDir)
@@ -76,6 +93,13 @@ exports.get_every_files_with_extension_of_dir = (startDir = "./source", extensio
 }
 
 exports.get_every_files_of_dir = (startDir = "./source") => {
+    /*
+        Get every files of a directory (recursively)
+
+        Takes the path of the root dir
+
+        Return an array of string (the path)
+    */
     let files = []
     
     files_of_dir=fs.readdirSync(startDir)
@@ -96,7 +120,9 @@ exports.get_every_files_of_dir = (startDir = "./source") => {
 }
 
 exports.is_markdown_file = (source_path) => {
-    // check extension
+    /*
+        Return true if the passed file is a markdown file and false if not
+    */
     let extension = source_path.match(/(.md)$/)
     if(!extension) {
         return false
@@ -106,16 +132,32 @@ exports.is_markdown_file = (source_path) => {
 }
 
 exports.copy_file = (source_path, dest, silent = false) => {
+    /*
+        Copy a file to the specified dest
+        It will firstly try to make a link,
+        if it fail (e.g. with docker), the fail will
+        be entirely copied
+
+        Takes the path of the file to copy
+        Takes the destination path
+        Takes an optional silent, if silent is true, nothing
+          will be logged (except the errors)
+    */
+
+    // create the dir
     fs.mkdir(path.dirname(dest), {recursive: true}, (err) => {
         if(err) {
             console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
             console.log(`    ${err}`.red)
         }
         else {
+            // remove the file in destination if it still exist
             fs.unlink(dest, (err) => {
+                // link the file in dest
                 fs.link(`${source_path}`, dest, (err) => {
                     if(err && err.code != "EEXIST") {
-                        if(err.code == "EXDEV") { // unable to link file (eg. with docker), fallback with copy
+                        if(err.code == "EXDEV") {
+                            // unable to link file (eg. with docker), fallback with copy
                             fs.copyFile(`${source_path}`, dest, (err) => {
                                 if(err && err.code != "EEXIST") {
                                     console.log(`\n${this.remove_before_source_from_path(source_path).bold}`)
@@ -147,6 +189,16 @@ exports.copy_file = (source_path, dest, silent = false) => {
 }
 
 exports.look_for_conflict = (source_path, new_file_source_path) => {
+    /*
+        Check if two files are in conflicts
+        If there are in conflicts, an warning will be logged
+        A conflict is when a file and a directory have the same name
+        e.g. :
+            page.md
+            page/index.md
+
+        Takes the two path to check together
+    */
     if(new_file_source_path.endsWith("index.html")) {
         let file = `${path.dirname(new_file_source_path)}.html`
         fs.access(`${file}`, fs.F_OK, (err) => {
@@ -165,6 +217,13 @@ exports.look_for_conflict = (source_path, new_file_source_path) => {
 }
 
 exports.remove_before_source_from_path = (u_path) => {
+    /*
+        Take a path, and return it without the path before the starting source
+
+        e.g.
+            ./source/blog => source/blog
+            /home/cestoliv/source/page.md => source/page.md
+    */
     u_path = path_resolve(u_path)
     let reg = /^(.+?)source/g
     let match = reg.exec(u_path)
@@ -178,15 +237,33 @@ exports.remove_before_source_from_path = (u_path) => {
 }
 
 exports.remove_source_and_md_extension_from_path = (u_path) => {
+    /* 
+        Remove the source and the .md extension from a path.
+        Path before source is removed by remove_before_source_from_path()
+
+        e.g.
+            ./source/blog/post.md => /blog/post
+    */
     let without_before_source = this.remove_before_source_from_path(u_path)
     return without_before_source.substr(6, without_before_source.length - 9)
 }
 
 exports.remove_source_from_path = (u_path) => {
+    /* 
+        Remove the source from a path.
+        Path before source is removed by remove_before_source_from_path()
+
+        e.g.
+            ./source/blog/post.md => /blog/post.md
+    */
     return this.remove_before_source_from_path(u_path).substr(6)
 }
 
 exports.get_header_content = () => {
+    /* 
+        Return the file content of the header file specified by the config.yml
+        and compile it
+    */
     try {
         let header_file = fs.readFileSync(config.get("string", ["content", "header_file"]), "utf-8")
         return markdown_compiler.compile(header_file)
@@ -199,6 +276,10 @@ exports.get_header_content = () => {
 }
 
 exports.get_footer_content = () => {
+    /* 
+        Return the file content of the header file specified by the config.yml
+        and compile it
+    */
     try {
         let footer_file = fs.readFileSync(config.get("string", ["content", "footer_file"]), "utf-8")
         return markdown_compiler.compile(footer_file)
@@ -211,10 +292,13 @@ exports.get_footer_content = () => {
 }
 
 exports.generate_errors = () => {
+    /*
+        Generate the errors page with the templates (EJS) of the theme
+    */
     return new Promise((resolve, reject) => {
-
         let errors = ["404", "500"]
 
+        // loop in every errors
         for(error in errors) {
             let site = {
                 title: config.get("string", ["content", "title"]),
@@ -241,7 +325,7 @@ exports.generate_errors = () => {
                     console.log(`    ${err}`.red)
                 }
                 else {
-                    let new_file_source_path = path.join(contentDir, "__errors", `${errors[error]}.html`)
+                    let new_file_source_path = path.join("res", "content", "generated", "__errors", `${errors[error]}.html`)
                     let folder = path.dirname(new_file_source_path)
                     
                     fs.mkdir(folder, {recursive: true}, (err) => {
