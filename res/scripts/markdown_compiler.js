@@ -1,3 +1,4 @@
+// Importing external modules
 const marked = require("marked")
 const hljs = require('highlight.js')
 
@@ -11,10 +12,13 @@ marked.setOptions({
     smartypants: false,
     xhtml: false,
     highlight: function(code) {
-      return hljs.highlightAuto(code).value;
+        return hljs.highlightAuto(code).value;
     }
 })
 
 exports.compile = (str) => {
+    /*
+        Return the configured marked
+    */
     return marked(str)
 }
