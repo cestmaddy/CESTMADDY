@@ -16,12 +16,6 @@ const contentDir = path.join("res", "content", "generated")
 exports.special_content_type = (source_path) => {
     let absolute_source_path = path_resolve(source_path)
 
-    /* PAGE */
-    if(source_path.endsWith("index.md")) {
-        return {
-            type: "page"
-        }
-    }
     /* NOT TO COMPILE */
     if(path_resolve(config.get("string", ["content", "header_file"])) == absolute_source_path) {
         return {
@@ -31,6 +25,12 @@ exports.special_content_type = (source_path) => {
     else if(path_resolve(config.get("string", ["content", "footer_file"])) == absolute_source_path) {
         return {
             type: "not_to_compile"
+        }
+    }
+    /* PAGE */
+    if(source_path.endsWith("index.md")) {
+        return {
+            type: "page"
         }
     }
     /* PODCAST */
