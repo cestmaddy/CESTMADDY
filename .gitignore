@@ -4,10 +4,10 @@
 
 /res/content/generated
 
-/source
-/custom
-/config.yml
+/cestici
+/dist
 /.env
 /docker-compose.yml
 /entrypoint.sh
 /dev.md
+TODO.md
