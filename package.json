@@ -28,7 +28,7 @@
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-run": "^0.8.1",
-    "highlight.js": "^10.5.0",
+    "highlight.js": "^11.5.1",
     "imagemagick": "*",
     "marked": "^2.0.0",
     "mime": "^2.4.7",
