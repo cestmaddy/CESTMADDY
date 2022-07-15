@@ -1,5 +1,9 @@
 <br><div style="display: flex; justify-content: center;"><a href="https://cestmaddy.cestoliv.com"><img src="res/brand/logo/logotype/logotype_color.svg" width="230"></a></div><br>
 
+⚠⚠⚠
+
+**I'm currently working on CESTMADDY v2 on the branch v2. The v2 branch is absolutely unstable, you can try the new version of cestmaddy on the v2-stabler branch, which is a more stable version of v2 (currently used by the cestoliv.com site).**
+
 # CESTMADDY
 ## Hi ! You made the right choice.
 **You came to use cestmaddy, didn't you?**
