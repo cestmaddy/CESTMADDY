@@ -17,8 +17,8 @@
 		"compile": "npm run assets; node dist/core/scripts/generation/build.js",
 		"compile:dev": "node dist/core/scripts/generation/build.js",
 		"compile:watch": "chokidar -t 5000 \"dist/**/*\" --ignore \"dist/cestici/generated/**/*\" -c 'npm run compile:dev'",
-		"format": "prettier --write \"**/*.ts\"",
-		"lint": "eslint --fix \"**/*.ts\""
+		"test:format": "prettier --write \"**/*.ts\"",
+		"test:lint": "eslint --fix \"**/*.ts\""
 	},
 	"dependencies": {
 		"@colors/colors": "^1.5.0",
