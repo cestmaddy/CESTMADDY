@@ -1,7 +1,0 @@
-*
-!.gitignore
-!clean
-!clean/*
-!clean/*/*
-!clean/*/*/*
-*.min.*

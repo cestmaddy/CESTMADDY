@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="<%- site.language %>">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><%- content.title %> | <%- site.title %></title>
+	<meta name="description" content="<%- content.description %>">
+
+<%- include(ejsFavicons) %>
+
+<%- include(ejsCSS) %>
+</head>
+<body>
+	<header class="markdown">
+		<%- site.header %>
+	</header>
+	<div id="content" class="markdown">
+		<div class="podcast_image_n_title">
+			<img class="podcast_image" src="<%- content.enclosure.webPath  %>" />
+			<h1 class="podcast_title"><%- content.title %></h1>
+		</div>
+
+		<div class="podcast_links">
+			<% for(platform in content.platforms) { %>
+				<a href="<%= content.platforms[platform] %>" class="podcast_link <%= platform %>_icon"><svg><use xlink:href="/front/theme/srcs/icons/<%= platform %>.svg#icon"></use></svg></a>
+			<% } %>
+		</div>
+
+		<audio controls class="podcast_audio">
+			<source src="<%- content.audio.webPath %>" type="<%- content.audio.mime %>">
+			<a href="<%- content.audio.webPath %>"><%- content.title %></a>
+		</audio>
+
+		<p class="podcast_infos"><%- content.author.name %>, <strong><%- content.date.relativeString%></strong> <%- content.date.localeString %></p>
+
+		<div class="podcast_description">
+			<%- content.description %>
+		</div>
+
+		<!-- <- include("../../../../../templates/comments.ejs") %> -->
+	</div>
+	<footer class="markdown">
+		<%- site.footer %>
+	</footer>
+</body>
+</html>

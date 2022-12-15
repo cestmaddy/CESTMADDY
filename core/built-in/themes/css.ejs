@@ -1,0 +1,15 @@
+	<link rel="stylesheet" href="/front/theme/css/markdown.css">
+	<% if(content.type == 1) { // enum ESourceType %>
+	<link rel="stylesheet" href="/front/theme/css/post.css">
+	<% } else if(content.type == 2) { // enum ESourceType %>
+	<link rel="stylesheet" href="/front/theme/css/episode.css">
+	<% } else if(content.type == 3) { // enum ESourceType %>
+	<link rel="stylesheet" href="/front/theme/css/errors.css">
+	<% } %>
+	<link rel="stylesheet" href="/front/theme/css/blog.css">
+	<link rel="stylesheet" href="/front/theme/css/podcast.css">
+	<link rel="stylesheet" href="/front/theme/css/highlight.css">
+	<link rel="stylesheet" href="/front/theme/css/page.css">
+	<% if (content.css) content.css.forEach((css) => { %>
+	<link rel="stylesheet" href="/front/theme/css/additional/<%- css %>"
+	><% }) %>

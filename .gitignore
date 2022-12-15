@@ -1,13 +1,3 @@
-/package-lock.json
-/node_modules
-/commento_db
-
-/res/content/generated
-
-/cestici
-/dist
-/.env
-/docker-compose.yml
-/entrypoint.sh
-/dev.md
-TODO.md
+dist/
+.env
+node_modules/

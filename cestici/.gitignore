@@ -1,0 +1,6 @@
+*
+!.gitignore
+!custom
+!custom/hotcodes/
+!custom/shortcodes/
+!custom/themes/

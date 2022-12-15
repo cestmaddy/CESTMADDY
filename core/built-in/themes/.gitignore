@@ -1,0 +1,9 @@
+*
+!.gitignore
+!clean
+!clean/*
+!clean/*/*
+!clean/*/*/*
+*.min.*
+!css.ejs
+!favicons.ejs

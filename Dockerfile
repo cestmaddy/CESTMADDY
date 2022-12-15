@@ -1,24 +1,20 @@
-FROM node:current-alpine
+FROM node:18-alpine as compile
 
-RUN apk update
-RUN apk add --no-cache imagemagick
+# Install dependencies
+RUN apk add --no-cache \
+	imagemagick
 
-RUN mkdir /cestmaddy
-
+# Copy sources
 WORKDIR /cestmaddy
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm install
+COPY core core
+COPY deployment/default cestici
 
-COPY package.json package.json
-
-RUN apk --no-cache --virtual build-dependencies add \
-    python3 \
-    make \
-    g++ && \
-    npm i && \
-    apk del build-dependencies
-
-COPY res res
-COPY gruntfile.js gruntfile.js
-COPY server.js server.js
+# Build and compile
+RUN npm run build
+RUN npm run compile
 
 EXPOSE 80
 ENV PORT=80
+CMD ["sh", "-c", "npm run compile && npm run start"]

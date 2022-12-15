@@ -1,0 +1,11 @@
+content:
+  title: "CESTMADDY"
+  language: en
+  header: "header.md"
+  footer: "footer.md"
+  theme: "clean"
+  favicon: {
+    path: "imgs/monogram_color.svg",
+    background: "#ffffff",
+    theme_color: "#8e443d"
+  }

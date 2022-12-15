@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  cestmaddy:
+    # image: "registry.chevro.fr/cestmaddy/cestmaddy:latest"
+    build:
+      context: ../../
+      dockerfile: ./deployment/docker-example/Dockerfile
+    container_name: "cestmaddy"
+    ports:
+      - 8080:80

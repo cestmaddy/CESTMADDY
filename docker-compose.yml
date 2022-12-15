@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  cestmaddy:
+    # image: "registry.chevro.fr/cestmaddy/cestmaddy:latest"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: "cestmaddy"
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - ./cestici/:/cestmaddy/cestici/

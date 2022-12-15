@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="<%- site.language %>">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><%- content.title %> | <%- site.title %></title>
+	<meta name="description" content="<%- content.description %>">
+
+<%- include(ejsFavicons) %>
+
+<%- include(ejsCSS) %>
+</head>
+<body>
+	<header class="markdown">
+		<%- site.header %>
+	</header>
+	<div id="content" class="markdown post_content">
+		<img class="post_enclosure" src="<%- content.enclosure.webPath %>" />
+		<h1 class="post_title"><%- content.title %></h1>
+		<p class="post_infos"><%- content.author.name %>, <strong><%- content.date.relativeString %></strong><%- content.date.localeString %></p>
+		<%- content.html %>
+
+		<!--  include("../../../../templates/comments.ejs") -->
+	</div>
+	<footer class="markdown">
+		<%- site.footer %>
+	</footer>
+</body>
+</html>
