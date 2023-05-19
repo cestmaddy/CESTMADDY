@@ -4,9 +4,9 @@ import { marked } from 'marked';
 import prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index';
 
-import { IOther, ISources } from '../interfaces';
+import { ESourceType, IOther, ISources } from '../interfaces';
 import { replaceShortcodes } from './shortcodes';
-import { getThemePath } from './paths';
+import { getThemePath, getWebPath } from './paths';
 import { error } from '../log';
 import { GENERATED_ROOT } from '../const';
 
@@ -32,9 +32,22 @@ marked.use({
 			let imageHTML = `<img loading="lazy"`;
 			if (text) imageHTML += ` alt="${text}"`;
 			if (title) imageHTML += ` title="${title}"`;
-			if (href) imageHTML += ` src="${href}"`;
+			if (href) {
+				if (href.startsWith('/')) href = '${"hot": "domain"}' + href;
+				imageHTML += ` src="${href}"`;
+			}
 			imageHTML += `>`;
 			return imageHTML;
+		},
+		link(href: string, title: string, text: string) {
+			let linkHTML = `<a`;
+			if (title) linkHTML += ` title="${title}"`;
+			if (href) {
+				if (href.startsWith('/')) href = '${"hot": "domain"}' + href;
+				linkHTML += ` href="${href}"`;
+			}
+			linkHTML += `>${text}</a>`;
+			return linkHTML;
 		},
 	},
 });
@@ -53,6 +66,14 @@ export async function compileHTML(markdown: string, sourcePath: string, sources:
 
 	markdown = markdown.replace(metaReg, '');
 	markdown = await replaceShortcodes(markdown, sourcePath, sources);
+
+	// Replace every relative path with a /sourceDir/relativePath
+	// ${"hot": "domain"} will be added after (to avoid marked error)
+	markdown = markdown.replace(
+		/\]\((?!http:\/\/|https:\/\/|data:|\/)([\s\S]+?)\)/gm,
+		'](' + getWebPath(path.dirname(sourcePath), ESourceType.Page) + '/$1)',
+	);
+
 	const html = await markedPromise(markdown).catch((err) => {
 		error(sourcePath, 'COMPILATION', err, 'ERROR');
 		return undefined;
