@@ -24,7 +24,7 @@ export function getWebPath(sourcePath: string, sourceType: ESourceType): string 
 	// Remove everything before the first source/
 	webPath = `/${sourcePath.split('source/').slice(1, sourcePath.length).join('source/')}`;
 	// Remove extension
-	if (sourceType != ESourceType.Other) webPath = webPath.split('.').slice(0, -1).join('.');
+	if (sourceType != ESourceType.Other) if (webPath.includes('.')) webPath = webPath.split('.').slice(0, -1).join('.');
 	// Remove index, post and episode at the end
 	if (sourceType == ESourceType.Page)
 		if (webPath.endsWith('/index')) webPath = webPath.split('/').slice(0, -1).join('/');
