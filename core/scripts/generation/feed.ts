@@ -35,7 +35,7 @@ async function createBlogFeed(blog: IBlog): Promise<void> {
 <channel>
 	<title>${blog.name}</title>
 	<description>${blog.description}</description>
-	<link>\${"hot": "domain"}/${blog.path}</link>
+	<link>\${"hot": "domain"}${getWebPath(blog.path, ESourceType.Page)}</link>
 	<category>${blog.category}</category>
 	<language>${blog.language}</language>
 	${postsFeed}
