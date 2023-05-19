@@ -11,6 +11,8 @@ services:
 eslint:
   image: node:latest
   stage: test
+  except:
+    - tags
   retry: 2
   script:
     - npm install @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint
@@ -29,6 +31,7 @@ docker-publish:
   stage: deploy
   only:
     - main
+    - tags
   retry: 2
   before_script:
     - docker info
