@@ -5,9 +5,23 @@ import { error } from '../log';
 import { writeFile } from './compile';
 import { getGeneratedPath, getWebPath } from './paths';
 
+function escapeSymbols(str: string): string {
+	// Escape list from https://podcasters.apple.com/support/823-podcast-requirements
+	return str
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/'/g, '&apos;')
+		.replace(/"/g, '&quot;')
+		.replace(/©/g, '&#xA9;')
+		.replace(/℗/g, '&#x2117;')
+		.replace(/™/g, '&#x2122;');
+}
+
 async function createBlogFeed(blog: IBlog): Promise<void> {
 	let postsFeed = '';
 	const feedPath = getGeneratedPath(path.join(blog.path, 'rss.xml'), ESourceType.Other);
+	const blogUrl = getWebPath(blog.path, ESourceType.Page);
 
 	// Sort by date
 	const posts: Array<IPost> = blog.posts.sort((a, b) => {
@@ -18,25 +32,26 @@ async function createBlogFeed(blog: IBlog): Promise<void> {
 		let enclosureUrl = '';
 		if (post.enclosure.webPath != '') enclosureUrl = `\${"hot": "domain"}${post.enclosure.webPath}`;
 		postsFeed += `<item>
-		<title>${post.title}</title>
-		<link>\${"hot": "domain"}${post.webPath}</link>
-		<guid>${post.webPath}</guid>
-		<description>${post.description}</description>
-		<author>${post.author.email} (${post.author.name})</author>
-		<enclosure url="${enclosureUrl}"/>
-		<pubDate>${post.date.object.toUTCString()}</pubDate>
-		<content:encoded><![CDATA[${post.html}]]></content:encoded>
-	</item>
-	`;
+			<title>${escapeSymbols(post.title)}</title>
+			<link>\${"hot": "domain"}${post.webPath}</link>
+			<guid>\${"hot": "domain"}${post.webPath}</guid>
+			<description>${escapeSymbols(post.description)}</description>
+			<author>${post.author.email} (${post.author.name})</author>
+			<pubDate>${post.date.object.toUTCString()}</pubDate>
+			<content:encoded><![CDATA[${post.html}]]></content:encoded>`;
+		if (post.enclosure.webPath != '')
+			postsFeed += `<enclosure url="${enclosureUrl}" length="${post.enclosure.length}" type="${post.enclosure.type}"/>`;
+		postsFeed += `</item>`;
 	});
 
 	const feed = `<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-	<title>${blog.name}</title>
-	<description>${blog.description}</description>
-	<link>\${"hot": "domain"}${getWebPath(blog.path, ESourceType.Page)}</link>
-	<category>${blog.category}</category>
+	<atom:link href="\${"hot": "domain"}${blogUrl}/rss.xml" rel="self" type="application/rss+xml" />
+	<title>${escapeSymbols(blog.name)}</title>
+	<description>${escapeSymbols(blog.description)}</description>
+	<link>\${"hot": "domain"}${blogUrl}</link>
+	<category>${escapeSymbols(blog.category)}</category>
 	<language>${blog.language}</language>
 	${postsFeed}
 </channel>

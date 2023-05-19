@@ -47,6 +47,8 @@ function getEmptyPost(sourcePath: string, blog: IBlog): IPost {
 		enclosure: {
 			generatedPath: '',
 			webPath: '',
+			type: '',
+			length: 0,
 		},
 		css: [],
 		html: '', // set in compilation
@@ -87,6 +89,8 @@ function getEmptyEpisode(sourcePath: string, podcast: IPodcast): IEpisode {
 		enclosure: {
 			generatedPath: '',
 			webPath: '',
+			type: '',
+			length: 0,
 		},
 		audio: {
 			generatedPath: '',
@@ -176,8 +180,11 @@ export function getMeta(sourcePath: string, data: Array<IPage> | IBlog | IPodcas
 									const enclosurePath = path.join(path.dirname(sourcePath), fileMeta.enclosure);
 									fs.promises
 										.access(enclosurePath, fs.constants.R_OK)
-										.then(() => {
-											if (!isPost(page) && !isEpisode(page)) return resolve();
+										.then(() => fs.promises.stat(enclosurePath))
+										.then((stats) => {
+											if (!isPost(page) && !isEpisode(page)) return resolve(); // Should never happen (just for TS)
+											page.enclosure.length = stats.size;
+											page.enclosure.type = mime.lookup(path.extname(enclosurePath)) || '';
 											page.enclosure.generatedPath = getGeneratedPath(
 												enclosurePath,
 												ESourceType.Other,

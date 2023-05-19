@@ -36,6 +36,8 @@ export interface IPost {
 	enclosure: {
 		generatedPath: string;
 		webPath: string;
+		type: string;
+		length: number;
 	};
 	css: Array<string>;
 	html: string;
@@ -69,6 +71,8 @@ export interface IEpisode {
 	enclosure: {
 		generatedPath: string;
 		webPath: string;
+		type: string;
+		length: number;
 	};
 	audio: {
 		generatedPath: string;
