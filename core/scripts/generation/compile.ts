@@ -3,6 +3,7 @@ import path from 'path';
 import { marked } from 'marked';
 import prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index';
+import * as prismComponents from 'prismjs/components';
 
 import { ESourceType, IOther, ISources } from '../interfaces';
 import { replaceShortcodes } from './shortcodes';
@@ -20,10 +21,12 @@ marked.use({
 	smartypants: false,
 	xhtml: false,
 	highlight: (code, lang) => {
-		if (lang) loadLanguages([lang]);
+		// Check that the language is supported before loading it
+		if (lang && prismComponents.languages[lang]) loadLanguages([lang]);
 		if (prism.languages[lang]) {
 			return prism.highlight(code, prism.languages[lang], lang);
 		} else {
+			error(undefined, 'COMPILATION', `Language ${lang.bold} is not supported by Prism`, 'WARNING');
 			return code;
 		}
 	},
@@ -33,6 +36,7 @@ marked.use({
 			if (text) imageHTML += ` alt="${text}"`;
 			if (title) imageHTML += ` title="${title}"`;
 			if (href) {
+				// add the domain to the href
 				if (href.startsWith('/')) href = '${"hot": "domain"}' + href;
 				imageHTML += ` src="${href}"`;
 			}
@@ -43,6 +47,7 @@ marked.use({
 			let linkHTML = `<a`;
 			if (title) linkHTML += ` title="${title}"`;
 			if (href) {
+				// add the domain to the href
 				if (href.startsWith('/')) href = '${"hot": "domain"}' + href;
 				linkHTML += ` href="${href}"`;
 			}
