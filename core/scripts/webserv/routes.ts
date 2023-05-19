@@ -4,6 +4,12 @@ import { staticFront, staticContent, static404, redirExtIndexes, intercept } fro
 
 const router = Router({ strict: true });
 
+// Remove `x-powered-by` header
+router.use((_req, res, next) => {
+	res.removeHeader('X-Powered-By');
+	next();
+});
+
 router.use('/front', staticFront);
 router.use(redirExtIndexes);
 router.use(intercept);
