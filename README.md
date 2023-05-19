@@ -5,7 +5,7 @@
 		<img src="https://git.chevro.fr/cestmaddy/cestmaddy/-/badges/release.svg?style=flat&key_text=latest+release" alt="Latest release" />
 	</a>
 	<a href="https://git.chevro.fr/cestmaddy/cestmaddy/-/commits/main">
-		<img src="https://img.shields.io/maintenance/yes/2022?style=flat" alt="Maintenance" />
+		<img src="https://img.shields.io/maintenance/yes/2023?style=flat" alt="Maintenance" />
 	</a>
 	<a href="https://choosealicense.com/licenses/mit/">
 		<img src=".readme/mit-license.svg" alt="MIT License" />
