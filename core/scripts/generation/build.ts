@@ -53,7 +53,7 @@ async function compileSources(sources: ISources): Promise<void> {
 	console.log('Retrieving metadata'.blue);
 
 	// RETRIEVE METADATA
-	const sources = await getSources(); // PAS OK
+	const sources = await getSources();
 	if (!sources) return logError();
 
 	// REMOVE GENERATED FOLDER
