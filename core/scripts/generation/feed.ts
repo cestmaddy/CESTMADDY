@@ -74,6 +74,7 @@ async function createPodcastFeed(podcast: IPodcast): Promise<void> {
 	let episodesFeed = '';
 	const feedPath = getGeneratedPath(path.join(podcast.path, 'rss.xml'), ESourceType.Other);
 	const webFeedPath = getWebPath(path.join(podcast.path, 'rss.xml'), ESourceType.Other);
+	const podcastUrl = getWebPath(podcast.path, ESourceType.Page);
 
 	// Sort by date
 	const episodes: Array<IEpisode> = podcast.episodes.sort((a, b) => {
@@ -117,10 +118,10 @@ async function createPodcastFeed(podcast: IPodcast): Promise<void> {
 	<channel>
 		<atom:link href="\${"hot": "domain"}${webFeedPath}" rel="self" type="application/rss+xml" />
 		<title>${podcast.name}</title>
-		<link>\${"hot": "domain"}/${podcast.path}</link>
+		<link>\${"hot": "domain"}${podcastUrl}</link>
 		<description>${podcast.description}</description>
 		<image>
-			<link>\${"hot": "domain"}/${podcast.path}</link>
+			<link>\${"hot": "domain"}${podcastUrl}</link>
 			<title>${podcast.name}</title>
 			<url>${enclosureUrl}</url>
 		</image>
