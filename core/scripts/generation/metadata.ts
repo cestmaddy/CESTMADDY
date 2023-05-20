@@ -7,102 +7,12 @@ import getAudioDurationInSeconds from 'get-audio-duration';
 import { glob } from 'glob';
 
 import { conf } from '../config';
-import {
-	EConf,
-	ESourceType,
-	IBlog,
-	IEpisode,
-	IPage,
-	IPodcast,
-	IPost,
-	isBlog,
-	isEpisode,
-	isPage,
-	isPages,
-	isPodcast,
-	isPost,
-} from '../interfaces';
+import { EConf, ESourceType } from '../interfaces/interfaces';
 import { getGeneratedPath, getThemePath, getWebPath } from './paths';
 import { error } from '../log';
-
-function getEmptyPost(sourcePath: string, blog: IBlog): IPost {
-	return {
-		type: ESourceType.Post,
-		sourcePath,
-		generatedPath: getGeneratedPath(sourcePath, ESourceType.Post),
-		webPath: getWebPath(sourcePath, ESourceType.Post),
-		title: 'Unnamed',
-		date: {
-			object: new Date(),
-			localeString: DateTime.now()
-				.setLocale(conf(`content.language`, 'string', EConf.Required))
-				.toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY),
-			relativeString: `\${"hot": "relative_date", "date": "${new Date().toISOString()}"}`,
-		},
-		author: {
-			name: conf(`content.blogs.${blog.name}.main_author`, 'string', EConf.Required),
-			email: '',
-		},
-		description: '',
-		enclosure: {
-			generatedPath: '',
-			webPath: '',
-			type: '',
-			length: 0,
-		},
-		css: [],
-		html: '', // set in compilation
-	};
-}
-
-function getEmptyPage(sourcePath: string): IPage {
-	return {
-		type: ESourceType.Page,
-		sourcePath,
-		generatedPath: getGeneratedPath(sourcePath, ESourceType.Page),
-		title: 'Unnamed',
-		description: '',
-		css: [],
-		html: '', // set in compilation
-	};
-}
-
-function getEmptyEpisode(sourcePath: string, podcast: IPodcast): IEpisode {
-	return {
-		type: ESourceType.Episode,
-		sourcePath,
-		generatedPath: getGeneratedPath(sourcePath, ESourceType.Episode),
-		webPath: getWebPath(sourcePath, ESourceType.Episode),
-		title: 'Unnamed',
-		date: {
-			object: new Date(),
-			localeString: DateTime.now()
-				.setLocale(conf(`content.language`, 'string', EConf.Required))
-				.toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY),
-			relativeString: `\${"hot": "relative_date", "date": "${new Date().toISOString()}"}`,
-		},
-		author: {
-			name: conf(`content.podcasts.${podcast.name}.main_author`, 'string', EConf.Required),
-			email: '',
-		},
-		description: '',
-		enclosure: {
-			generatedPath: '',
-			webPath: '',
-			type: '',
-			length: 0,
-		},
-		audio: {
-			generatedPath: '',
-			webPath: '',
-			mime: '',
-			length: 0,
-			duration: 0,
-		},
-		platforms: {},
-		css: [],
-	};
-}
+import { IBlog, IPost, getEmptyPost, isBlog, isPost } from '../interfaces/blog';
+import { IPage, isPages, isPage, getEmptyPage } from '../interfaces/pages';
+import { IPodcast, IEpisode, isPodcast, isEpisode, getEmptyEpisode } from '../interfaces/podcast';
 
 export function getMeta(sourcePath: string, data: Array<IPage> | IBlog | IPodcast): Promise<void> {
 	return new Promise((resolve, reject) => {

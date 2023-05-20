@@ -1,4 +1,5 @@
-import { IPost, ISources } from '../../../scripts/interfaces';
+import { IPost } from '../../../scripts/interfaces/blog';
+import { ISources } from '../../../scripts/interfaces/interfaces';
 
 export async function compile(settings: any, sources: ISources): Promise<string> {
 	let HTMLlist = '';

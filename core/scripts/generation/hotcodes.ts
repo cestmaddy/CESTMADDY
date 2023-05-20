@@ -1,6 +1,6 @@
 import path from 'path';
 import { BUILTIN_HOTCODES_ROOT, CUSTOM_HOTCODES_ROOT } from '../const';
-import { HotData } from '../interfaces';
+import { HotData } from '../interfaces/interfaces';
 import { error } from '../log';
 
 async function getHotcodeReturn(hcPath: string, hotSettings: any, hotData: HotData): Promise<string> {

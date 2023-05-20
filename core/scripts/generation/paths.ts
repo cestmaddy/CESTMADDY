@@ -2,7 +2,7 @@ import path from 'path';
 
 import { conf } from '../config';
 import { BUILTIN_THEMES_ROOT, CUSTOM_THEMES_ROOT, GENERATED_ROOT, SOURCE_ROOT } from '../const';
-import { EConf, ESourceType } from '../interfaces';
+import { EConf, ESourceType } from '../interfaces/interfaces';
 
 export function getGeneratedPath(sourcePath: string, sourceType: ESourceType): string {
 	let generatedPath: string;

@@ -5,7 +5,7 @@ import prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index';
 import * as prismComponents from 'prismjs/components';
 
-import { ESourceType, IOther, ISources } from '../interfaces';
+import { ESourceType, IOther, ISources } from '../interfaces/interfaces';
 import { replaceShortcodes } from './shortcodes';
 import { getThemePath, getWebPath } from './paths';
 import { error } from '../log';

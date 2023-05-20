@@ -1,6 +1,6 @@
 import path from 'path';
 import { BUILTIN_SHORTCODES_ROOT, CUSTOM_SHORTCODES_ROOT } from '../const';
-import { ISources } from '../interfaces';
+import { ISources } from '../interfaces/interfaces';
 import { error } from '../log';
 
 async function getShortcodeReturn(obj: any, sourcePath: string, sources: ISources, scPath: string): Promise<string> {

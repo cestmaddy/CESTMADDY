@@ -1,9 +1,11 @@
 import path from 'path';
 
-import { ESourceType, IBlog, IEpisode, IPodcast, IPost, ISources } from '../interfaces';
+import { ESourceType, ISources } from '../interfaces/interfaces';
 import { error } from '../log';
 import { writeFile } from './compile';
 import { getGeneratedPath, getWebPath } from './paths';
+import { IBlog, IPost } from '../interfaces/blog';
+import { IPodcast, IEpisode } from '../interfaces/podcast';
 
 function escapeSymbols(str: string): string {
 	// Escape list from https://podcasters.apple.com/support/823-podcast-requirements

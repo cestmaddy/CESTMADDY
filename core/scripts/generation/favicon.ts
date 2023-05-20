@@ -4,7 +4,7 @@ import fs from 'fs';
 import { optimize, PluginConfig, Output as SvgoOutput } from 'svgo';
 
 import { conf } from '../config';
-import { EConf } from '../interfaces';
+import { EConf } from '../interfaces/interfaces';
 import { error } from '../log';
 import { GENERATED_ROOT, SOURCE_ROOT } from '../const';
 

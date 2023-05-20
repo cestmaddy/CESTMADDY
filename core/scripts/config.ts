@@ -2,7 +2,7 @@ import { load } from 'js-yaml';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-import { EConf } from './interfaces';
+import { EConf } from './interfaces/interfaces';
 import { error } from './log';
 import { CONFIG } from './const';
 

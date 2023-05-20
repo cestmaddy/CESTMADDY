@@ -5,7 +5,7 @@ import mime from 'mime-types';
 const MatomoTracker = require('matomo-tracker');
 
 import { conf, env } from '../../config';
-import { EConf } from '../../interfaces';
+import { EConf } from '../../interfaces/interfaces';
 
 let authToken: string;
 let matomo: any;

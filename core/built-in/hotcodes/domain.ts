@@ -1,4 +1,4 @@
-import { HotData } from '../../scripts/interfaces';
+import { HotData } from '../../scripts/interfaces/interfaces';
 
 /*
  * Domain

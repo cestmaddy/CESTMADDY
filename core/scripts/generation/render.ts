@@ -4,10 +4,13 @@ import fs from 'fs';
 
 import { conf } from '../config';
 import { GENERATED_ROOT, BUILTIN_THEMES_ROOT } from '../const';
-import { ESourceType, EConf, IPage, IPost, IEpisode, ISources, isPage, isPost, isEpisode } from '../interfaces';
 import { error } from '../log';
 import { getCompiledHtml, writeFile } from './compile';
 import { getThemePath } from './paths';
+import { IPost, isPost } from '../interfaces/blog';
+import { ESourceType, EConf, ISources } from '../interfaces/interfaces';
+import { IPage, isPage } from '../interfaces/pages';
+import { IEpisode, isEpisode } from '../interfaces/podcast';
 
 export async function renderErrors(): Promise<void> {
 	const codes: number[] = [404, 500];

@@ -6,7 +6,7 @@ import serveStaticCb from 'serve-static-callback';
 const interceptor = require('express-interceptor');
 
 import { conf } from '../config';
-import { EConf, HotData } from '../interfaces';
+import { EConf, HotData } from '../interfaces/interfaces';
 import { matomoInit, matomoTrack } from './trackers/matomo';
 import { replaceHotcodes } from '../generation/hotcodes';
 import { GENERATED_ROOT } from '../const';

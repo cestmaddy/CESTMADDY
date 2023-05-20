@@ -2,11 +2,13 @@ import path from 'path';
 import { glob } from 'glob';
 
 import { conf } from '../config';
-import { EConf, ESourceType, IBlog, IPodcast, ISources } from '../interfaces';
+import { EConf, ESourceType, ISources } from '../interfaces/interfaces';
 import { getMeta } from './metadata';
 import { getFooterPath, getGeneratedPath, getHeaderPath, getWebPath } from './paths';
 import { ROOT, SOURCE_ROOT } from '../const';
 import { getCompiledHtml } from './compile';
+import { IBlog } from '../interfaces/blog';
+import { IPodcast } from '../interfaces/podcast';
 
 const indexReg = new RegExp(/index\.(md|markdown|markdn|mdown|mkd)$/);
 const mdReg = new RegExp(/\.(md|markdown|markdn|mdown|mkd)$/);

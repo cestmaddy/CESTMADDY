@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { conf } from '../../scripts/config';
-import { EConf, HotData } from '../../scripts/interfaces';
+import { EConf, HotData } from '../../scripts/interfaces/interfaces';
 
 /*
  * Relative date

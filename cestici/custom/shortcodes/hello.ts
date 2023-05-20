@@ -1,4 +1,4 @@
-import { ISources } from '../../../core/scripts/interfaces';
+import { ISources } from '../../../core/scripts/interfaces/interfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function compile(settings: any, sources: ISources): Promise<string> {

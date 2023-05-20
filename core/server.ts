@@ -3,7 +3,7 @@ import '@colors/colors';
 
 import { conf, env } from './scripts/config';
 import routes from './scripts/webserv/routes';
-import { EConf } from './scripts/interfaces';
+import { EConf } from './scripts/interfaces/interfaces';
 
 let port = 80;
 

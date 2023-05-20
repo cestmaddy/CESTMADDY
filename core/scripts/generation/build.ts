@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import { getSources } from './sources';
 import { copyTheme, compileOther } from './compile';
-import { EConf, ISources } from '../interfaces';
+import { EConf, ISources } from '../interfaces/interfaces';
 import { createFavicons } from './favicon';
 import { createFeeds } from './feed';
 import { conf } from '../config';
