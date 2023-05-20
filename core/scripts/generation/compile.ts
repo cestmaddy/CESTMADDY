@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
 import prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index';
 import * as prismComponents from 'prismjs/components';
+import slugify from 'slugify';
 
 import { ESourceType, IOther, ISources } from '../interfaces/interfaces';
 import { replaceShortcodes } from './shortcodes';
@@ -14,22 +16,12 @@ import { GENERATED_ROOT } from '../const';
 marked.use({
 	async: true,
 	pedantic: false,
-	gfm: true,
+	headerIds: false,
 	breaks: false,
 	sanitize: false,
-	smartLists: true,
+	mangle: false,
 	smartypants: false,
 	xhtml: false,
-	highlight: (code, lang) => {
-		// Check that the language is supported before loading it
-		if (lang && prismComponents.languages[lang]) loadLanguages([lang]);
-		if (prism.languages[lang]) {
-			return prism.highlight(code, prism.languages[lang], lang);
-		} else {
-			error(undefined, 'COMPILATION', `Language ${lang.bold} is not supported by Prism`, 'WARNING');
-			return code;
-		}
-	},
 	renderer: {
 		image(href: string, title: string, text: string) {
 			let imageHTML = `<img loading="lazy"`;
@@ -54,17 +46,26 @@ marked.use({
 			linkHTML += `>${text}</a>`;
 			return linkHTML;
 		},
+		heading(text, level, raw) {
+			return `<h${level} id="${slugify(raw, { strict: true, lower: true, trim: true })}">${text}</h${level}>\n`;
+		},
 	},
 });
 
-export function markedPromise(markdown: string): Promise<string> {
-	return new Promise((resolve, reject) => {
-		marked(markdown, (err, content) => {
-			if (err) reject(err);
-			else resolve(content);
-		});
-	});
-}
+marked.use(
+	markedHighlight({
+		highlight(code, lang) {
+			// Check that the language is supported before loading it
+			if (lang && prismComponents.languages[lang]) loadLanguages([lang]);
+			if (prism.languages[lang]) {
+				return prism.highlight(code, prism.languages[lang], lang);
+			} else {
+				error(undefined, 'COMPILATION', `Language ${lang.bold} is not supported by Prism`, 'WARNING');
+				return code;
+			}
+		},
+	}),
+);
 
 export async function compileHTML(markdown: string, sourcePath: string, sources: ISources): Promise<string> {
 	const metaReg = new RegExp(/^---([\s\S]+?)---/, 'gmy');
@@ -79,10 +80,7 @@ export async function compileHTML(markdown: string, sourcePath: string, sources:
 		'](' + getWebPath(path.dirname(sourcePath), ESourceType.Page) + '/$1)',
 	);
 
-	const html = await markedPromise(markdown).catch((err) => {
-		error(sourcePath, 'COMPILATION', err, 'ERROR');
-		return undefined;
-	});
+	const html = await marked.parse(markdown);
 	if (html == undefined) return Promise.reject();
 
 	return html;
