@@ -33,7 +33,8 @@ test:
   allow_failure: true
   script:
     - npm install
-    - TEST=1 npx nyc --reporter cobertura npm test
+    - TEST=1 npx nyc -r text -r cobertura npm test # For creating coverage report
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
     reports:
       coverage_report:
