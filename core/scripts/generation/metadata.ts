@@ -104,8 +104,6 @@ async function setAudio(page: IPage | IPost | IEpisode, fileMeta: any, sourcePat
 		return;
 	}
 
-	console.log(fileMeta.audio);
-
 	const audioPath = path.join(path.dirname(sourcePath), fileMeta.audio);
 	const canAccess = await fs.promises
 		.access(audioPath, fs.constants.R_OK)
