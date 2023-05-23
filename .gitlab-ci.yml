@@ -27,6 +27,7 @@ include:
 - template: Security/Secret-Detection.gitlab-ci.yml
 
 test:
+  image: node:latest
   stage: test
   retry: 2
   script:
