@@ -26,6 +26,19 @@ include:
 - template: Security/Dependency-Scanning.gitlab-ci.yml
 - template: Security/Secret-Detection.gitlab-ci.yml
 
+test:
+  stage: test
+  retry: 2
+  script:
+    - npm install
+    - npx nyc --reporter cobertura npm test
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
+
 docker-publish:
   image: docker:latest
   stage: deploy
