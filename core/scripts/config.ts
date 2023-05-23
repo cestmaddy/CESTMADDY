@@ -1,6 +1,12 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { load } from 'js-yaml';
-import fs from 'fs';
 import dotenv from 'dotenv';
+
+// Conditional import for tests
+let fs: typeof import('fs');
+if (process.env.TEST) fs = require('memfs').fs;
+else fs = require('fs');
+// End conditional import for tests
 
 import { EConf } from './interfaces/interfaces';
 import { error } from './log';
@@ -8,7 +14,7 @@ import { CONFIG } from './const';
 
 let file = '';
 try {
-	file = fs.readFileSync(CONFIG, 'utf8');
+	file = fs.readFileSync(CONFIG, 'utf8').toString();
 } catch (e) {
 	error(undefined, 'CONFIG', `Could not read config file: ${e}`, 'ERROR');
 	process.exit(1);

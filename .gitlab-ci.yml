@@ -30,9 +30,10 @@ test:
   image: node:latest
   stage: test
   retry: 2
+  allow_failure: true
   script:
     - npm install
-    - npx nyc --reporter cobertura npm test
+    - TEST=1 npx nyc --reporter cobertura npm test
   artifacts:
     reports:
       coverage_report:

@@ -1,11 +1,20 @@
 /* eslint-disable prettier/prettier */
 import { expect } from 'chai';
 import path from 'path';
+// import mock_fs from 'mock-fs';
+import { fs, vol } from 'memfs';
+
+// Create a fake config file for tests
+import { CONFIG } from '../../../../core/scripts/const';
+fs.mkdirpSync(path.dirname(CONFIG));
+fs.writeFileSync(CONFIG, 'hey');
+import { set_conf } from '../../../../core/scripts/config'; // will use the fake config file
+vol.reset();
+// End create a fake config file for tests
 
 import { getFooterPath, getGeneratedPath, getHeaderPath, getThemePath, getWebPath } from '../../../../core/scripts/generation/paths';
 import { ESourceType } from '../../../../core/scripts/interfaces/interfaces';
 import { GENERATED_ROOT, SOURCE_ROOT, BUILTIN_THEMES_ROOT, CUSTOM_THEMES_ROOT } from '../../../../core/scripts/const';
-import { set_conf } from '../../../../core/scripts/config';
 
 describe('core/scripts/generation/paths.ts', () => {
 	describe('getGeneratedPath', () => {
