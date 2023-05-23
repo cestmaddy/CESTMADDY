@@ -13,6 +13,9 @@
 	<a href="https://git.chevro.fr/cestmaddy/cestmaddy/-/commits/main">
 		<img src="https://git.chevro.fr/cestmaddy/cestmaddy/badges/main/pipeline.svg?style=flat&ignore_skipped=true" alt="Pipeline status" />
 	</a>
+	<a href="https://git.chevro.fr/cestmaddy/cestmaddy/-/graphs/main/charts">
+		<img src="https://git.chevro.fr/cestmaddy/cestmaddy/badges/main/coverage.svg?style=flat" alt="Code coverage" />
+	</a>
 </p>
 
 # cestmaddy
