@@ -13,7 +13,7 @@ try {
 	error(undefined, 'CONFIG', `Could not read config file: ${e}`, 'ERROR');
 	process.exit(1);
 }
-const configYaml = load(file);
+let configYaml = load(file);
 dotenv.config();
 
 export const conf = (
@@ -47,6 +47,11 @@ export const conf = (
 		);
 		return process.exit(1);
 	} else return elem;
+};
+
+export const set_conf = (new_conf: object) => {
+	// Should be only used for tests
+	configYaml = new_conf;
 };
 
 export function env(

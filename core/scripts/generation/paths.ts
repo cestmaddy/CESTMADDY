@@ -7,12 +7,9 @@ import { EConf, ESourceType } from '../interfaces/interfaces';
 export function getGeneratedPath(sourcePath: string, sourceType: ESourceType): string {
 	let generatedPath: string;
 
-	// Remove everything before the first source/
-	generatedPath = path.join(
-		GENERATED_ROOT,
-		'content',
-		sourcePath.split('source/').slice(1, sourcePath.length).join('source/'),
-	);
+	// Replace the first SOURCE_ROOT with source/
+	sourcePath = sourcePath.replace(SOURCE_ROOT, '');
+	generatedPath = path.join(GENERATED_ROOT, 'content', sourcePath);
 	// Replace extension with .html
 	if (sourceType != ESourceType.Other) generatedPath = `${generatedPath.split('.').slice(0, -1).join('.')}.html`;
 	return generatedPath;
@@ -33,6 +30,7 @@ export function getWebPath(sourcePath: string, sourceType: ESourceType): string 
 	if (sourceType == ESourceType.Episode)
 		if (webPath.endsWith('/episode')) webPath = webPath.split('/').slice(0, -1).join('/');
 
+	if (webPath == '') webPath = '/';
 	return webPath;
 }
 

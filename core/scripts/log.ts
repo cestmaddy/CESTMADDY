@@ -1,4 +1,5 @@
 import path from 'path';
+import '@colors/colors';
 
 export function error(
 	file: string | undefined,
