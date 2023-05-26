@@ -10,6 +10,7 @@ export interface IPage {
 	title: string;
 	description: string;
 	css: Array<string>;
+	js: Array<string>;
 	html: string;
 }
 
@@ -29,6 +30,7 @@ export function getEmptyPage(sourcePath: string): IPage {
 		title: 'Unnamed',
 		description: '',
 		css: [],
+		js: [],
 		html: '', // set in compilation
 	};
 }

@@ -59,6 +59,7 @@ export async function renderErrors(): Promise<void> {
 					},
 					ejsFavicons: path.resolve(BUILTIN_THEMES_ROOT, 'favicons.ejs'),
 					ejsCSS: path.resolve(BUILTIN_THEMES_ROOT, 'css.ejs'),
+					ejsJS: path.resolve(BUILTIN_THEMES_ROOT, 'js.ejs'),
 				};
 
 				// Render template
@@ -125,6 +126,7 @@ export async function renderPage(page: IPage | IPost | IEpisode, sources: ISourc
 		},
 		ejsFavicons: path.resolve('dist', 'core', 'built-in', 'themes', 'favicons.ejs'),
 		ejsCSS: path.resolve('dist', 'core', 'built-in', 'themes', 'css.ejs'),
+		ejsJS: path.resolve('dist', 'core', 'built-in', 'themes', 'js.ejs'),
 		sources: {
 			blogs: sources.blogs,
 			podcasts: sources.podcasts,

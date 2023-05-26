@@ -7,3 +7,4 @@
 *.min.*
 !css.ejs
 !favicons.ejs
+!js.ejs

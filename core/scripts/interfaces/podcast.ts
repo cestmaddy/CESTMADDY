@@ -36,6 +36,7 @@ export interface IEpisode {
 	};
 	platforms: object;
 	css: Array<string>;
+	js: Array<string>;
 }
 
 export interface IPodcast {
@@ -102,5 +103,6 @@ export function getEmptyEpisode(sourcePath: string, podcast: IPodcast): IEpisode
 		},
 		platforms: {},
 		css: [],
+		js: [],
 	};
 }

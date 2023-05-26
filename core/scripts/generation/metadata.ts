@@ -132,38 +132,66 @@ async function setAudio(page: IPage | IPost | IEpisode, fileMeta: any, sourcePat
 	});
 }
 
-async function setCSS(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
-	if (!fileMeta.hasOwnProperty('css')) return;
+/*
+ * Set the page CSS or JS files,
+ * according to fileExt (css or js)
+ */
+async function _setAdditionalFiles(
+	page: IPage | IPost | IEpisode,
+	fileMeta: any,
+	sourcePath: string,
+	fileExt: 'css' | 'js',
+): Promise<void> {
+	if (!fileMeta.hasOwnProperty(fileExt)) return;
 
-	const cssDir = path.join(getThemePath(), 'css', 'additional');
-	const cssFiles = await glob(`${cssDir}/**/*.css`);
+	const additionalDir = path.join(getThemePath(), fileExt, 'additional');
+	const additionalFiles = await glob(`${additionalDir}/**/*.${fileExt}`);
 
 	const userFiles = [];
-	if (typeof fileMeta['css'] == 'string') userFiles.push(fileMeta['css']);
-	else if (Array.isArray(fileMeta['css'])) {
-		fileMeta['css'].forEach((path) => {
+	if (typeof fileMeta[fileExt] == 'string') userFiles.push(fileMeta[fileExt]);
+	else if (Array.isArray(fileMeta[fileExt])) {
+		fileMeta[fileExt].forEach((path: any) => {
 			if (typeof path != 'string')
-				error(sourcePath, 'METADATA', `The CSS array should only contain string`, 'WARNING');
+				error(
+					sourcePath,
+					'METADATA',
+					`The ${fileExt.toUpperCase()} array should only contain string`,
+					'WARNING',
+				);
 			else userFiles.push(path);
 		});
 	} else {
-		error(sourcePath, 'METADATA', 'Invalid "css" format (need a string or an array of string)', 'WARNING');
+		error(sourcePath, 'METADATA', `Invalid "${fileExt}" format (need a string or an array of string)`, 'WARNING');
 		return;
 	}
 
 	userFiles.forEach((userFile) => {
-		const cssPath = path.join(cssDir, userFile);
+		const additionalPath = path.join(additionalDir, userFile);
 		let found = false;
 
-		cssFiles.forEach((file) => {
-			if (file == cssPath) {
-				page.css.push(userFile);
+		additionalFiles.forEach((file) => {
+			if (file == additionalPath) {
+				page[fileExt].push(userFile);
 				found = true;
 				return;
 			}
 		});
-		if (!found) error(sourcePath, 'METADATA', `Additional CSS file not found: ${cssPath}`, 'WARNING');
+		if (!found)
+			error(
+				sourcePath,
+				'METADATA',
+				`Additional ${fileExt.toUpperCase()} file not found: ${additionalPath}`,
+				'WARNING',
+			);
 	});
+}
+
+async function setCSS(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
+	return await _setAdditionalFiles(page, fileMeta, sourcePath, 'css');
+}
+
+async function setJS(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
+	return await _setAdditionalFiles(page, fileMeta, sourcePath, 'js');
 }
 
 export async function getMeta(sourcePath: string, data: Array<IPage> | IBlog | IPodcast): Promise<void> {
@@ -202,6 +230,7 @@ export async function getMeta(sourcePath: string, data: Array<IPage> | IBlog | I
 		promisesList.push(setPlatforms(page, fileMeta, sourcePath));
 		promisesList.push(setAudio(page, fileMeta, sourcePath));
 		promisesList.push(setCSS(page, fileMeta, sourcePath));
+		promisesList.push(setJS(page, fileMeta, sourcePath));
 	}
 
 	await Promise.allSettled(promisesList).then(() => {

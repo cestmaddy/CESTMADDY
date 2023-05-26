@@ -28,6 +28,7 @@ export interface IPost {
 		length: number;
 	};
 	css: Array<string>;
+	js: Array<string>;
 	html: string;
 }
 
@@ -74,6 +75,7 @@ export function getEmptyPost(sourcePath: string, blog: IBlog): IPost {
 			length: 0,
 		},
 		css: [],
+		js: [],
 		html: '', // set in compilation
 	};
 }
