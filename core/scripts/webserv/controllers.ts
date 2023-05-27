@@ -1,17 +1,13 @@
 import express, { RequestHandler, Response, Request } from 'express';
 import path from 'path';
 import fs from 'fs';
-import serveStaticCb from 'serve-static-callback';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const interceptor = require('express-interceptor');
 
 import { conf } from '../config';
 import { EConf, HotData } from '../interfaces/interfaces';
-import { matomoInit, matomoTrack } from './trackers/matomo';
 import { replaceHotcodes } from '../generation/hotcodes';
 import { GENERATED_ROOT } from '../const';
-
-if (conf('content.tracker.matomo', 'object', EConf.Optional)) matomoInit();
 
 export const sendError = (code: number, res: Response) => {
 	const codes: number[] = [404, 500];
@@ -31,18 +27,12 @@ export const staticFront: RequestHandler = express.static(path.resolve(GENERATED
 	fallthrough: true,
 });
 
-export const staticContent: RequestHandler = serveStaticCb(
-	path.resolve(GENERATED_ROOT, 'content'),
-	{
-		extensions: ['html'],
-		dotfiles: 'deny',
-		index: ['index.html', 'post.html', 'episode.html'],
-		fallthrough: true,
-	},
-	function (req: express.Request, _res: express.Response, path: string) {
-		if (conf('content.tracker.matomo', 'object', EConf.Optional)) matomoTrack(req, path);
-	},
-);
+export const staticContent: RequestHandler = express.static(path.resolve(GENERATED_ROOT, 'content'), {
+	extensions: ['html'],
+	dotfiles: 'deny',
+	index: ['index.html', 'post.html', 'episode.html'],
+	fallthrough: true,
+});
 
 export const static404: RequestHandler = (_req, res) => {
 	sendError(404, res);
