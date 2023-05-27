@@ -1,4 +1,4 @@
-import '@colors/colors';
+import { blue } from 'colorette';
 import fs from 'fs';
 
 import { getSources } from './sources';
@@ -50,7 +50,7 @@ async function compileSources(sources: ISources): Promise<void> {
 
 (async function main() {
 	process.title = `cmy generation ${conf('content.title', 'string', EConf.Optional)}`;
-	console.log('Retrieving metadata'.blue);
+	console.log(blue('Retrieving metadata'));
 
 	// RETRIEVE METADATA
 	const sources = await getSources();
@@ -69,7 +69,7 @@ async function compileSources(sources: ISources): Promise<void> {
 	)
 		return;
 
-	console.log('Compiling'.blue);
+	console.log(blue('Compiling'));
 	// COMPILATION
 	Promise.allSettled([
 		compileSources(sources),

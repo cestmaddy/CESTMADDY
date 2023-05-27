@@ -1,5 +1,5 @@
 import express from 'express';
-import '@colors/colors';
+import { bold, magenta } from 'colorette';
 
 import { conf, env } from './scripts/config';
 import routes from './scripts/webserv/routes';
@@ -16,5 +16,5 @@ const app = express();
 app.set('trust proxy', 1);
 app.use('/', routes);
 app.listen(port, () => {
-	console.log(`\ncestmaddy started on ::${port}`.magenta.bold);
+	console.log(magenta(bold(`\ncestmaddy started on ::${port}`)));
 });

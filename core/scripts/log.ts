@@ -1,5 +1,5 @@
 import path from 'path';
-import '@colors/colors';
+import { yellow, red, blue, green, bold } from 'colorette';
 
 export function error(
 	file: string | undefined,
@@ -20,9 +20,9 @@ export function error(
 	let typeString = '';
 	let logString = '';
 
-	if (type == 'WARNING') typeString = 'WARNING'.yellow;
-	else if (type == 'ERROR') typeString = 'ERROR'.red;
-	else typeString = 'INFO'.blue;
+	if (type == 'WARNING') typeString = yellow('WARNING');
+	else if (type == 'ERROR') typeString = red('ERROR');
+	else typeString = blue('INFO');
 
 	if (step == 'SERVING') {
 		// Serving errors
@@ -46,14 +46,14 @@ export function error(
 }
 
 export function logError(): void {
-	console.log('FAILED'.red.bold);
+	console.log(red(bold('ERROR')));
 
 	const used = process.memoryUsage().heapUsed / 1024 / 1024;
 	console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
 }
 
 export function logSuccess(): void {
-	console.log('COMPILED'.green.bold);
+	console.log(green(bold('COMPILED')));
 
 	const used = process.memoryUsage().heapUsed / 1024 / 1024;
 	console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
