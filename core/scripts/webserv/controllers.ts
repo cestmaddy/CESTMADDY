@@ -4,10 +4,28 @@ import fs from 'fs';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const interceptor = require('express-interceptor');
 
-import { conf } from '../config';
-import { EConf, HotData } from '../interfaces/interfaces';
+import { HotData } from '../interfaces/interfaces';
 import { replaceHotcodes } from '../generation/hotcodes';
 import { GENERATED_ROOT } from '../const';
+
+export const createNewPath = (reqPath: string): string => {
+	const indexFiles: string[] = ['index', 'post', 'episode'];
+	let newPath: string = reqPath;
+
+	if (newPath.endsWith('.html'))
+		// remove .html
+		newPath = newPath.substring(0, newPath.length - 5);
+
+	const filename = newPath.split('/').slice(-1)[0];
+	if (indexFiles.includes(filename))
+		// remove index, post, episode
+		newPath = newPath.substring(0, newPath.length - filename.length);
+
+	// If there's no extension, add a trailing slash
+	if (path.extname(newPath) === '' && !newPath.endsWith('/')) newPath += '/';
+
+	return newPath;
+};
 
 export const sendError = (code: number, res: Response) => {
 	const codes: number[] = [404, 500];
@@ -39,18 +57,9 @@ export const static404: RequestHandler = (_req, res) => {
 };
 
 export const redirExtIndexes: RequestHandler = (req, res, next) => {
-	const indexFiles: string[] = ['index', 'post', 'episode'];
-	let newPath: string = req.path;
+	const newPath = createNewPath(req.path);
 
-	if (newPath.endsWith('.html'))
-		// remove .html
-		newPath = newPath.substring(0, newPath.length - 5);
-
-	const filename = newPath.split('/').slice(-1)[0];
-	if (indexFiles.includes(filename))
-		// remove index, post, episode
-		newPath = newPath.substring(0, newPath.length - filename.length);
-
+	console.log(newPath, req.path);
 	if (newPath != req.path) res.redirect(newPath);
 	else next();
 };

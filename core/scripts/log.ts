@@ -27,7 +27,7 @@ export function error(
 	if (step == 'SERVING') {
 		// Serving errors
 		let filePath = '';
-		if (file != undefined) filePath = ` ${file.bold}`;
+		if (file != undefined) filePath = ` ${bold(file)}`;
 
 		logString = `[${typeString}]${filePath}\n    -> ${error}`;
 	} else {
@@ -36,7 +36,7 @@ export function error(
 			let filePath = path.relative(path.resolve(), file);
 			if (filePath.startsWith('dist/')) filePath = filePath.substring(5);
 
-			logString = `[${typeString}] ${filePath.bold}: ${step}\n    -> ${error}`;
+			logString = `[${typeString}] ${bold(filePath)}: ${step}\n    -> ${error}`;
 		} else logString = `[${typeString}] ${step}\n    -> ${error}`;
 	}
 

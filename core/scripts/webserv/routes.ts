@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { staticFront, staticContent, static404, redirExtIndexes, intercept } from './controllers';
+import { addProxies } from './proxies';
 
 const router = Router({ strict: true });
 
@@ -10,6 +11,7 @@ router.use((_req, res, next) => {
 	next();
 });
 
+addProxies(router);
 router.use('/front', staticFront);
 router.use(redirExtIndexes);
 router.use(intercept);
