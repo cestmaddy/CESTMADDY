@@ -19,7 +19,13 @@ try {
 	error(undefined, 'CONFIG', `Could not read config file: ${e}`, 'ERROR');
 	process.exit(1);
 }
-let configYaml = load(file);
+let configYaml: unknown = {};
+try {
+	configYaml = load(file);
+} catch (e) {
+	error(undefined, 'CONFIG', `Could not parse config file: ${e}`, 'ERROR');
+	process.exit(1);
+}
 dotenv.config();
 
 export const conf = (
