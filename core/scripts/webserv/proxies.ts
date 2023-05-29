@@ -4,7 +4,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { EConf } from '../interfaces/interfaces';
 import { conf, env } from '../config';
 import { error } from '../log';
-import { createNewPath } from './controllers';
+import { createNewPath, sendError } from './controllers';
 
 /*
  * Take a router and add proxies fom the config to it
@@ -35,9 +35,17 @@ export function addProxies(router: Router) {
 					[`^${newRoute}`]: '',
 				},
 				router: () => {
-					console.log('yo', proxy, createNewPath(proxy)); // TODO: /index2/nnn not working (should be 404)
-					if (proxy.startsWith('/')) return `http://localhost:${port}${createNewPath(proxy)}`;
+					if (proxy.startsWith('/')) return `http://localhost:${port}${createNewPath(proxy, false)}`;
 					return proxy;
+				},
+				onError: (err, req, res) => {
+					error(
+						`${req.protocol}://${req.headers.host}${newRoute}`,
+						'SERVING',
+						`Proxy error: ${err.message}`,
+						'ERROR',
+					);
+					sendError(500, res);
 				},
 			}),
 		);

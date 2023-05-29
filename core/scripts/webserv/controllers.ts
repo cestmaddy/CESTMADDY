@@ -8,11 +8,11 @@ import { HotData } from '../interfaces/interfaces';
 import { replaceHotcodes } from '../generation/hotcodes';
 import { GENERATED_ROOT } from '../const';
 
-export const createNewPath = (reqPath: string): string => {
+export const createNewPath = (reqPath: string, removeHtmlExt = true): string => {
 	const indexFiles: string[] = ['index', 'post', 'episode'];
 	let newPath: string = reqPath;
 
-	if (newPath.endsWith('.html'))
+	if (removeHtmlExt && newPath.endsWith('.html'))
 		// remove .html
 		newPath = newPath.substring(0, newPath.length - 5);
 
@@ -59,7 +59,6 @@ export const static404: RequestHandler = (_req, res) => {
 export const redirExtIndexes: RequestHandler = (req, res, next) => {
 	const newPath = createNewPath(req.path);
 
-	console.log(newPath, req.path);
 	if (newPath != req.path) res.redirect(newPath);
 	else next();
 };
