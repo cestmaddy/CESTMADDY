@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { conf } from '../config';
 import { getGeneratedPath, getWebPath } from '../generation/paths';
-import { EConf, ESourceType } from './interfaces';
+import { EConf, ESourceType, ICustomMeta } from './interfaces';
 import { IPage } from './pages';
 import { IEpisode, IPodcast } from './podcast';
 
@@ -30,6 +30,7 @@ export interface IPost {
 	css: Array<string>;
 	js: Array<string>;
 	html: string;
+	custom: ICustomMeta;
 }
 
 export interface IBlog {
@@ -77,5 +78,6 @@ export function getEmptyPost(sourcePath: string, blog: IBlog): IPost {
 		css: [],
 		js: [],
 		html: '', // set in compilation
+		custom: {},
 	};
 }
