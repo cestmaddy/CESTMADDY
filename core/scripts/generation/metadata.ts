@@ -221,6 +221,7 @@ export async function getMeta(sourcePath: string, data: Array<IPage> | IBlog | I
 		}
 	} else error(sourcePath, 'METADATA', "You didn't provide any metadata", 'WARNING');
 
+	const systemMeta = ['title', 'date', 'author', 'description', 'enclosure', 'platforms', 'audio', 'css', 'js'];
 	if (fileMeta) {
 		promisesList.push(setTitle(page, fileMeta, sourcePath));
 		promisesList.push(setDate(page, fileMeta, sourcePath));
@@ -231,6 +232,13 @@ export async function getMeta(sourcePath: string, data: Array<IPage> | IBlog | I
 		promisesList.push(setAudio(page, fileMeta, sourcePath));
 		promisesList.push(setCSS(page, fileMeta, sourcePath));
 		promisesList.push(setJS(page, fileMeta, sourcePath));
+
+		// Custom post metadata
+		for (const key in fileMeta) {
+			if (!systemMeta.includes(key)) {
+				page['custom'][key] = fileMeta[key];
+			}
+		}
 	}
 
 	await Promise.allSettled(promisesList).then(() => {

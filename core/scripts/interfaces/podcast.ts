@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { conf } from '../config';
 import { getGeneratedPath, getWebPath } from '../generation/paths';
 import { IPost, IBlog } from './blog';
-import { EConf, ESourceType } from './interfaces';
+import { EConf, ESourceType, ICustomMeta } from './interfaces';
 import { IPage } from './pages';
 
 export interface IEpisode {
@@ -37,6 +37,7 @@ export interface IEpisode {
 	platforms: object;
 	css: Array<string>;
 	js: Array<string>;
+	custom: ICustomMeta;
 }
 
 export interface IPodcast {
@@ -104,5 +105,6 @@ export function getEmptyEpisode(sourcePath: string, podcast: IPodcast): IEpisode
 		platforms: {},
 		css: [],
 		js: [],
+		custom: {},
 	};
 }

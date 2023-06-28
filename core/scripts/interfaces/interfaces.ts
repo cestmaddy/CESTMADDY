@@ -11,6 +11,10 @@ export enum ESourceType {
 	Other,
 }
 
+export interface ICustomMeta {
+	[key: string]: any;
+}
+
 export interface IOther {
 	type: ESourceType;
 	sourcePath: string;

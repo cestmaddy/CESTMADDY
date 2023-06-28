@@ -1,6 +1,6 @@
 import { getGeneratedPath } from '../generation/paths';
 import { IPost, IBlog } from './blog';
-import { ESourceType } from './interfaces';
+import { ESourceType, ICustomMeta } from './interfaces';
 import { IEpisode, IPodcast } from './podcast';
 
 export interface IPage {
@@ -12,6 +12,7 @@ export interface IPage {
 	css: Array<string>;
 	js: Array<string>;
 	html: string;
+	custom: ICustomMeta;
 }
 
 export function isPage(page: IPage | IPost | IEpisode): page is IPage {
@@ -32,5 +33,6 @@ export function getEmptyPage(sourcePath: string): IPage {
 		css: [],
 		js: [],
 		html: '', // set in compilation
+		custom: {},
 	};
 }
