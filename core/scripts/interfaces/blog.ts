@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { LanguageCode } from 'iso-639-1';
 import { conf } from '../config';
 import { getGeneratedPath, getWebPath } from '../generation/paths';
 import { EConf, ESourceType, ICustomMeta } from './interfaces';
@@ -11,6 +12,7 @@ export interface IPost {
 	generatedPath: string;
 	webPath: string;
 	title: string;
+	language: LanguageCode;
 	date: {
 		object: Date;
 		localeString: string;
@@ -57,6 +59,7 @@ export function getEmptyPost(sourcePath: string, blog: IBlog): IPost {
 		generatedPath: getGeneratedPath(sourcePath, ESourceType.Post),
 		webPath: getWebPath(sourcePath, ESourceType.Post),
 		title: 'Unnamed',
+		language: conf(`content.language`, 'string', EConf.Required),
 		date: {
 			object: new Date(),
 			localeString: DateTime.now()

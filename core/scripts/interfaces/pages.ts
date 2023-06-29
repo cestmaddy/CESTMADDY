@@ -1,13 +1,16 @@
+import { LanguageCode } from 'iso-639-1';
 import { getGeneratedPath } from '../generation/paths';
 import { IPost, IBlog } from './blog';
-import { ESourceType, ICustomMeta } from './interfaces';
+import { EConf, ESourceType, ICustomMeta } from './interfaces';
 import { IEpisode, IPodcast } from './podcast';
+import { conf } from '../config';
 
 export interface IPage {
 	type: ESourceType;
 	sourcePath: string;
 	generatedPath: string;
 	title: string;
+	language: LanguageCode;
 	description: string;
 	css: Array<string>;
 	js: Array<string>;
@@ -29,6 +32,7 @@ export function getEmptyPage(sourcePath: string): IPage {
 		sourcePath,
 		generatedPath: getGeneratedPath(sourcePath, ESourceType.Page),
 		title: 'Unnamed',
+		language: conf(`content.language`, 'string', EConf.Required),
 		description: '',
 		css: [],
 		js: [],

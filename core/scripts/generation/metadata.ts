@@ -5,6 +5,7 @@ import path from 'path';
 import mime from 'mime-types';
 import getAudioDurationInSeconds from 'get-audio-duration';
 import { glob } from 'glob';
+import ISO6391 from 'iso-639-1';
 
 import { conf } from '../config';
 import { EConf, ESourceType } from '../interfaces/interfaces';
@@ -17,6 +18,13 @@ import { IPodcast, IEpisode, isPodcast, isEpisode, getEmptyEpisode } from '../in
 async function setTitle(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
 	if (fileMeta.hasOwnProperty('title')) page.title = fileMeta.title;
 	else error(sourcePath, 'METADATA', "You didn't provide a title", 'WARNING');
+}
+
+async function setLanguage(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
+	if (fileMeta.hasOwnProperty('language')) {
+		if (ISO6391.validate(fileMeta.language)) page.language = fileMeta.language;
+		else error(sourcePath, 'METADATA', 'Language should be a valid ISO 639-1 code', 'ERROR');
+	}
 }
 
 async function setDate(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
@@ -224,6 +232,7 @@ export async function getMeta(sourcePath: string, data: Array<IPage> | IBlog | I
 	const systemMeta = ['title', 'date', 'author', 'description', 'enclosure', 'platforms', 'audio', 'css', 'js'];
 	if (fileMeta) {
 		promisesList.push(setTitle(page, fileMeta, sourcePath));
+		promisesList.push(setLanguage(page, fileMeta, sourcePath));
 		promisesList.push(setDate(page, fileMeta, sourcePath));
 		promisesList.push(setAuthor(page, fileMeta, data));
 		promisesList.push(setDescription(page, fileMeta, sourcePath));

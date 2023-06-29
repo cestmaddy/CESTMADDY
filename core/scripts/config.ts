@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { load } from 'js-yaml';
 import dotenv from 'dotenv';
+import ISO6391 from 'iso-639-1';
 
 // Conditional import for tests
 let fs: typeof import('fs');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 if (process.env.TEST) fs = require('memfs').fs;
 else fs = require('fs');
 // End conditional import for tests
@@ -58,7 +59,15 @@ export const conf = (
 			'ERROR',
 		);
 		return process.exit(1);
-	} else return elem;
+	}
+
+	// CHECK VALUE
+	if (path == 'content.language' && !ISO6391.validate(elem)) {
+		error(CONFIG, 'CONFIG', `Wrong value for ${path}, it should be a valid ISO 639-1 code`, 'ERROR');
+		return process.exit(1);
+	}
+
+	return elem;
 };
 
 export const set_conf = (new_conf: object) => {

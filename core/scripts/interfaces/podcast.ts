@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { LanguageCode } from 'iso-639-1';
 import { conf } from '../config';
 import { getGeneratedPath, getWebPath } from '../generation/paths';
 import { IPost, IBlog } from './blog';
@@ -11,6 +12,7 @@ export interface IEpisode {
 	generatedPath: string;
 	webPath: string;
 	title: string;
+	language: LanguageCode;
 	date: {
 		object: Date;
 		localeString: string;
@@ -77,6 +79,7 @@ export function getEmptyEpisode(sourcePath: string, podcast: IPodcast): IEpisode
 		generatedPath: getGeneratedPath(sourcePath, ESourceType.Episode),
 		webPath: getWebPath(sourcePath, ESourceType.Episode),
 		title: 'Unnamed',
+		language: conf(`content.language`, 'string', EConf.Required),
 		date: {
 			object: new Date(),
 			localeString: DateTime.now()
