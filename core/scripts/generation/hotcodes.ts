@@ -1,4 +1,5 @@
 import path from 'path';
+import JSON5 from 'json5';
 import { BUILTIN_HOTCODES_ROOT, CUSTOM_HOTCODES_ROOT } from '../const';
 import { HotData } from '../interfaces/interfaces';
 import { error } from '../log';
@@ -55,17 +56,28 @@ async function compileHotcode(hotSettings: any, hotData: HotData): Promise<strin
 // (doing this way because the size of the markdown change at each replacement)
 export function replaceHotcodes(markdown: string, hotData: HotData, startIndex = 0): Promise<string> {
 	return new Promise(async (resolve) => {
-		const hcReg = new RegExp(/\$\{[\s\S]*?\}/, 'gm');
+		// Capture a hotcode, escaped or not, or a escaped shortcode
+		const hcReg = new RegExp(/(\\\$|\$)(\{[\s\S]*?\})/, 'gm');
 		const found = hcReg.exec(markdown.substring(startIndex));
 
 		if (!found) return resolve(markdown);
 
 		let nextIndex = startIndex + found.index + found[0].length;
+
+		// If the {hot,short}code is escaped, replace it with the unescaped version
+		if (found[1] == '\\$') {
+			markdown = markdown.substring(0, startIndex + found.index) + '$' + found[2] + markdown.substring(nextIndex);
+			return resolve(await replaceHotcodes(markdown, hotData, nextIndex));
+		}
+
 		let foundObj = undefined;
+		const hotContent = found[0].substring(1).replace(new RegExp('&quot;', 'g'), '"');
+
 		try {
-			foundObj = JSON.parse(found[0].substring(1).replace(new RegExp('&quot;', 'g'), '"'));
+			foundObj = JSON5.parse(hotContent);
 		} catch {
-			error(hotData.url, 'SERVING', `A hotcode is badly formatted (the syntax is that of json)`, 'ERROR');
+			console.log(hotContent);
+			error(hotData.url, 'SERVING', `A hotcode is badly formatted (the syntax is that of json5)`, 'ERROR');
 		}
 
 		if (foundObj !== undefined) {

@@ -1,4 +1,5 @@
 import path from 'path';
+import JSON5 from 'json5';
 import { BUILTIN_SHORTCODES_ROOT, CUSTOM_SHORTCODES_ROOT } from '../const';
 import { ISources } from '../interfaces/interfaces';
 import { error } from '../log';
@@ -67,7 +68,8 @@ export function replaceShortcodes(
 	startIndex = 0,
 ): Promise<string> {
 	return new Promise(async (resolve) => {
-		const scReg = new RegExp(/^\$\{[\s\S]*?\}/, 'gm');
+		// Capture a shortcode, but not if it is escaped
+		const scReg = new RegExp(/(?<!\\)\$\{[\s\S]*?\}/, 'gm');
 		const found = scReg.exec(markdown.substring(startIndex));
 
 		if (!found) return resolve(markdown);
@@ -75,9 +77,9 @@ export function replaceShortcodes(
 		let nextIndex = startIndex + found.index + found[0].length;
 		let foundObj = undefined;
 		try {
-			foundObj = JSON.parse(found[0].substring(1));
+			foundObj = JSON5.parse(found[0].substring(1));
 		} catch {
-			error(sourcePath, 'COMPILATION', 'A shortcode is badly formatted (the syntax is that of json)', 'ERROR');
+			error(sourcePath, 'COMPILATION', 'A shortcode is badly formatted (the syntax is that of json5)', 'ERROR');
 		}
 
 		if (foundObj !== undefined) {
