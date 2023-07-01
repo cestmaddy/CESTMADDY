@@ -73,7 +73,6 @@ async function setDescription(page: IPage | IPost | IEpisode, fileMeta: any, sou
 }
 
 async function setEnclosure(page: IPage | IPost | IEpisode, fileMeta: any, sourcePath: string): Promise<void> {
-	if (!isPost(page) && !isEpisode(page)) return;
 	if (!fileMeta.hasOwnProperty('enclosure')) {
 		if (isEpisode(page)) error(sourcePath, 'METADATA', "You didn't provide an enclosure", 'WARNING');
 		return;

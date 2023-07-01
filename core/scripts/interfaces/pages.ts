@@ -13,6 +13,12 @@ export interface IPage {
 	title: string;
 	language: LanguageCode;
 	description: string;
+	enclosure: {
+		generatedPath: string;
+		webPath: string;
+		type: string;
+		length: number;
+	};
 	css: Array<string>;
 	js: Array<string>;
 	html: string;
@@ -36,6 +42,12 @@ export function getEmptyPage(sourcePath: string): IPage {
 		title: 'Unnamed',
 		language: conf(`content.language`, 'string', EConf.Required),
 		description: '',
+		enclosure: {
+			generatedPath: '',
+			webPath: '',
+			type: '',
+			length: 0,
+		},
 		css: [],
 		js: [],
 		html: '', // set in compilation
