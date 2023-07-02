@@ -1,11 +1,12 @@
 import path from 'path';
 
-import { ESourceType, ISources } from '../interfaces/interfaces';
+import { EConf, ESourceType, ISources } from '../interfaces/interfaces';
 import { error } from '../log';
 import { writeFile } from './compile';
 import { getGeneratedPath, getWebPath } from './paths';
 import { IBlog, IPost } from '../interfaces/blog';
 import { IPodcast, IEpisode } from '../interfaces/podcast';
+import { conf } from '../config';
 
 function escapeSymbols(str: string): string {
 	// Escape list from https://podcasters.apple.com/support/823-podcast-requirements
@@ -20,10 +21,13 @@ function escapeSymbols(str: string): string {
 		.replace(/™/g, '&#x2122;');
 }
 
-async function createBlogFeed(blog: IBlog): Promise<void> {
+async function createBlogFeed(blog: IBlog): Promise<Map<Date, string>> {
 	let postsFeed = '';
 	const feedPath = getGeneratedPath(path.join(blog.path, 'rss.xml'), ESourceType.Other);
 	const blogUrl = getWebPath(blog.path, ESourceType.Page);
+	// Store XML posts elements (for global feed)
+	// With a map, so we can sort by date
+	const postsElems: Map<Date, string> = new Map();
 
 	// Sort by date
 	const posts: Array<IPost> = blog.posts.sort((a, b) => {
@@ -33,7 +37,7 @@ async function createBlogFeed(blog: IBlog): Promise<void> {
 	posts.forEach((post) => {
 		let enclosureUrl = '';
 		if (post.enclosure.webPath != '') enclosureUrl = `\${"hot": "domain"}${post.enclosure.webPath}`;
-		postsFeed += `<item>
+		let postElem = `<item>
 			<title>${escapeSymbols(post.title)}</title>
 			<link>\${"hot": "domain"}${post.webPath}</link>
 			<guid>\${"hot": "domain"}${post.webPath}</guid>
@@ -42,8 +46,11 @@ async function createBlogFeed(blog: IBlog): Promise<void> {
 			<pubDate>${post.date.object.toUTCString()}</pubDate>
 			<content:encoded><![CDATA[${post.html}]]></content:encoded>`;
 		if (post.enclosure.webPath != '')
-			postsFeed += `<enclosure url="${enclosureUrl}" length="${post.enclosure.length}" type="${post.enclosure.type}"/>`;
-		postsFeed += `</item>`;
+			postElem += `<enclosure url="${enclosureUrl}" length="${post.enclosure.length}" type="${post.enclosure.type}"/>`;
+		postElem += `</item>`;
+
+		postsElems.set(post.date.object, postElem);
+		postsFeed += postElem;
 	});
 
 	const feed = `<?xml version="1.0" encoding="utf-8"?>
@@ -59,6 +66,57 @@ async function createBlogFeed(blog: IBlog): Promise<void> {
 </channel>
 </rss>`;
 
+	if (
+		!(await writeFile(feedPath, feed)
+			.then(() => true)
+			.catch((err) => {
+				error(feedPath, 'FEEDS', err, 'ERROR');
+				return false;
+			}))
+	)
+		return Promise.reject();
+	return postsElems;
+}
+
+async function createBlogsFeed(blogs: Map<string, IBlog>): Promise<void> {
+	const feedPath = getGeneratedPath('blogs.xml', ESourceType.Other);
+	const promisesList: Array<Promise<Map<Date, string>>> = [];
+	const postsElems: Map<Date, string> = new Map();
+
+	blogs.forEach((blog) => {
+		promisesList.push(createBlogFeed(blog));
+	});
+
+	await Promise.allSettled(promisesList).then((results) => {
+		let hasFail = false;
+		results.forEach((result) => {
+			if (result.status == 'fulfilled') {
+				result.value.forEach((postElem, date) => {
+					postsElems.set(date, postElem);
+				});
+			} else hasFail = true;
+		});
+		if (hasFail) return Promise.reject();
+	});
+
+	// Create an array of date sorted posts
+	const postsElemsSorted = [...postsElems.entries()].sort((a, b) => {
+		return a[0] < b[0] ? 1 : -1;
+	});
+
+	const feed = `<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	<atom:link href="\${"hot": "domain"}/blogs.xml" rel="self" type="application/rss+xml" />
+	<title>${escapeSymbols(conf('content.title', 'string', EConf.Required))}</title>
+	<description>${escapeSymbols('' /* TODO */)}</description>
+	<link>\${"hot": "domain"}</link>
+	<language>${conf('content.language', 'string', EConf.Required)}</language>
+	${postsElemsSorted.map((postElem) => postElem[1]).join('\n')}
+</channel>
+</rss>`;
+
+	// Write to file
 	if (
 		!(await writeFile(feedPath, feed)
 			.then(() => true)
@@ -164,9 +222,10 @@ export function createFeeds(sources: ISources): Promise<void> {
 	return new Promise((resolve, reject) => {
 		const promisesList: Array<Promise<void>> = [];
 
-		sources.blogs.forEach((blog) => {
-			promisesList.push(createBlogFeed(blog));
-		});
+		promisesList.push(createBlogsFeed(sources.blogs));
+		// sources.blogs.forEach((blog) => {
+		// 	promisesList.push(createBlogFeed(blog));
+		// });
 
 		sources.podcasts.forEach((podcast) => {
 			promisesList.push(createPodcastFeed(podcast));
