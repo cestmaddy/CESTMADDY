@@ -222,7 +222,7 @@ export function createFeeds(sources: ISources): Promise<void> {
 	return new Promise((resolve, reject) => {
 		const promisesList: Array<Promise<void>> = [];
 
-		promisesList.push(createBlogsFeed(sources.blogs));
+		if (sources.blogs.size > 0) promisesList.push(createBlogsFeed(sources.blogs));
 
 		sources.podcasts.forEach((podcast) => {
 			promisesList.push(createPodcastFeed(podcast));
