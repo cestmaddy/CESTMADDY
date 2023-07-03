@@ -109,7 +109,7 @@ async function createBlogsFeed(blogs: Map<string, IBlog>): Promise<void> {
 <channel>
 	<atom:link href="\${"hot": "domain"}/blogs.xml" rel="self" type="application/rss+xml" />
 	<title>${escapeSymbols(conf('content.title', 'string', EConf.Required))}</title>
-	<description>${escapeSymbols('' /* TODO */)}</description>
+	<description>${escapeSymbols(conf('content.description', 'string', EConf.Required))}</description>
 	<link>\${"hot": "domain"}</link>
 	<language>${conf('content.language', 'string', EConf.Required)}</language>
 	${postsElemsSorted.map((postElem) => postElem[1]).join('\n')}
@@ -223,9 +223,6 @@ export function createFeeds(sources: ISources): Promise<void> {
 		const promisesList: Array<Promise<void>> = [];
 
 		promisesList.push(createBlogsFeed(sources.blogs));
-		// sources.blogs.forEach((blog) => {
-		// 	promisesList.push(createBlogFeed(blog));
-		// });
 
 		sources.podcasts.forEach((podcast) => {
 			promisesList.push(createPodcastFeed(podcast));

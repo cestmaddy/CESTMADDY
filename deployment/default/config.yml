@@ -1,5 +1,6 @@
 content:
   title: "CESTMADDY"
+  description: "An example website"
   language: en
   header: "header.md"
   footer: "footer.md"
@@ -8,4 +9,7 @@ content:
     path: "imgs/monogram_color.svg",
     background: "#ffffff",
     theme_color: "#8e443d"
+  }
+  proxies: {
+    "/image": "https://images.unsplash.com/photo-1685979837563-3c5c88ccc48f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY4ODQxMjY1Mw&ixlib=rb-4.0.3&q=80&w=1080"
   }
