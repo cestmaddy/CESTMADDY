@@ -75,8 +75,9 @@ export async function compileHTML(markdown: string, sourcePath: string, sources:
 
 	// Replace every relative path with a /sourceDir/relativePath
 	// ${"hot": "domain"} will be added after (to avoid marked error)
+	// match ](path), but not ](http://path), ](/path)
 	markdown = markdown.replace(
-		/\]\((?!http:\/\/|https:\/\/|data:|\/)([\s\S]+?)\)/gm,
+		/\]\((?!http:\/\/|https:\/\/|data:|\/|#)([\s\S]+?)\)/gm,
 		'](' + getWebPath(path.dirname(sourcePath), ESourceType.Page) + '/$1)',
 	);
 
