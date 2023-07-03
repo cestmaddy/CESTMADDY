@@ -6,9 +6,18 @@
 	<title><%- content.title %> | <%- site.title %></title>
 	<meta name="description" content="<%- content.description %>">
 
-<%- include(ejsFavicons) %>
+	<!-- Open Graph -->
+	<meta property="og:title" content="<%- content.title %> | <%- site.title %>">
+	<meta property="og:url" content="${'hot': 'domain'}<%- content.webPath %>">
+	<meta property="og:description" content="<%- content.description %>">
+	<meta property="og:image" content="${'hot': 'domain'}<%- content.enclosure.webPath %>">
+	<meta property="og:type" content="website">
+	<meta property="og:locale" content="<%- content.language %>">
+	<meta property="og:site_name" content="<%- site.title %>">
 
+<%- include(ejsFavicons) %>
 <%- include(ejsCSS) %>
+<%- include(ejsJS) %>
 </head>
 <body>
 	<header class="markdown">

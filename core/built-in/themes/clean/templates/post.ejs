@@ -6,9 +6,20 @@
 	<title><%- content.title %> | <%- site.title %></title>
 	<meta name="description" content="<%- content.description %>">
 
-<%- include(ejsFavicons) %>
+	<!-- Open Graph -->
+	<meta property="og:title" content="<%= content.title %> | <%= site.title %>">
+	<meta property="og:url" content="${'hot': 'domain'}<%= content.webPath %>">
+	<meta property="og:description" content="<%= content.description %>">
+	<meta property="og:image" content="${'hot': 'domain'}<%= content.enclosure.webPath %>">
+	<meta property="og:type" content="article">
+	<meta property="og:locale" content="<%= content.language %>">
+	<meta property="og:site_name" content="<%= site.title %>">
+	<meta property="article:published_time" content="<%= content.date.object.toISOString() %>">
+	<meta property="article:author" content="<%= content.author.name %>">
 
+<%- include(ejsFavicons) %>
 <%- include(ejsCSS) %>
+<%- include(ejsJS) %>
 </head>
 <body>
 	<header class="markdown">
@@ -20,7 +31,6 @@
 		<p class="post_infos"><%- content.author.name %>, <strong><%- content.date.relativeString %></strong><%- content.date.localeString %></p>
 		<%- content.html %>
 
-		<!--  include("../../../../templates/comments.ejs") -->
 	</div>
 	<footer class="markdown">
 		<%- site.footer %>
