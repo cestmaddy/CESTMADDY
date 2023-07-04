@@ -6,9 +6,9 @@
 	<title>404 Not Found | <%- site.title %></title>
 	<meta name="description" content="404 Not found.">
 
-<%- include(ejsFavicons) %>
-
-<%- include(ejsCSS) %>
+	<%- include(OpenGraph) %>
+	<%- include(Favicons) %>
+	<%- include(CSS) %>
 </head>
 <body>
 	<div id="content" class="error markdown">
@@ -16,6 +16,6 @@
 		<p class="error_text">Not found.</p>
 	</div>
 
-	<%- include(ejsJS) %>
+	<%- include(JavaScript) %>
 </body>
 </html>
