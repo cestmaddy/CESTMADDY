@@ -26,6 +26,7 @@ FROM alpine:3.16 as main
 # Install dependencies
 RUN apk add --no-cache \
 	nodejs \
+	icu-data-full \
 	npm
 
 WORKDIR /cestmaddy
