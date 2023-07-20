@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import { EConf } from '../interfaces/interfaces';
-import { conf, env } from '../config';
+import { conf } from '../config';
 import { error } from '../log';
 import { createNewPath, sendError } from './controllers';
 
@@ -12,10 +12,6 @@ import { createNewPath, sendError } from './controllers';
 export function addProxies(router: Router) {
 	const proxies = conf('content.proxies', 'object', EConf.Optional);
 	if (!proxies) return;
-
-	let port = 80;
-	const envPort = env('PORT', 'number', EConf.Optional);
-	if (envPort) port = envPort as number;
 
 	for (const [route, proxy] of Object.entries(proxies)) {
 		if (typeof proxy !== 'string' || typeof route !== 'string') {
@@ -34,8 +30,10 @@ export function addProxies(router: Router) {
 				pathRewrite: {
 					[`^${newRoute}`]: '',
 				},
-				router: () => {
-					if (proxy.startsWith('/')) return `http://localhost:${port}${createNewPath(proxy, false)}`;
+				router: (req) => {
+					const domain = `${req.protocol}://${req.headers.host}`;
+					if (!proxy.startsWith('http://') && !proxy.startsWith('https://'))
+						return `${domain}${createNewPath(proxy, false)}`;
 					return proxy;
 				},
 				onError: (err, req, res) => {
