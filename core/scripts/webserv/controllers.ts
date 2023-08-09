@@ -21,9 +21,6 @@ export const createNewPath = (reqPath: string, removeHtmlExt = true): string => 
 		// remove index, post, episode
 		newPath = newPath.substring(0, newPath.length - filename.length);
 
-	// If there's no extension, add a trailing slash
-	if (path.extname(newPath) === '' && !newPath.endsWith('/')) newPath += '/';
-
 	return newPath;
 };
 
@@ -53,6 +50,7 @@ export const staticContent: RequestHandler = express.static(path.resolve(GENERAT
 });
 
 export const static404: RequestHandler = (_req, res) => {
+	console.log(_req.path);
 	sendError(404, res);
 };
 
