@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import { BUILTIN_HOTCODES_ROOT, CUSTOM_HOTCODES_ROOT } from '../const';
 import { HotData } from '../interfaces/interfaces';
 import { error } from '../log';
+import { HOTCODE_REGEX_STRING } from './utils';
 
 async function getHotcodeReturn(hcPath: string, hotSettings: any, hotData: HotData): Promise<string> {
 	const hc = await import(hcPath).catch((err) => {
@@ -57,7 +58,7 @@ async function compileHotcode(hotSettings: any, hotData: HotData): Promise<strin
 export function replaceHotcodes(markdown: string, hotData: HotData, startIndex = 0): Promise<string> {
 	return new Promise(async (resolve) => {
 		// Capture a hotcode, escaped or not, or a escaped shortcode
-		const hcReg = new RegExp(/(\\\$|\$)(\{[\s\S]*?\})/, 'gm');
+		const hcReg = new RegExp(HOTCODE_REGEX_STRING, 'gm');
 		const found = hcReg.exec(markdown.substring(startIndex));
 
 		if (!found) return resolve(markdown);
@@ -76,7 +77,6 @@ export function replaceHotcodes(markdown: string, hotData: HotData, startIndex =
 		try {
 			foundObj = JSON5.parse(hotContent);
 		} catch {
-			console.log(hotContent);
 			error(hotData.url, 'SERVING', `A hotcode is badly formatted (the syntax is that of json5)`, 'ERROR');
 		}
 

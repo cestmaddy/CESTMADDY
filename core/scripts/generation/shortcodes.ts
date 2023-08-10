@@ -3,6 +3,7 @@ import JSON5 from 'json5';
 import { BUILTIN_SHORTCODES_ROOT, CUSTOM_SHORTCODES_ROOT } from '../const';
 import { ISources } from '../interfaces/interfaces';
 import { error } from '../log';
+import { SHORTCODE_REGEX_STRING } from './utils';
 
 async function getShortcodeReturn(obj: any, sourcePath: string, sources: ISources, scPath: string): Promise<string> {
 	const sc = await import(scPath).catch((err) => {
@@ -69,7 +70,7 @@ export function replaceShortcodes(
 ): Promise<string> {
 	return new Promise(async (resolve) => {
 		// Capture a shortcode, but not if it is escaped
-		const scReg = new RegExp(/(?<!\\)\$\{[\s\S]*?\}/, 'gm');
+		const scReg = new RegExp(SHORTCODE_REGEX_STRING, 'gm');
 		const found = scReg.exec(markdown.substring(startIndex));
 
 		if (!found) return resolve(markdown);
