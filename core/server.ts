@@ -5,16 +5,22 @@ import { conf, env } from './scripts/config';
 import routes from './scripts/webserv/routes';
 import { EConf } from './scripts/interfaces/interfaces';
 
-let port = 80;
+export function start() {
+	let port = 80;
 
-process.title = `cmy webserver ${conf('content.title', 'string', EConf.Optional)}`;
+	process.title = `cmy webserver ${conf('content.title', 'string', EConf.Optional)}`;
 
-const envPort = env('PORT', 'number', EConf.Optional);
-if (envPort) port = envPort as number;
+	const envPort = env('PORT', 'number', EConf.Optional);
+	if (envPort) port = envPort as number;
 
-const app = express();
-app.set('trust proxy', 1);
-app.use('/', routes);
-app.listen(port, () => {
-	console.log(magenta(bold(`\ncestmaddy started on ::${port}`)));
-});
+	const app = express();
+	app.set('trust proxy', 1);
+	app.use('/', routes);
+	app.listen(port, () => {
+		console.log(magenta(bold(`\ncestmaddy started on ::${port}`)));
+	});
+}
+
+if (require.main === module) {
+	start();
+}

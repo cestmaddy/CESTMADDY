@@ -48,7 +48,7 @@ async function compileSources(sources: ISources): Promise<void> {
 	});
 }
 
-(async function main() {
+export async function build() {
 	process.title = `cmy generation ${conf('content.title', 'string', EConf.Optional)}`;
 	console.log(blue('Retrieving metadata'));
 
@@ -71,7 +71,7 @@ async function compileSources(sources: ISources): Promise<void> {
 
 	console.log(blue('Compiling'));
 	// COMPILATION
-	Promise.allSettled([
+	await Promise.allSettled([
 		compileSources(sources),
 		renderErrors(),
 		copyTheme(),
@@ -100,4 +100,9 @@ async function compileSources(sources: ISources): Promise<void> {
 		if (fail == 'other' || feedFailed) logError();
 		else logSuccess();
 	});
+}
+
+(async function main() {
+	// If the script is called directly, build the website
+	if (require.main === module) await build();
 })();
