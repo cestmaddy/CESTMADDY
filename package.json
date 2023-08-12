@@ -7,20 +7,20 @@
 	"author": "Olivier Cartier <me@cestoliv.com>",
 	"license": "MIT",
 	"scripts": {
-		"start": "node dist/core/server.js",
-		"start:watch": "nodemon --delay 2 dist/core/server.js",
-		"start:dev": "npm run build && concurrently -k -n build,compile,start,assets \"npm run build:watch\" \"npm run compile:watch\" \"npm run start:watch\" \"npm run assets:watch\"",
-		"build": "rimraf dist && tsc",
-		"build:watch": "tsc -w",
+		"compile": "rimraf dist && tsc && npm run assets",
+		"compile:watch": "npm run compile && concurrently -n \"assets,compile\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run assets:watch\" \"tsc -w\"",
 		"assets": "cpx \"core/**/!(*.ts)\" dist/core && cpx \"cestici/**/!(*.ts)\" dist/cestici",
 		"assets:watch": "concurrently \"cpx \\\"core/**/!(*.ts)\\\" dist/core -w\" \"cpx \\\"cestici/**/!(*.ts)\\\" dist/cestici -w\"",
-		"compile": "npm run assets; node dist/core/scripts/generation/build.js",
-		"compile:dev": "node dist/core/scripts/generation/build.js",
-		"compile:watch": "chokidar -t 5000 \"dist/**/*\" --ignore \"dist/cestici/generated/**/*\" -c 'npm run compile:dev'",
+
 		"test": "TEST=1 mocha -r ts-node/register tests/**/*.test.ts",
 		"test:coverage": "nyc npm test",
 		"test:format": "prettier --write \"**/*.ts\"",
-		"test:lint": "eslint --fix \"**/*.ts\""
+		"test:lint": "eslint --fix \"**/*.ts\"",
+
+		"start": "node ./dist/core/bin/cli.js start",
+		"start:watch": "node ./dist/core/bin/cli.js --watch",
+		"build": "node ./dist/core/bin/cli.js build",
+		"build:watch": "node ./dist/core/bin/cli.js build --watch"
 	},
 	"bin": "./dist/core/bin/cli.js",
 	"dependencies": {
