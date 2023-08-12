@@ -4,16 +4,44 @@ import { BUILTIN_HOTCODES_ROOT, CUSTOM_HOTCODES_ROOT } from '../const';
 import { HotData } from '../interfaces/interfaces';
 import { error } from '../log';
 import { HOTCODE_REGEX_STRING } from './utils';
+import { bold } from 'colorette';
 
-async function getHotcodeReturn(hcPath: string, hotSettings: any, hotData: HotData): Promise<string> {
+async function getHotcodeReturn(
+	hcPath: string,
+	hotSettings: any,
+	hotData: HotData,
+	importCanFail = false,
+): Promise<string> {
 	const hc = await import(hcPath).catch((err) => {
-		if (err.code == 'MODULE_NOT_FOUND') return Promise.reject('MODULE_NOT_FOUND');
+		// Differentiate between a module not found error and a module not found in the hotcode
+		if (err.code == 'MODULE_NOT_FOUND') {
+			// If the Hotcode is not found (if the hotcode is in the stack trace,
+			// it means that it is successfully imported and that the error is in the hotcode)
+			if (!err.message.includes(`- ${hcPath}.js`)) {
+				if (importCanFail) return Promise.reject('MODULE_NOT_FOUND');
+				else {
+					error(
+						hotData.url,
+						'SERVING',
+						`The specified 'hot' property (${bold(hotSettings['hot'])}) does not match any hotcode.`,
+						'ERROR',
+					);
+					return '';
+				}
+			}
+			// If the Hotcode is found but one of its dependencies is not
+			else {
+				error(hotData.url, 'SERVING', `Hotcode ${bold(hotSettings['hot'])}: ${err}.`, 'ERROR');
+				return '';
+			}
+		}
+
 		return undefined;
 	});
 	if (hc === undefined) return '';
 
 	return await hc.compile(hotSettings, hotData).catch((err: any) => {
-		error(hotData.url, 'SERVING', `Hotcode ${hotSettings['hot']}: ${err}.`, 'ERROR');
+		error(hotData.url, 'SERVING', `Hotcode ${bold(hotSettings['hot'])}: ${err}.`, 'ERROR');
 		return '';
 	});
 }
@@ -28,7 +56,7 @@ async function compileHotcode(hotSettings: any, hotData: HotData): Promise<strin
 
 	// Search in built-in Hotcodes
 	hcPath = path.join(BUILTIN_HOTCODES_ROOT, hotSettings['hot'].replace(/\./g, '/'));
-	let compiledHc: string | undefined = await getHotcodeReturn(hcPath, hotSettings, hotData).catch(() => {
+	let compiledHc: string | undefined = await getHotcodeReturn(hcPath, hotSettings, hotData, true).catch(() => {
 		return undefined;
 	});
 
@@ -41,12 +69,6 @@ async function compileHotcode(hotSettings: any, hotData: HotData): Promise<strin
 	}
 
 	if (compiledHc == undefined) {
-		error(
-			hotData.url,
-			'SERVING',
-			`The specified 'hot' property (${hotSettings['hot']}) does not match any hotcodes.`,
-			'ERROR',
-		);
 		return '';
 	}
 	return compiledHc;
