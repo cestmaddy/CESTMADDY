@@ -23,7 +23,7 @@ marked.use({
 	smartypants: false,
 	xhtml: false,
 	renderer: {
-		image(href: string, title: string, text: string) {
+		image(href: string, title: string | null, text: string) {
 			let imageHTML = `<img loading="lazy"`;
 			if (text) imageHTML += ` alt="${text}"`;
 			if (title) imageHTML += ` title="${title}"`;
@@ -35,7 +35,7 @@ marked.use({
 			imageHTML += `>`;
 			return imageHTML;
 		},
-		link(href: string, title: string, text: string) {
+		link(href: string, title: string | null | undefined, text: string) {
 			let linkHTML = `<a`;
 			if (title) linkHTML += ` title="${title}"`;
 			if (href) {

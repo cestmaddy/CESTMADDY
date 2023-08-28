@@ -1,9 +1,12 @@
 {
-	"name": "cestmaddy",
+	"name": "@cestmaddy/cestmaddy",
 	"version": "1.0.0",
 	"description": "A light and powerful CMS, for developers.",
 	"main": "dist/core/main.js",
-	"repository": "https://git.chevro.fr/cestmaddy/cestmaddy",
+	"repository": {
+		"type": "git",
+		"url": "https://git.chevro.fr/cestmaddy/cestmaddy"
+	},
 	"author": "Olivier Cartier <me@cestoliv.com>",
 	"license": "MIT",
 	"scripts": {
@@ -11,73 +14,70 @@
 		"compile:watch": "npm run compile && concurrently -n \"assets,compile\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run assets:watch\" \"tsc -w\"",
 		"assets": "cpx \"core/**/!(*.ts)\" dist/core && cpx \"cestici/**/!(*.ts)\" dist/cestici",
 		"assets:watch": "concurrently \"cpx \\\"core/**/!(*.ts)\\\" dist/core -w\" \"cpx \\\"cestici/**/!(*.ts)\\\" dist/cestici -w\"",
-
 		"test": "TEST=1 mocha -r ts-node/register tests/**/*.test.ts",
 		"test:coverage": "nyc npm test",
 		"test:format": "prettier --write \"**/*.ts\"",
 		"test:lint": "eslint --fix \"**/*.ts\"",
-
 		"start": "node ./dist/core/bin/cli.js start",
 		"start:watch": "node ./dist/core/bin/cli.js --watch",
 		"build": "node ./dist/core/bin/cli.js build",
 		"build:watch": "node ./dist/core/bin/cli.js build --watch"
 	},
-	"bin": "./dist/core/bin/cli.js",
+	"bin": {
+		"cestmaddy": "dist/core/bin/cli.js"
+	},
 	"dependencies": {
+		"chokidar": "^3.5.3",
 		"colorette": "^2.0.20",
-		"dotenv": "^16.0.3",
+		"dotenv": "^16.3.1",
 		"ejs": "^3.1.9",
 		"express": "^4.18.2",
 		"express-interceptor": "^1.2.0",
-		"get-audio-duration": "^3.1.1",
-		"glob": "^10.2.5",
+		"get-audio-duration": "^4.0.1",
+		"glob": "^10.3.3",
 		"http-proxy-middleware": "^2.0.6",
 		"imagemagick": "^0.1.3",
-		"iso-639-1": "^2.1.15",
+		"iso-639-1": "^3.0.1",
 		"js-yaml": "^4.1.0",
 		"json5": "^2.2.3",
-		"luxon": "^3.3.0",
-		"marked": "^5.0.2",
-		"marked-highlight": "^2.0.0",
+		"luxon": "^3.4.2",
+		"marked": "^7.0.5",
+		"marked-highlight": "^2.0.4",
 		"mime-types": "^2.1.35",
 		"prismjs": "^1.29.0",
 		"shelljs": "^0.8.5",
 		"slugify": "^1.6.6",
-		"svgo": "^3.0.2"
+		"svgo": "^3.0.2",
+		"typescript": "^5.2.2"
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@types/chai": "^4.3.5",
 		"@types/ejs": "^3.1.2",
 		"@types/express": "^4.17.17",
-		"@types/imagemagick": "^0.0.31",
+		"@types/imagemagick": "^0.0.32",
 		"@types/js-yaml": "^4.0.5",
-		"@types/luxon": "^3.3.0",
-		"@types/marked": "^5.0.0",
+		"@types/luxon": "^3.3.1",
+		"@types/marked": "^5.0.1",
 		"@types/mime-types": "^2.1.1",
 		"@types/mocha": "^10.0.1",
-		"@types/mock-fs": "^4.13.1",
-		"@types/node": "^20.2.1",
+		"@types/node": "^20.5.7",
 		"@types/prismjs": "^1.26.0",
-		"@types/request-ip": "^0.0.37",
 		"@types/shelljs": "^0.8.12",
-		"@typescript-eslint/eslint-plugin": "^5.59.6",
-		"chai": "^4.3.7",
-		"chokidar-cli": "^3.0.0",
-		"concurrently": "^8.0.1",
-		"cpx2": "^4.2.3",
-		"eslint": "^8.41.0",
-		"eslint-config-prettier": "^8.8.0",
-		"eslint-plugin-prettier": "^4.2.1",
-		"memfs": "^3.5.1",
+		"@typescript-eslint/eslint-plugin": "^6.4.1",
+		"@typescript-eslint/parser": "^6.4.1",
+		"chai": "^4.3.8",
+		"concurrently": "^8.2.1",
+		"cpx2": "^5.0.0",
+		"eslint": "^8.48.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.0",
+		"memfs": "^4.2.1",
 		"mocha": "^10.2.0",
-		"mock-fs": "^5.2.0",
-		"nodemon": "^2.0.22",
 		"nyc": "^15.1.0",
-		"prettier": "^2.8.8",
+		"prettier": "^3.0.2",
 		"rimraf": "^5.0.1",
-		"ts-node": "^10.9.1",
-		"typescript": "^5.0.4"
+		"ts-node": "^10.9.1"
 	},
 	"nyc": {
 		"extends": "@istanbuljs/nyc-config-typescript",
@@ -97,5 +97,14 @@
 			"text-summary"
 		],
 		"report-dir": "coverage"
-	}
+	},
+	"files": [
+		"dist/core",
+		"package.json",
+		"package-lock.json",
+		"README.md",
+		"LICENSE",
+		"tsconfig.json"
+	],
+	"types": "dist/core/main.d.ts"
 }
