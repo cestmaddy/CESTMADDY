@@ -10,6 +10,7 @@ services:
   - docker:dind
 
 install:
+  image: node:latest
   stage: prepare
   retry: 1
   dependencies: []
@@ -85,7 +86,11 @@ docker-publish:
     - docker push "$CI_REGISTRY/$CI_PROJECT_PATH${tag}"
 
 npm-publish:
+  image: node:latest
   stage: publish
+  only:
+    - main
+    - tags
   interruptible: false
   retry: 2
   dependencies:
@@ -97,11 +102,3 @@ npm-publish:
     # Publish to NPM Registry
     - npm config set -- '//registry.npmjs.org/:_authToken' "${NPM_AUTH_TOKEN}"
     - npm publish --verbose
-  rules:
-    - if: '$CI_DEPLOY_FREEZE != null'
-      when: never
-    - if: '$CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_REF_NAME != "develop"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME == "develop"'
-      when: never
-    - when: on_success
