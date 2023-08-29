@@ -21,7 +21,8 @@
 		"start": "node ./dist/core/bin/cli.js start",
 		"start:watch": "node ./dist/core/bin/cli.js --watch",
 		"build": "node ./dist/core/bin/cli.js build",
-		"build:watch": "node ./dist/core/bin/cli.js build --watch"
+		"build:watch": "node ./dist/core/bin/cli.js build --watch",
+		"prepublishOnly": "npm run compile"
 	},
 	"bin": {
 		"cestmaddy": "dist/core/bin/cli.js"
