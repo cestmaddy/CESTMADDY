@@ -4,6 +4,7 @@ import { yellow, red, blue, green, bold } from 'colorette';
 export function error(
 	file: string | undefined,
 	step:
+		| 'CLI'
 		| 'PREPARATION'
 		| 'METADATA'
 		| 'CONFIG'

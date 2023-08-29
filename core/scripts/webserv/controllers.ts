@@ -50,7 +50,6 @@ export const staticContent: RequestHandler = express.static(path.resolve(GENERAT
 });
 
 export const static404: RequestHandler = (_req, res) => {
-	console.log(_req.path);
 	sendError(404, res);
 };
 

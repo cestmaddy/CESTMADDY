@@ -5,7 +5,7 @@ import { fs, vol } from 'memfs';
 
 // Create a fake config file for tests
 import { CONFIG } from '../../../../core/scripts/const';
-fs.mkdirpSync(path.dirname(CONFIG));
+fs.mkdirSync(path.dirname(CONFIG));
 fs.writeFileSync(CONFIG, 'hey');
 import { set_conf } from '../../../../core/scripts/config'; // will use the fake config file
 vol.reset();

@@ -1,6 +1,7 @@
 stages:
+  - "prepare"
   - "test"
-  - "deploy"
+  - "publish"
 
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
@@ -8,14 +9,30 @@ variables:
 services:
   - docker:dind
 
+install:
+  image: node:latest
+  stage: prepare
+  retry: 1
+  dependencies: []
+  artifacts:
+    name: 'deps_$CI_COMMIT_REF_SLUG'
+    paths:
+      - node_modules/
+    when: on_success
+    expire_in: 12h
+  script:
+    - npm install --no-progress --no-audit --no-fund --verbose
+
 eslint:
   image: node:latest
   stage: test
   except:
     - tags
   retry: 2
+  allow_failure: true
+  dependencies:
+    - install
   script:
-    - npm install @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint
     - npm run test:lint
 
 sast:
@@ -31,8 +48,9 @@ test:
   stage: test
   retry: 2
   allow_failure: true
+  dependencies:
+    - install
   script:
-    - npm install
     - TEST=1 npx nyc -r text -r cobertura npm test # For creating coverage report
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
@@ -44,7 +62,7 @@ test:
 
 docker-publish:
   image: docker:latest
-  stage: deploy
+  stage: publish
   only:
     - main
     - tags
@@ -66,3 +84,21 @@ docker-publish:
       fi
     - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_PATH${tag}" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_PATH${tag}"
+
+npm-publish:
+  image: node:latest
+  stage: publish
+  only:
+    - main
+    - tags
+  interruptible: false
+  retry: 2
+  dependencies:
+    - install
+  script:
+    # Publish to GitLab NPM Registry
+    - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}">.npmrc
+    - npm publish --verbose
+    # Publish to NPM Registry
+    - npm config set -- '//registry.npmjs.org/:_authToken' "${NPM_AUTH_TOKEN}"
+    - npm publish --verbose

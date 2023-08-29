@@ -3,11 +3,39 @@ import JSON5 from 'json5';
 import { BUILTIN_SHORTCODES_ROOT, CUSTOM_SHORTCODES_ROOT } from '../const';
 import { ISources } from '../interfaces/interfaces';
 import { error } from '../log';
+import { SHORTCODE_REGEX_STRING } from './utils';
+import { bold } from 'colorette';
 
-async function getShortcodeReturn(obj: any, sourcePath: string, sources: ISources, scPath: string): Promise<string> {
+async function getShortcodeReturn(
+	obj: any,
+	sourcePath: string,
+	sources: ISources,
+	scPath: string,
+	importCanFail = false,
+): Promise<string> {
 	const sc = await import(scPath).catch((err) => {
-		if (err.code == 'MODULE_NOT_FOUND') return Promise.reject('MODULE_NOT_FOUND');
-		return undefined;
+		// Differentiate between a module not found error and a module not found in the shortcode
+		if (err.code == 'MODULE_NOT_FOUND') {
+			// If the Shortcode is not found (if the shortcode is in the stack trace,
+			// it means that it is successfully imported and that the error is in the shortcode)
+			if (!err.message.includes(`- ${scPath}.js`)) {
+				if (importCanFail) return Promise.reject('MODULE_NOT_FOUND');
+				else {
+					error(
+						sourcePath,
+						'COMPILATION',
+						`The specified 'short' property (${bold(obj['short'])}) does not match any shortcode.`,
+						'ERROR',
+					);
+					return '';
+				}
+			}
+			// If the Shortcode is found but one of its dependencies is not
+			else {
+				error(sourcePath, 'COMPILATION', `Shortcode ${bold(obj['short'])}: ${err}.`, 'ERROR');
+				return '';
+			}
+		}
 	});
 	if (sc == undefined) return '';
 
@@ -34,7 +62,7 @@ async function compileShortcode(obj: any, sourcePath: string, sources: ISources)
 
 	// Search in built-in Shortcodes
 	scPath = path.join(BUILTIN_SHORTCODES_ROOT, obj['short'].replace(/\./g, '/'));
-	let compiledSC: string | undefined = await getShortcodeReturn(obj, sourcePath, sources, scPath).catch(() => {
+	let compiledSC: string | undefined = await getShortcodeReturn(obj, sourcePath, sources, scPath, true).catch(() => {
 		return undefined;
 	});
 
@@ -47,12 +75,6 @@ async function compileShortcode(obj: any, sourcePath: string, sources: ISources)
 	}
 
 	if (compiledSC == undefined) {
-		error(
-			sourcePath,
-			'COMPILATION',
-			`The specified 'short' property ${`(${obj['short']})`.bold} does not match any shortcode.`,
-			'ERROR',
-		);
 		return '';
 	}
 	return compiledSC;
@@ -69,7 +91,7 @@ export function replaceShortcodes(
 ): Promise<string> {
 	return new Promise(async (resolve) => {
 		// Capture a shortcode, but not if it is escaped
-		const scReg = new RegExp(/(?<!\\)\$\{[\s\S]*?\}/, 'gm');
+		const scReg = new RegExp(SHORTCODE_REGEX_STRING, 'gm');
 		const found = scReg.exec(markdown.substring(startIndex));
 
 		if (!found) return resolve(markdown);
