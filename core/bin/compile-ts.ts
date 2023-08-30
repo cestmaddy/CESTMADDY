@@ -2,9 +2,9 @@ import ts from 'typescript';
 import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
+import { blue } from 'colorette';
 
 import { CUSTOM_SHORTCODES_ROOT, CUSTOM_HOTCODES_ROOT, ROOT } from '../scripts/const';
-import { blue } from 'colorette';
 
 export function buildCustomShortHotCodes(shortcodesRoot = CUSTOM_SHORTCODES_ROOT, hotcodesRoot = CUSTOM_HOTCODES_ROOT) {
 	// List custom shortcodes
@@ -38,6 +38,11 @@ export function buildCustomShortHotCodes(shortcodesRoot = CUSTOM_SHORTCODES_ROOT
 			jsPath = path.join(ROOT, '.dist', 'custom', 'shortcodes', filePath.replace(/\.ts$/, '.js'));
 		} else if (tsFile.startsWith(hotcodesRoot)) {
 			jsPath = path.join(ROOT, '.dist', 'custom', 'hotcodes', filePath.replace(/\.ts$/, '.js'));
+		}
+
+		// Module replacement
+		if (require.cache[jsPath]) {
+			delete require.cache[jsPath];
 		}
 
 		fs.mkdirSync(path.dirname(jsPath), { recursive: true });
