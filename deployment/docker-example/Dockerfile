@@ -14,9 +14,11 @@ RUN npm install
 COPY core core
 COPY deployment/default cestici
 
-# Build and compile
-RUN npm run build
+# Compile sources
 RUN npm run compile
+
+# Build website
+RUN npm run build
 
 ###################
 # RUN WEBSITE     #
@@ -32,6 +34,8 @@ RUN apk add --no-cache \
 WORKDIR /cestmaddy
 COPY --from=compile /cestmaddy/package.json /cestmaddy/package-lock.json ./
 COPY --from=compile /cestmaddy/dist dist
+COPY --from=compile /cestmaddy/.dist .dist
+COPY --from=compile /cestmaddy/cestici/config.yml cestici/config.yml
 RUN npm install --omit=dev
 
 EXPOSE 80

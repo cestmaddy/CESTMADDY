@@ -11,10 +11,12 @@ RUN npm install
 COPY core core
 COPY deployment/default cestici
 
-# Build and compile
-RUN npm run build
+# Compile sources
 RUN npm run compile
+
+# Build website
+RUN npm run build
 
 EXPOSE 80
 ENV PORT=80
-CMD ["sh", "-c", "npm run compile && npm run start"]
+CMD [ "npm", "start" ]
