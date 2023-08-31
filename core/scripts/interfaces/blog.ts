@@ -42,6 +42,8 @@ export interface IBlog {
 	category: string;
 	language: string;
 	posts: Array<IPost>;
+	feed: boolean;
+	global_feed: boolean;
 }
 
 export function isPost(page: IPage | IPost | IEpisode): page is IPost {

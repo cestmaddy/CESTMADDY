@@ -23,10 +23,14 @@ export function getBlogsInfo(): Map<string, IBlog> {
 		let bDescription = conf(`content.blogs.${bName}.description`, 'string', EConf.Optional);
 		let bCategory = conf(`content.blogs.${bName}.category`, 'string', EConf.Optional);
 		let bLanguage = conf(`content.blogs.${bName}.language`, 'string', EConf.Optional);
+		let bFeed = conf(`content.blogs.${bName}.feed`, 'boolean', EConf.Optional);
+		let bGlobalFeed = conf(`content.blogs.${bName}.global_feed`, 'boolean', EConf.Optional);
 
 		if (!bDescription) bDescription = '';
 		if (!bCategory) bCategory = '';
 		if (!bLanguage) bLanguage = conf('content.language', 'string', EConf.Required);
+		if (!bFeed && bFeed !== false) bFeed = true;
+		if (!bGlobalFeed && bGlobalFeed !== false) bGlobalFeed = true;
 
 		struct.set(bName, {
 			name: bName,
@@ -35,6 +39,8 @@ export function getBlogsInfo(): Map<string, IBlog> {
 			description: bDescription,
 			language: bLanguage,
 			posts: [],
+			feed: bFeed,
+			global_feed: bGlobalFeed,
 		});
 	});
 	return struct;
@@ -49,6 +55,9 @@ export function getPodcastsInfo(): Map<string, IPodcast> {
 		const pDir = conf(`content.podcasts.${pName}.dir`, 'string', EConf.Required);
 		const pAuthor = conf(`content.podcasts.${pName}.main_author`, 'string', EConf.Required);
 		let enclosurePath = conf(`content.podcasts.${pName}.enclosure`, 'string', EConf.Optional);
+		let pFeed = conf(`content.podcasts.${pName}.feed`, 'boolean', EConf.Optional);
+
+		if (!pFeed && pFeed !== false) pFeed = true;
 
 		const podcast: IPodcast = {
 			name: pName,
@@ -70,6 +79,7 @@ export function getPodcastsInfo(): Map<string, IPodcast> {
 				generatedPath: '',
 				webPath: '',
 			},
+			feed: pFeed,
 		};
 
 		if (enclosurePath) {

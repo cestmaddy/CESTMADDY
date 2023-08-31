@@ -62,6 +62,7 @@ export interface IPodcast {
 		email: string;
 	};
 	episodes: Array<IEpisode>;
+	feed: boolean;
 }
 
 export function isEpisode(page: IPage | IPost | IEpisode): page is IEpisode {

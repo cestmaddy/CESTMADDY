@@ -21,7 +21,7 @@ function escapeSymbols(str: string): string {
 		.replace(/™/g, '&#x2122;');
 }
 
-async function createBlogFeed(blog: IBlog): Promise<Map<Date, string>> {
+async function createBlogFeed(blog: IBlog): Promise<{ blog: IBlog; posts: Map<Date, string> }> {
 	let postsFeed = '';
 	const feedPath = getGeneratedPath(path.join(blog.path, 'rss.xml'), ESourceType.Other);
 	const blogUrl = getWebPath(blog.path, ESourceType.Page);
@@ -75,25 +75,33 @@ async function createBlogFeed(blog: IBlog): Promise<Map<Date, string>> {
 			}))
 	)
 		return Promise.reject();
-	return postsElems;
+
+	return {
+		blog,
+		posts: postsElems,
+	};
 }
 
 async function createBlogsFeed(blogs: Map<string, IBlog>): Promise<void> {
 	const feedPath = getGeneratedPath('blogs.xml', ESourceType.Other);
-	const promisesList: Array<Promise<Map<Date, string>>> = [];
+	const promisesList: Array<Promise<{ blog: IBlog; posts: Map<Date, string> }>> = [];
 	const postsElems: Map<Date, string> = new Map();
 
 	blogs.forEach((blog) => {
-		promisesList.push(createBlogFeed(blog));
+		// Create feed only if feed is true for the blog
+		if (blog.feed) promisesList.push(createBlogFeed(blog));
 	});
 
 	await Promise.allSettled(promisesList).then((results) => {
 		let hasFail = false;
 		results.forEach((result) => {
 			if (result.status == 'fulfilled') {
-				result.value.forEach((postElem, date) => {
-					postsElems.set(date, postElem);
-				});
+				// Add posts to global feed only if global_feed is true for the blog
+				if (result.value.blog.global_feed) {
+					result.value.posts.forEach((postElem, date) => {
+						postsElems.set(date, postElem);
+					});
+				}
 			} else hasFail = true;
 		});
 		if (hasFail) return Promise.reject();
@@ -225,7 +233,8 @@ export function createFeeds(sources: ISources): Promise<void> {
 		if (sources.blogs.size > 0) promisesList.push(createBlogsFeed(sources.blogs));
 
 		sources.podcasts.forEach((podcast) => {
-			promisesList.push(createPodcastFeed(podcast));
+			// Create feed only if feed is true for the podcast
+			if (podcast.feed) promisesList.push(createPodcastFeed(podcast));
 		});
 
 		Promise.allSettled(promisesList).then((results) => {
