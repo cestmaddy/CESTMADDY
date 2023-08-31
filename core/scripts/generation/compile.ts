@@ -6,6 +6,7 @@ import prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index';
 import * as prismComponents from 'prismjs/components';
 import slugify from 'slugify';
+import { bold } from 'colorette';
 
 import { ESourceType, IOther, ISources } from '../interfaces/interfaces';
 import { replaceShortcodes } from './shortcodes';
@@ -60,7 +61,7 @@ marked.use(
 			if (prism.languages[lang]) {
 				return prism.highlight(code, prism.languages[lang], lang);
 			} else {
-				error(undefined, 'COMPILATION', `Language ${lang.bold} is not supported by Prism`, 'WARNING');
+				error(undefined, 'COMPILATION', `Language ${bold(lang)} is not supported by Prism`, 'WARNING');
 				return code;
 			}
 		},
