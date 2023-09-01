@@ -140,6 +140,14 @@ async function buildAll() {
 
 // Async function
 (async () => {
+	// on watch mode, override the process.exit function to prevent the process from exiting
+	if (watch) {
+		process.exit = () => {
+			/* Ignore */
+			return undefined as never;
+		};
+	}
+
 	// build
 	if (command === 'build' || command === null) {
 		await buildAll();

@@ -13,21 +13,25 @@ import { EConf } from './interfaces/interfaces';
 import { error } from './log';
 import { CONFIG } from './const';
 
-let file = '';
-try {
-	file = fs.readFileSync(CONFIG, 'utf8').toString();
-} catch (e) {
-	error(undefined, 'CONFIG', `Could not read config file: ${e}`, 'ERROR');
-	process.exit(1);
-}
-let configYaml: unknown = {};
-try {
-	configYaml = load(file);
-} catch (e) {
-	error(undefined, 'CONFIG', `Could not parse config file: ${e}`, 'ERROR');
-	process.exit(1);
-}
 dotenv.config();
+let configYaml: unknown = {};
+
+export const loadConfig = () => {
+	let file = '';
+	try {
+		file = fs.readFileSync(CONFIG, 'utf8').toString();
+	} catch (e) {
+		error(undefined, 'CONFIG', `Could not read config file: ${e}`, 'ERROR');
+		process.exit(1);
+	}
+
+	try {
+		configYaml = load(file);
+	} catch (e) {
+		error(undefined, 'CONFIG', `Could not parse config file: ${e}`, 'ERROR');
+		process.exit(1);
+	}
+};
 
 export const conf = (
 	path: string,

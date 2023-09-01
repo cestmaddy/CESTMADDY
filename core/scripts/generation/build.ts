@@ -6,7 +6,7 @@ import { copyTheme, compileOther } from './compile';
 import { EConf, ISources } from '../interfaces/interfaces';
 import { createFavicons } from './favicon';
 import { createFeeds } from './feed';
-import { conf } from '../config';
+import { conf, loadConfig } from '../config';
 import { GENERATED_ROOT } from '../const';
 import { error, logError, logSuccess } from '../log';
 import { renderErrors, renderPage } from './render';
@@ -51,6 +51,9 @@ async function compileSources(sources: ISources): Promise<void> {
 export async function build() {
 	process.title = `cmy generation ${conf('content.title', 'string', EConf.Optional)}`;
 	console.log(blue('Retrieving metadata'));
+
+	// Load config
+	loadConfig();
 
 	// RETRIEVE METADATA
 	const sources = await getSources();
