@@ -101,6 +101,7 @@
 	},
 	"files": [
 		"dist/core",
+		"deployment/default",
 		"package.json",
 		"package-lock.json",
 		"README.md",
