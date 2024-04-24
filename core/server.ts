@@ -1,7 +1,7 @@
 import express from 'express';
 import { bold, magenta } from 'colorette';
 
-import { conf, env } from './scripts/config';
+import { conf, env, loadConfig } from './scripts/config';
 import routes from './scripts/webserv/routes';
 import { EConf } from './scripts/interfaces/interfaces';
 
@@ -12,6 +12,8 @@ export function start() {
 
 	const envPort = env('PORT', 'number', EConf.Optional);
 	if (envPort) port = envPort as number;
+
+	loadConfig();
 
 	const app = express();
 	app.set('trust proxy', 1);
