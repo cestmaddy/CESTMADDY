@@ -96,8 +96,19 @@ export function getPodcastsInfo(): Map<string, IPodcast> {
 function isBlogPost(sourcePath: string, blogs: Map<string, IBlog>): IBlog | undefined {
 	for (const blogName of blogs.keys()) {
 		const blog = blogs.get(blogName);
+		if (!blog) return undefined;
+
+		const root = path.resolve(ROOT, blog.path);
+		const relativePath = path.relative(root, sourcePath);
+		const excludes: string[] | undefined = conf(`content.blogs.${blog.name}.excludes`, 'array', EConf.Optional);
+
 		// If it's in a blog directory and it's not the index file
-		if (blog && sourcePath.startsWith(path.resolve(ROOT, blog.path)) && !indexReg.test(sourcePath)) return blog;
+		if (blog && sourcePath.startsWith(root) && !indexReg.test(sourcePath)) {
+			// Check that the current file is not excluded
+			if (!excludes || !excludes.includes(relativePath)) {
+				return blog;
+			}
+		}
 	}
 	return undefined;
 }
@@ -105,9 +116,23 @@ function isBlogPost(sourcePath: string, blogs: Map<string, IBlog>): IBlog | unde
 function isPodcastEpisode(sourcePath: string, podcasts: Map<string, IPodcast>): IPodcast | undefined {
 	for (const podcastName of podcasts.keys()) {
 		const podcast = podcasts.get(podcastName);
+		if (!podcast) return undefined;
+
+		const root = path.resolve(ROOT, podcast.path);
+		const relativePath = path.relative(root, sourcePath);
+		const excludes: string[] | undefined = conf(
+			`content.podcasts.${podcast.name}.excludes`,
+			'array',
+			EConf.Optional,
+		);
+
 		// If it's in a podcast directory and it's not the index file
-		if (podcast && sourcePath.startsWith(path.resolve(ROOT, podcast.path)) && !indexReg.test(sourcePath))
-			return podcast;
+		if (podcast && sourcePath.startsWith(root) && !indexReg.test(sourcePath)) {
+			// Check that the current file is not excluded
+			if (!excludes || !excludes.includes(relativePath)) {
+				return podcast;
+			}
+		}
 	}
 	return undefined;
 }

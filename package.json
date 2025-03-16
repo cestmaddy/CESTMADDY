@@ -1,6 +1,6 @@
 {
 	"name": "@cestmaddy/cestmaddy",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"description": "A light and powerful CMS, for developers.",
 	"main": "dist/core/main.js",
 	"repository": {
